@@ -30,17 +30,18 @@ return new class extends Migration
         });
 
         Schema::create('fallout_reports', function (Blueprint $table) {
-            $table->id();
-            $table->string('no_report')->unique();
-            $table->date('tanggal');
-            $table->foreignId('hd_daman_id')->constrained('hd_damans');
-            $table->foreignId('order_type_id')->constrained('order_types');
-            $table->string('order_id');
-            $table->foreignId('fallout_status_id')->constrained('fallout_statuses');
-            $table->text('keterangan')->nullable();
-            $table->timestamps();
-        });
-    }
+        $table->id(); // id_fallout
+        $table->string('tipe_order'); 
+        $table->string('order_id'); 
+        $table->string('nomer_layanan'); 
+        $table->string('sn_ont'); 
+        $table->string('datek_odp');
+        $table->integer('port_odp'); 
+        $table->string('status_fallout'); 
+        $table->text('respon_fallout'); 
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.
