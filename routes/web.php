@@ -12,6 +12,14 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('/fallout-reports', App\Livewire\FalloutReportDashboard::class)
+    ->middleware(['auth', 'verified'])
+    ->name('fallout-reports.index');
+
+Route::view('pelurusan', 'pelurusan.index')
+    ->middleware(['auth', 'verified'])
+    ->name('pelurusan.index');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 

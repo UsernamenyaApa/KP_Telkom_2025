@@ -12,7 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('fallout_reports', function (Blueprint $table) {
-            $table->string('reporter_name')->nullable()->after('order_id');
+            // Drop the old string column if it exists
+            if (Schema::hasColumn('fallout_reports', 'reporter_name')) {
+                $table->dropColumn('reporter_name');
+            }
+        });
+
+        Schema::table('fallout_reports', function (Blueprint $table) {
+            // Add the new foreign key column
+            $table->foreignId('reporter_user_id')->nullable()->constrained('users')->after('order_id');
         });
     }
 
@@ -22,7 +30,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('fallout_reports', function (Blueprint $table) {
-            $table->dropColumn('reporter_name');
+            // Drop the foreign key column
+            $table->dropConstrainedForeignId('reporter_user_id');
+        });
+
+        Schema::table('fallout_reports', function (Blueprint $table) {
+            // Re-add the old string column (for rollback purposes)
+            $table->string('reporter_name')->nullable()->after('order_id');
         });
     }
 };

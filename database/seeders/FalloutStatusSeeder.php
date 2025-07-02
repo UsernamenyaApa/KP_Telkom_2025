@@ -13,7 +13,11 @@ class FalloutStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        FalloutStatus::create(['name' => 'PI']);
-        FalloutStatus::create(['name' => 'FA']);
+        FalloutStatus::firstOrCreate(['name' => 'Open']);
+        FalloutStatus::firstOrCreate(['name' => 'OnProgress']);
+        FalloutStatus::firstOrCreate(['name' => 'input ulang']);
+        FalloutStatus::firstOrCreate(['name' => 'eskalasi']);
+        FalloutStatus::firstOrCreate(['name' => 'PI']);
+        FalloutStatus::firstOrCreate(['name' => 'FA']);
     }
 }

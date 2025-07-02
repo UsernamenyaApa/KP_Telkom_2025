@@ -13,8 +13,8 @@ class OrderTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        OrderType::create(['name' => 'AO']);
-        OrderType::create(['name' => 'MO']);
-        OrderType::create(['name' => 'Migration']);
+        OrderType::firstOrCreate(['name' => 'AO']);
+        OrderType::firstOrCreate(['name' => 'MO']);
+        OrderType::firstOrCreate(['name' => 'Migration']);
     }
 }

@@ -14,7 +14,7 @@ class FalloutReport extends Model
 
     public function reporter(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'reporter_id');
+        return $this->belongsTo(User::class, 'reporter_user_id');
     }
 
     public function orderType(): BelongsTo
@@ -25,5 +25,10 @@ class FalloutReport extends Model
     public function falloutStatus(): BelongsTo
     {
         return $this->belongsTo(FalloutStatus::class);
+    }
+
+    public function assignedToUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to_user_id');
     }
 }

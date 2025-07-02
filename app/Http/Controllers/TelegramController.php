@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\FalloutReport;
+use App\Models\FalloutStatus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Illuminate\Support\Facades\DB;
 use Telegram\Bot\Exceptions\TelegramSDKException;
+use Carbon\Carbon;
 
 class TelegramController extends Controller
 {
@@ -201,19 +203,30 @@ class TelegramController extends Controller
         $dbData = [
             'tipe_order'    => $reportData['tipe_order'] ?? null,
             'order_id'      => $reportData['order_id'] ?? null,
-            'reporter_name' => $createdBy, // FIX: Changed 'created_by' to 'reporter_name'
+            'reporter_user_id' => $user['id'], // Store Telegram user ID
             'nomer_layanan' => $reportData['nomer_layanan'] ?? null,
             'sn_ont'        => $reportData['sn_ont'] ?? null,
             'datek_odp'     => $reportData['datek_odp'] ?? null,
             'port_odp'      => $reportData['port_odp'] ?? null,
             'keterangan'    => $reportData['keterangan'] ?? null,
-            // REMOVED: 'tanggal' => now(), Laravel handles this with created_at/updated_at
         ];
+
+        // Generate id_harian and fallout_code
+        $today = Carbon::today();
+        $id_harian = FalloutReport::whereDate('created_at', $today)->count() + 1;
+        $fallout_code = 'FA' . $today->format('Ymd') . str_pad($id_harian, 2, '0', STR_PAD_LEFT);
+
+        // Get 'Open' status ID
+        $openStatus = FalloutStatus::where('name', 'Open')->first();
+        $status_fallout_id = $openStatus ? $openStatus->id : null;
+
+        $dbData['id_harian'] = $id_harian;
+        $dbData['fallout_code'] = $fallout_code;
+        $dbData['fallout_status_id'] = $status_fallout_id;
 
         // 2. Save to database
         try {
             DB::transaction(function () use ($dbData) {
-                // The 'id' column is auto-increment and handled by the database.
                 FalloutReport::create($dbData);
             });
         } catch (\Exception $e) {

@@ -25,14 +25,13 @@ return new class extends Migration
 
         Schema::create('fallout_reports', function (Blueprint $table) {
         $table->id(); // id_fallout
-        $table->string('tipe_order'); 
+        $table->foreignId('tipe_order_id')->constrained('order_types');
         $table->string('order_id'); 
         $table->string('nomer_layanan'); 
         $table->string('sn_ont'); 
         $table->string('datek_odp');
         $table->integer('port_odp'); 
-        $table->string('status_fallout')->nullable(); 
-        $table->text('respon_fallout')->nullable(); 
+        $table->foreignId('fallout_status_id')->nullable()->constrained('fallout_statuses');
         $table->string('keterangan')->nullable();
         $table->timestamps();
     });
