@@ -33,6 +33,7 @@ return new class extends Migration
         $table->integer('port_odp'); 
         $table->foreignId('fallout_status_id')->nullable()->constrained('fallout_statuses');
         $table->string('keterangan')->nullable();
+        $table->foreignId('reporter_user_id')->nullable()->constrained('users');
         $table->timestamps();
     });
 }

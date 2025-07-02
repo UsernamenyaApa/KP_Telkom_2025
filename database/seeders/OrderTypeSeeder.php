@@ -13,8 +13,18 @@ class OrderTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        OrderType::firstOrCreate(['name' => 'AO']);
-        OrderType::firstOrCreate(['name' => 'MO']);
-        OrderType::firstOrCreate(['name' => 'Migration']);
+        $orderTypes = [
+            ['id' => 1, 'name' => 'AO'],
+            ['id' => 2, 'name' => 'MO'],
+            ['id' => 3, 'name' => 'SO'],
+            ['id' => 4, 'name' => 'DO'],
+            ['id' => 5, 'name' => 'RO'],
+            ['id' => 6, 'name' => 'PDA'],
+            ['id' => 7, 'name' => 'MIGRASI'],
+        ];
+
+        foreach ($orderTypes as $type) {
+            OrderType::updateOrCreate(['id' => $type['id']], ['name' => $type['name']]);
+        }
     }
 }

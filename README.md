@@ -64,18 +64,36 @@ Sebelum memulai, pastikan Anda memiliki hal-hal berikut yang terinstal di sistem
 
 ## Menjalankan Aplikasi
 
-1.  **Mulai server pengembangan Laravel:**
+Untuk menjalankan aplikasi ini secara penuh, Anda memerlukan **beberapa jendela terminal** yang berjalan secara bersamaan.
+
+1.  **Terminal 1: Menjalankan Server Aplikasi**
+    Perintah ini memulai server pengembangan Laravel.
     ```bash
     php artisan serve
     ```
     Ini biasanya akan berjalan di `http://127.0.0.1:8000`.
 
-2.  **Mulai Ngrok (untuk webhook Bot Telegram):**
-    Di jendela terminal baru, jalankan Ngrok untuk mengekspos server Laravel Anda ke internet:
+2.  **Terminal 2: Menjalankan Ngrok (untuk Webhook Bot Telegram)**
+    Di jendela terminal baru, jalankan Ngrok untuk mengekspos server Laravel Anda ke internet. Ini penting agar Telegram dapat mengirim pembaruan ke aplikasi Anda.
     ```bash
     ngrok http 8000
     ```
     Ngrok akan memberi Anda URL HTTPS publik (misalnya, `https://xxxx-xxxx-xxxx-xxxx.ngrok-free.app`). Salin URL ini.
+
+3.  **Terminal 3: Menjalankan Queue Worker**
+    Karena aplikasi menggunakan antrian (queue) untuk memproses laporan secara asinkron, Anda perlu menjalankan *queue worker* di terminal terpisah. Ini akan memproses job yang dikirimkan ke antrian (misalnya, `ProcessTelegramReport`).
+    ```bash
+    php artisan queue:work
+    ```
+    *Catatan: Pastikan `QUEUE_CONNECTION` di file `.env` Anda diatur ke `database` atau driver antrian lain yang Anda gunakan.*
+
+4.  **Terminal 4 (Opsional): Menjalankan Vite untuk Pengembangan Frontend**
+    Jika Anda melakukan pengembangan pada bagian frontend (misalnya, mengubah file `.blade.php`, `.js`, atau `.css`), Anda mungkin ingin menjalankan Vite untuk kompilasi aset secara real-time.
+    ```bash
+    npm run dev
+    ```
+    *Untuk produksi atau jika Anda tidak sedang mengembangkan frontend, Anda cukup menjalankan `npm run build` sekali setelah perubahan frontend.*
+
 
 ## Pengaturan Bot Telegram
 

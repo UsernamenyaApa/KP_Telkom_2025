@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessTelegramReport;
 use App\Models\FalloutReport;
 use App\Models\FalloutStatus;
+use App\Models\OrderType;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Illuminate\Support\Facades\DB;
 use Telegram\Bot\Exceptions\TelegramSDKException;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class TelegramController extends Controller
 {
@@ -170,13 +174,25 @@ class TelegramController extends Controller
     /**
      * Starts the process for a new fallout report.
      */
-    private function startFalloutReport($chat_id, $user, $orderType)
+    private function startFalloutReport($chat_id, $user, $orderTypeName)
     {
+        Log::info("startFalloutReport: Received orderTypeName: {$orderTypeName} for chat_id: {$chat_id}");
+        $orderType = OrderType::where('name', $orderTypeName)->first();
+
+        if (!$orderType) {
+            Log::error("Invalid order type '{$orderTypeName}' selected by user in chat {$chat_id}. OrderType not found in DB.");
+            $this->sendMessage($chat_id, "Terjadi kesalahan: Tipe order tidak valid. Silakan coba lagi.");
+            $this->showMainMenu($chat_id);
+            return;
+        }
+
+        Log::info("startFalloutReport: Found OrderType ID: {$orderType->id} for name: {$orderTypeName}");
+
         $state = [
             'process' => 'fallout',
             'step' => 'order_id',
             'report_data' => [
-                'tipe_order' => $orderType // Pre-fill the selected order type
+                'tipe_order_id' => $orderType->id // Store the order type ID
             ],
             'user' => [ // Store user info in the state
                 'id' => $user->getId(),
@@ -187,6 +203,7 @@ class TelegramController extends Controller
         ];
         // Save state to cache BEFORE asking the first question.
         Cache::put($chat_id, $state, now()->addMinutes(30));
+        Log::info("startFalloutReport: State cached for chat_id {$chat_id} with tipe_order_id: {$state['report_data']['tipe_order_id']}");
         $this->askQuestionForStep($chat_id, $state);
     }
 
@@ -195,72 +212,8 @@ class TelegramController extends Controller
      */
     private function generateAndSendReport($chat_id, $state)
     {
-        $reportData = $state['report_data'];
-        $user = $state['user'];
-        $createdBy = $user['username'] ? "@" . $user['username'] : $user['first_name'];
-
-        // 1. Prepare data for database matching the database schema
-        $dbData = [
-            'tipe_order'    => $reportData['tipe_order'] ?? null,
-            'order_id'      => $reportData['order_id'] ?? null,
-            'reporter_user_id' => $user['id'], // Store Telegram user ID
-            'nomer_layanan' => $reportData['nomer_layanan'] ?? null,
-            'sn_ont'        => $reportData['sn_ont'] ?? null,
-            'datek_odp'     => $reportData['datek_odp'] ?? null,
-            'port_odp'      => $reportData['port_odp'] ?? null,
-            'keterangan'    => $reportData['keterangan'] ?? null,
-        ];
-
-        // Generate id_harian and fallout_code
-        $today = Carbon::today();
-        $id_harian = FalloutReport::whereDate('created_at', $today)->count() + 1;
-        $fallout_code = 'FA' . $today->format('Ymd') . str_pad($id_harian, 2, '0', STR_PAD_LEFT);
-
-        // Get 'Open' status ID
-        $openStatus = FalloutStatus::where('name', 'Open')->first();
-        $status_fallout_id = $openStatus ? $openStatus->id : null;
-
-        $dbData['id_harian'] = $id_harian;
-        $dbData['fallout_code'] = $fallout_code;
-        $dbData['fallout_status_id'] = $status_fallout_id;
-
-        // 2. Save to database
-        try {
-            DB::transaction(function () use ($dbData) {
-                FalloutReport::create($dbData);
-            });
-        } catch (\Exception $e) {
-            // Enhanced logging to help debug database issues.
-            Log::error("DATABASE SAVE FAILED for chat {$chat_id}. Error: " . $e->getMessage() . " --- Attempted Data: " . json_encode($dbData));
-            $this->sendMessage($chat_id, "❌ Terjadi kesalahan fatal saat menyimpan laporan ke database. Laporan tidak tersimpan. Silakan hubungi admin.");
-            $this->resetStateAndShowMenu($chat_id);
-            return;
-        }
-
-        // 3. Format the report message
-        $reportText = "📊 *Laporan Fallout Baru* 📊\n\n"
-                    . "*Tipe Order:* `" . ($dbData['tipe_order'] ?? '-') . "`\n"
-                    . "*OrderID:* `" . ($dbData['order_id'] ?? '-') . "`\n"
-                    . "*Nomor Layanan:* `" . ($dbData['nomer_layanan'] ?? '-') . "`\n"
-                    . "*SN ONT:* `" . ($dbData['sn_ont'] ?? '-') . "`\n"
-                    . "*Datek ODP:* `" . ($dbData['datek_odp'] ?? '-') . "`\n"
-                    . "*Port ODP:* `" . ($dbData['port_odp'] ?? '-') . "`\n\n"
-                    . "*Keterangan:*\n" . ($dbData['keterangan'] ?? '-') . "\n\n"
-                    . "----------------------------------------\n"
-                    . "*Created By:* " . $createdBy . "\n"
-                    . "*Create Order:* " . now()->format('Y-m-d H:i:s');
-
-        // 4. Send confirmation to the user who created it
-        $this->sendMessage($chat_id, "✅ Laporan berhasil dibuat dan dikirim!");
-        $sentMessage = $this->sendMessage($chat_id, $reportText);
-
-        // 5. Forward the message to the channel and group
-        if ($sentMessage) {
-            $this->forwardMessageToDestinations($chat_id, $sentMessage->message_id);
-        }
-
-        // 6. Clean up state
-        $this->resetStateAndShowMenu($chat_id);
+        ProcessTelegramReport::dispatch($chat_id, $state);
+        $this->resetStateAndShowMenu($chat_id, "✅ Laporan berhasil dibuat dan sedang diproses. Anda akan menerima rekap laporan sebentar lagi.");
     }
 
     /**
@@ -309,15 +262,29 @@ class TelegramController extends Controller
      */
     private function showFalloutMenu($chat_id)
     {
-        $keyboard = [
-            'inline_keyboard' => [
-                [['text' => 'AO', 'callback_data' => 'start_fallout_AO'], ['text' => 'MO', 'callback_data' => 'start_fallout_MO']],
-                [['text' => 'DO', 'callback_data' => 'start_fallout_DO'], ['text' => 'RO', 'callback_data' => 'start_fallout_RO']],
-                [['text' => 'SO', 'callback_data' => 'start_fallout_SO']],
-                [['text' => '« Kembali ke Menu Utama', 'callback_data' => 'back_to_main_menu']]
-            ]
+        $orderTypes = OrderType::all();
+        $keyboard = [];
+        $row = [];
+
+        foreach ($orderTypes as $type) {
+            $row[] = ['text' => $type->name, 'callback_data' => 'start_fallout_' . $type->name];
+            if (count($row) === 2) {
+                $keyboard[] = $row;
+                $row = [];
+            }
+        }
+
+        if (!empty($row)) {
+            $keyboard[] = $row;
+        }
+
+        $keyboard[] = [['text' => '« Kembali ke Menu Utama', 'callback_data' => 'back_to_main_menu']];
+
+        $reply_markup = [
+            'inline_keyboard' => $keyboard
         ];
-        $this->sendMessage($chat_id, "Silakan pilih jenis Laporan Fallout:", $keyboard);
+
+        $this->sendMessage($chat_id, "Silakan pilih jenis Laporan Fallout:", $reply_markup);
     }
 
     /**

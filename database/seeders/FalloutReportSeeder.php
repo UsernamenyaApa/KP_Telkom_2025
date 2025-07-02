@@ -17,7 +17,7 @@ class FalloutReportSeeder extends Seeder
      */
     public function run(): void
     {
-        $orderTypes = OrderType::pluck('name')->toArray();
+        $orderTypes = OrderType::pluck('id')->toArray();
         $falloutStatuses = FalloutStatus::pluck('id')->toArray();
 
         $dates = [
@@ -36,7 +36,7 @@ class FalloutReportSeeder extends Seeder
                 $dataToInsert = [
                     'id_harian' => $id_harian,
                     'fallout_code' => $fallout_code,
-                    'tipe_order' => $orderTypes[array_rand($orderTypes)],
+                    'tipe_order_id' => $orderTypes[array_rand($orderTypes)],
                     'order_id' => 'ORD' . $date->format('Ymd') . str_pad($i + 1, 3, '0', STR_PAD_LEFT),
                     'reporter_user_id' => 1, // Assuming user with ID 1 exists
                     'nomer_layanan' => 'NL' . rand(100000000, 999999999),
