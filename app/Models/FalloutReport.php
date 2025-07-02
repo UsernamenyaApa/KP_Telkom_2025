@@ -12,9 +12,9 @@ class FalloutReport extends Model
 
     protected $guarded = [];
 
-    public function hdDaman(): BelongsTo
+    public function reporter(): BelongsTo
     {
-        return $this->belongsTo(HdDaman::class);
+        return $this->belongsTo(User::class, 'reporter_id');
     }
 
     public function orderType(): BelongsTo

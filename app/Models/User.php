@@ -61,8 +61,5 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    public function hdDaman()
-    {
-        return $this->hasOne(HdDaman::class);
-    }
+    
 }

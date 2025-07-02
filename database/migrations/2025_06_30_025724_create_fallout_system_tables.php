@@ -11,12 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hd_damans', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->timestamps();
-        });
-
         Schema::create('order_types', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
@@ -37,8 +31,9 @@ return new class extends Migration
         $table->string('sn_ont'); 
         $table->string('datek_odp');
         $table->integer('port_odp'); 
-        $table->string('status_fallout'); 
-        $table->text('respon_fallout'); 
+        $table->string('status_fallout')->nullable(); 
+        $table->text('respon_fallout')->nullable(); 
+        $table->string('keterangan')->nullable();
         $table->timestamps();
     });
 }

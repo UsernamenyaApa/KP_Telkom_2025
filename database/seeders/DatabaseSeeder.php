@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            HdDamanSeeder::class,
             OrderTypeSeeder::class,
             FalloutStatusSeeder::class,
             HdDamanRoleSeeder::class,

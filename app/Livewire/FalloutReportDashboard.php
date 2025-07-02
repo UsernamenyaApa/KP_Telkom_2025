@@ -20,7 +20,7 @@ class FalloutReportDashboard extends Component
 
     public function render()
     {
-        $reports = FalloutReport::with(['hdDaman', 'orderType', 'falloutStatus'])
+        $reports = FalloutReport::with(['reporter', 'orderType', 'falloutStatus'])
             ->whereDate('created_at', $this->date)
             ->orderBy('created_at', 'asc')
             ->paginate(10);

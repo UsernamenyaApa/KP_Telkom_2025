@@ -3,112 +3,99 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\HdDaman;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class HdDamanManager extends Component
 {
+    public $users;
+    public $searchTerm = '';
+
+    // Properti untuk pengguna baru
     public $name;
+    public $nik;
     public $date_of_birth;
-    public $hdDamanId;
-    public $isEditing = false;
 
     protected $rules = [
-        'name' => 'required|string|max:255|unique:hd_damans,name',
+        'name' => 'required|string|max:255',
+        'nik' => 'required|string|unique:users,nik',
         'date_of_birth' => 'required|date',
     ];
 
-    public function render()
+    public function mount()
     {
-        return view('livewire.hd-daman-manager', [
-            'hdDamans' => HdDaman::all(),
-        ]);
+        $this->loadUsers();
     }
 
-    public function create()
+    public function render()
+    {
+        return view('livewire.hd-daman-manager');
+    }
+
+    public function loadUsers()
+    {
+        $this->users = User::where(function ($query) {
+            $query->where('name', 'like', '%'.$this->searchTerm.'%')
+                  ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
+        })
+        ->with('roles') // Eager load roles
+        ->get();
+    }
+
+    public function updatedSearchTerm()
+    {
+        $this->loadUsers();
+    }
+
+    public function createUser()
     {
         $this->validate();
 
-        // Generate email and password
-        $email = strtolower(str_replace(' ', '', $this->name)) . '@tif.com';
-        $password = Carbon::parse($this->date_of_birth)->format('ymd');
+        // 1. Auto-generate email
+        $email = Str::of($this->name)
+            ->lower()
+            ->split('/\s+/') // split by one or more spaces
+            ->take(2)
+            ->join('') . '@tif.co.id';
 
-        // Create user
+        // Periksa apakah email yang dihasilkan sudah ada
+        if (User::where('email', $email)->exists()) {
+            $this->addError('name', "Generated email ({$email}) already exists. Please use a different name.");
+            return;
+        }
+
+        // 2. Password adalah NIK
+        $password = $this->nik;
+
         $user = User::create([
             'name' => $this->name,
             'email' => $email,
-            'password' => Hash::make($password),
+            'nik' => $this->nik,
             'date_of_birth' => $this->date_of_birth,
+            'password' => Hash::make($password),
         ]);
 
-        // Assign hd-daman role
-        $role = Role::where('name', 'hd-daman')->first();
-        if ($role) {
-            $user->assignRole($role);
-        }
+        $user->assignRole('hd-daman');
 
-        // Create HdDaman and link to user
-        HdDaman::create([
-            'name' => $this->name,
-            'user_id' => $user->id,
-        ]);
+        $this->reset('name', 'nik', 'date_of_birth');
+        $this->loadUsers();
 
-        $this->reset(['name', 'date_of_birth']);
-        session()->flash('message', 'HdDaman and user created successfully.');
+        session()->flash('message', "Pengguna {$user->name} berhasil dibuat dengan email: {$email}. Passwordnya adalah NIK pengguna.");
     }
 
-    public function edit($id)
+    public function assignHdDamanRole(User $user)
     {
-        $hdDaman = HdDaman::findOrFail($id);
-        $this->name = $hdDaman->name;
-        $this->hdDamanId = $hdDaman->id;
-        $this->isEditing = true;
-
-        // Load user's date of birth if available
-        if ($hdDaman->user) {
-            $this->date_of_birth = Carbon::parse($hdDaman->user->date_of_birth)->format('Y-m-d');
-        }
+        $user->assignRole('hd-daman');
+        $this->loadUsers();
+        session()->flash('message', 'Role "hd-daman" telah diberikan kepada '.$user->name);
     }
 
-    public function update()
+    public function revokeHdDamanRole(User $user)
     {
-        $this->validate([
-            'name' => 'required|string|max:255|unique:hd_damans,name,' . $this->hdDamanId,
-            'date_of_birth' => 'required|date',
-        ]);
-
-        $hdDaman = HdDaman::findOrFail($this->hdDamanId);
-        $hdDaman->update(['name' => $this->name]);
-
-        // Update user details
-        if ($hdDaman->user) {
-            $hdDaman->user->update([
-                'name' => $this->name,
-                'email' => strtolower(str_replace(' ', '', $this->name)) . '@tif.com',
-                'password' => Hash::make(Carbon::parse($this->date_of_birth)->format('ymd')),
-                'date_of_birth' => $this->date_of_birth,
-            ]);
-        }
-
-        $this->reset(['name', 'date_of_birth', 'hdDamanId', 'isEditing']);
-        session()->flash('message', 'HdDaman and user updated successfully.');
-    }
-
-    public function delete($id)
-    {
-        $hdDaman = HdDaman::findOrFail($id);
-        if ($hdDaman->user) {
-            $hdDaman->user->delete();
-        }
-        $hdDaman->delete();
-        session()->flash('message', 'HdDaman and associated user deleted successfully.');
-    }
-
-    public function cancelEdit()
-    {
-        $this->reset(['name', 'date_of_birth', 'hdDamanId', 'isEditing']);
+        $user->removeRole('hd-daman');
+        $this->loadUsers();
+        session()->flash('message', 'Role "hd-daman" telah dicabut dari '.$user->name);
     }
 }

@@ -37,6 +37,9 @@
 }
 
 @layer base {
+    body {
+        @apply text-zinc-800 dark:text-zinc-200;
+    }
 
     *,
     ::after,

@@ -13,5 +13,6 @@ class HdDamanRoleSeeder extends Seeder
     public function run(): void
     {
         Role::firstOrCreate(['name' => 'hd-daman']);
+        Role::firstOrCreate(['name' => 'super-admin']);
     }
 }

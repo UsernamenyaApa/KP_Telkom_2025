@@ -83,18 +83,6 @@ class TelegramController extends Controller
 
             case 'port_odp':
                 $state['report_data']['port_odp'] = (int) $text;
-                $state['step'] = 'status_fallout';
-                $this->sendMessage($chat_id, "Masukkan Status Fallout (contoh: act/data):");
-                break;
-
-            case 'status_fallout':
-                $state['report_data']['status_fallout'] = $text;
-                $state['step'] = 'respon_fallout';
-                $this->sendMessage($chat_id, "Masukkan Respon Fallout:");
-                break;
-
-            case 'respon_fallout':
-                $state['report_data']['respon_fallout'] = $text;
                 $this->saveReport($chat_id, $state);
                 break;
 
