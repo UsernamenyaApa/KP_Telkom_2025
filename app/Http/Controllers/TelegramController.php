@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\FalloutReport;
-// Model-model tidak lagi digunakan karena pilihan dibuat secara hardcoded.
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Laravel\Facades\Telegram;
@@ -21,13 +20,11 @@ class TelegramController extends Controller
         $update = Telegram::getWebhookUpdate();
         Log::info($update);
 
-        // Handle button clicks (Callback Queries)
         if ($update->isType('callback_query')) {
             $this->handleCallbackQuery($update);
             return;
         }
 
-        // Handle regular messages
         if ($update->has('message') && $update->getMessage()->has('text')) {
             $this->handleMessage($update);
             return;
@@ -45,9 +42,8 @@ class TelegramController extends Controller
         $text = $update->getMessage()->getText();
         $user = $update->getMessage()->getFrom();
 
-        // Command handling
         if ($text === '/start') {
-            $this->resetStateAndShowMenu($chat_id, "Halo " . $user->getFirstName() . "! Selamat datang. Silakan pilih jenis laporan yang ingin Anda buat.");
+            $this->resetStateAndShowMenu($chat_id, "Halo " . $user->getFirstName() . "! Selamat datang. Silakan pilih menu.");
             return;
         }
 
@@ -56,9 +52,8 @@ class TelegramController extends Controller
             return;
         }
 
-        // Continue conversation based on state
-        $state = Cache::get($chat_id, ['step' => 'idle']);
-        if ($state['step'] !== 'idle') {
+        $state = Cache::get($chat_id);
+        if ($state && ($state['step'] ?? 'idle') !== 'idle') {
             $this->continueConversation($chat_id, $text, $state);
         } else {
             $this->showMainMenu($chat_id, "Gunakan perintah /start untuk memulai atau pilih menu di bawah.");
@@ -72,202 +67,244 @@ class TelegramController extends Controller
     {
         $callbackQuery = $update->getCallbackQuery();
         $chat_id = $callbackQuery->getMessage()->getChat()->getId();
+        $user = $callbackQuery->getFrom();
         $data = $callbackQuery->getData();
 
-        // Acknowledge the button click first
         try {
             Telegram::answerCallbackQuery(['callback_query_id' => $callbackQuery->getId()]);
         } catch (TelegramSDKException $e) {
             Log::error("Failed to answer callback query: " . $e->getMessage());
         }
 
-        // Handle fallout type selection from main menu
+        // Handle selection of a specific fallout type (e.g., AO, MO)
         if (str_starts_with($data, 'start_fallout_')) {
             $orderType = substr($data, strlen('start_fallout_'));
-            $this->startFalloutReport($chat_id, $orderType);
+            $this->startFalloutReport($chat_id, $user, $orderType);
             return;
         }
 
-        // Handle other selections within the form
-        if (str_starts_with($data, 'select_')) {
-            $this->handleSelectionCallback($chat_id, $data);
-            return;
-        }
-
-        // Handle other main menu options
+        // Handle main menu navigation
         switch ($data) {
+            case 'show_fallout_menu':
+                $this->showFalloutMenu($chat_id);
+                break;
             case 'start_pelurusan':
                 $this->sendMessage($chat_id, "Fitur 'Pelurusan Data' sedang dalam pengembangan. Silakan pilih menu lain.");
                 $this->showMainMenu($chat_id);
                 break;
+            case 'back_to_main_menu':
+                $this->showMainMenu($chat_id, "Anda kembali ke menu utama. Silakan pilih lagi:");
+                break;
         }
     }
-
-    /**
-     * Handles callbacks from selection keyboards within the form.
-     */
-    private function handleSelectionCallback($chat_id, $data)
-    {
-        $state = Cache::get($chat_id);
-        if (!$state || $state['step'] === 'idle') {
-            $this->sendMessage($chat_id, "Sesi Anda telah berakhir atau tidak valid. Silakan mulai lagi dengan /start.");
-            return;
-        }
-
-        $parts = explode('_', $data, 3);
-        $selectedValue = $parts[2];
-
-        $stepName = str_replace('_id', '', $state['step']);
-        $state['report_data'][$stepName] = $selectedValue;
-
-        $this->advanceStep($chat_id, $state);
-        Cache::put($chat_id, $state, now()->addMinutes(30));
-    }
-
 
     /**
      * Guides the user through the conversation steps (handles text input).
      */
     private function continueConversation($chat_id, $text, &$state)
     {
-        $stepName = str_replace('_id', '', $state['step']);
-        $state['report_data'][$stepName] = ($text === 'skip' || $text === 'SKIP') ? null : $text;
-
+        $currentStep = $state['step'];
+        $state['report_data'][$currentStep] = $text;
         $this->advanceStep($chat_id, $state);
-        Cache::put($chat_id, $state, now()->addMinutes(30));
     }
 
     /**
-     * Advances the conversation to the next step.
+     * Advances the conversation to the next step with robust state management.
      */
     private function advanceStep($chat_id, &$state)
     {
-        // 'order_type_id' is removed from steps as it's selected upfront
         $steps = [
-            'hd_daman_id', 'order_id', 'nomer_layanan', 'sn_ont',
-            'datek_odp', 'port_odp', 'fallout_status_id', 'respon_fallout'
+            'order_id', 'nomer_layanan', 'sn_ont',
+            'datek_odp', 'port_odp', 'keterangan'
         ];
-
         $currentStepIndex = array_search($state['step'], $steps);
+
+        if ($currentStepIndex === false) {
+            Log::error("Invalid step '{$state['step']}' found for chat {$chat_id}. Resetting state.");
+            $this->resetStateAndShowMenu($chat_id, "Terjadi kesalahan pada alur, silakan mulai lagi.");
+            return;
+        }
+
         $nextStepIndex = $currentStepIndex + 1;
 
         if ($nextStepIndex < count($steps)) {
             $state['step'] = $steps[$nextStepIndex];
+            // Save state to cache BEFORE asking the next question. This is crucial.
+            Cache::put($chat_id, $state, now()->addMinutes(30));
             $this->askQuestionForStep($chat_id, $state);
         } else {
-            $this->saveFalloutReport($chat_id, $state);
+            // Last step is done, now generate the report.
+            $this->generateAndSendReport($chat_id, $state);
         }
     }
-
 
     /**
      * Asks the user the correct question for the current step.
      */
-    private function askQuestionForStep($chat_id, &$state)
+    private function askQuestionForStep($chat_id, $state)
     {
-        // Note the numbering is now out of 8 instead of 9
         switch ($state['step']) {
-            case 'hd_daman_id':
-                $options = ['HD Daman A', 'HD Daman B', 'HD Daman C', 'HD Daman D'];
-                $this->sendSelectionKeyboard($chat_id, "1/8: Siapa HD Daman yang menangani orderan ini?", $options, 'select_daman_');
-                break;
             case 'order_id':
-                $this->sendMessage($chat_id, "2/8: Masukkan Order ID:");
+                $this->sendMessage($chat_id, "1/6: Masukkan Order ID:");
                 break;
             case 'nomer_layanan':
-                $this->sendMessage($chat_id, "3/8: Masukkan Nomor Layanan:");
+                $this->sendMessage($chat_id, "2/6: Masukkan Nomor Layanan:");
                 break;
             case 'sn_ont':
-                $this->sendMessage($chat_id, "4/8: Masukkan SN ONT:");
+                $this->sendMessage($chat_id, "3/6: Masukkan SN ONT:");
                 break;
             case 'datek_odp':
-                $this->sendMessage($chat_id, "5/8: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):");
+                $this->sendMessage($chat_id, "4/6: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):");
                 break;
             case 'port_odp':
-                $this->sendMessage($chat_id, "6/8: Masukkan Port ODP (contoh: 3):");
+                $this->sendMessage($chat_id, "5/6: Masukkan Port ODP (contoh: 3):");
                 break;
-            case 'fallout_status_id':
-                $options = ['ONU/ONT Rusak', 'Jaringan', 'Alamat Tidak Ditemukan', 'Lainnya'];
-                $this->sendSelectionKeyboard($chat_id, "7/8: Silakan pilih Status Fallout:", $options, 'select_status_');
-                break;
-            case 'respon_fallout':
-                $this->sendMessage($chat_id, "8/8: Masukkan Keterangan/Respon Fallout. (Ketik 'skip' jika tidak ada)");
+            case 'keterangan':
+                $this->sendMessage($chat_id, "6/6: Masukkan Keterangan Laporan:");
                 break;
         }
     }
 
-
     /**
-     * Starts the process for a new fallout report with a pre-selected order type.
+     * Starts the process for a new fallout report.
      */
-    private function startFalloutReport($chat_id, $orderType)
+    private function startFalloutReport($chat_id, $user, $orderType)
     {
         $state = [
             'process' => 'fallout',
-            'step' => 'hd_daman_id', // Start with the first form question
+            'step' => 'order_id',
             'report_data' => [
-                'order_type' => $orderType // Pre-fill the order type
+                'tipe_order' => $orderType // Pre-fill the selected order type
+            ],
+            'user' => [ // Store user info in the state
+                'id' => $user->getId(),
+                'first_name' => $user->getFirstName(),
+                'last_name' => $user->getLastName(),
+                'username' => $user->getUsername(),
             ],
         ];
-
-        $this->sendMessage($chat_id, "Baik, mari kita mulai input laporan Fallout *{$orderType}*. (Gunakan /cancel untuk membatalkan)");
-        $this->askQuestionForStep($chat_id, $state); // Ask the first question
+        // Save state to cache BEFORE asking the first question.
         Cache::put($chat_id, $state, now()->addMinutes(30));
+        $this->askQuestionForStep($chat_id, $state);
     }
 
     /**
-     * Saves the completed report to the database.
+     * Generates the final report, saves it, and sends it to all channels.
      */
-    private function saveFalloutReport($chat_id, $state)
+    private function generateAndSendReport($chat_id, $state)
     {
-        $reportData = [];
-        foreach ($state['report_data'] as $key => $value) {
-            $newKey = str_replace('_id', '', $key);
-            $reportData[$newKey] = $value;
-        }
+        $reportData = $state['report_data'];
+        $user = $state['user'];
+        $createdBy = $user['username'] ? "@" . $user['username'] : $user['first_name'];
 
-        $reportData['tanggal'] = now();
+        // 1. Prepare data for database matching the database schema
+        $dbData = [
+            'tipe_order'    => $reportData['tipe_order'] ?? null,
+            'order_id'      => $reportData['order_id'] ?? null,
+            'reporter_name' => $createdBy, // FIX: Changed 'created_by' to 'reporter_name'
+            'nomer_layanan' => $reportData['nomer_layanan'] ?? null,
+            'sn_ont'        => $reportData['sn_ont'] ?? null,
+            'datek_odp'     => $reportData['datek_odp'] ?? null,
+            'port_odp'      => $reportData['port_odp'] ?? null,
+            'keterangan'    => $reportData['keterangan'] ?? null,
+            // REMOVED: 'tanggal' => now(), Laravel handles this with created_at/updated_at
+        ];
 
+        // 2. Save to database
         try {
-            $report = DB::transaction(function () use ($reportData) {
-                $newReport = FalloutReport::create($reportData);
-                $noReport = 'FO-' . now()->format('Ymd') . '-' . $newReport->id;
-                $newReport->no_report = $noReport;
-                $newReport->save();
-                return $newReport;
+            DB::transaction(function () use ($dbData) {
+                // The 'id' column is auto-increment and handled by the database.
+                FalloutReport::create($dbData);
             });
-
-            $this->sendMessage($chat_id, "✅ Laporan berhasil disimpan dengan No Laporan: *" . $report->no_report . "*. Terima kasih!");
         } catch (\Exception $e) {
-            Log::error("Failed to save report: " . $e->getMessage() . " Data: " . json_encode($reportData));
-            $this->sendMessage($chat_id, "❌ Terjadi kesalahan saat menyimpan laporan. Silakan coba lagi.");
-        } finally {
+            // Enhanced logging to help debug database issues.
+            Log::error("DATABASE SAVE FAILED for chat {$chat_id}. Error: " . $e->getMessage() . " --- Attempted Data: " . json_encode($dbData));
+            $this->sendMessage($chat_id, "❌ Terjadi kesalahan fatal saat menyimpan laporan ke database. Laporan tidak tersimpan. Silakan hubungi admin.");
             $this->resetStateAndShowMenu($chat_id);
+            return;
         }
+
+        // 3. Format the report message
+        $reportText = "📊 *Laporan Fallout Baru* 📊\n\n"
+                    . "*Tipe Order:* `" . ($dbData['tipe_order'] ?? '-') . "`\n"
+                    . "*OrderID:* `" . ($dbData['order_id'] ?? '-') . "`\n"
+                    . "*Nomor Layanan:* `" . ($dbData['nomer_layanan'] ?? '-') . "`\n"
+                    . "*SN ONT:* `" . ($dbData['sn_ont'] ?? '-') . "`\n"
+                    . "*Datek ODP:* `" . ($dbData['datek_odp'] ?? '-') . "`\n"
+                    . "*Port ODP:* `" . ($dbData['port_odp'] ?? '-') . "`\n\n"
+                    . "*Keterangan:*\n" . ($dbData['keterangan'] ?? '-') . "\n\n"
+                    . "----------------------------------------\n"
+                    . "*Created By:* " . $createdBy . "\n"
+                    . "*Create Order:* " . now()->format('Y-m-d H:i:s');
+
+        // 4. Send confirmation to the user who created it
+        $this->sendMessage($chat_id, "✅ Laporan berhasil dibuat dan dikirim!");
+        $sentMessage = $this->sendMessage($chat_id, $reportText);
+
+        // 5. Forward the message to the channel and group
+        if ($sentMessage) {
+            $this->forwardMessageToDestinations($chat_id, $sentMessage->message_id);
+        }
+
+        // 6. Clean up state
+        $this->resetStateAndShowMenu($chat_id);
     }
 
     /**
-     * Displays the main menu with choices for each order type.
+     * Forwards a message to predefined destinations from .env file.
+     */
+    private function forwardMessageToDestinations($from_chat_id, $message_id)
+    {
+        $destinations = [
+            env('TELEGRAM_CHANNEL_ID'),
+            env('TELEGRAM_GROUP_ID')
+        ];
+
+        foreach ($destinations as $to_chat_id) {
+            if ($to_chat_id) {
+                try {
+                    Telegram::forwardMessage([
+                        'chat_id'      => $to_chat_id,
+                        'from_chat_id' => $from_chat_id,
+                        'message_id'   => $message_id,
+                    ]);
+                    Log::info("Successfully forwarded message {$message_id} to {$to_chat_id}");
+                } catch (TelegramSDKException $e) {
+                    Log::error("Failed to forward message {$message_id} to {$to_chat_id}: " . $e->getMessage());
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Displays the main menu with two primary choices.
      */
     private function showMainMenu($chat_id, $messageText = "Silakan pilih menu:")
     {
         $keyboard = [
             'inline_keyboard' => [
-                [
-                    ['text' => '📊 Fallout AO', 'callback_data' => 'start_fallout_AO'],
-                    ['text' => '📊 Fallout MO', 'callback_data' => 'start_fallout_MO'],
-                ],
-                [
-                    ['text' => '📊 Fallout DO', 'callback_data' => 'start_fallout_DO'],
-                    ['text' => '📊 Fallout RO', 'callback_data' => 'start_fallout_RO'],
-                ],
-                [
-                    ['text' => '📊 Fallout SO', 'callback_data' => 'start_fallout_SO'],
-                    ['text' => '✏️ Pelurusan Data', 'callback_data' => 'start_pelurusan'],
-                ]
+                [['text' => '📊 Laporan Fallout', 'callback_data' => 'show_fallout_menu']],
+                [['text' => '✏️ Pelurusan Data', 'callback_data' => 'start_pelurusan']]
             ]
         ];
         $this->sendMessage($chat_id, $messageText, $keyboard);
+    }
+
+    /**
+     * Displays the sub-menu for Fallout report types.
+     */
+    private function showFalloutMenu($chat_id)
+    {
+        $keyboard = [
+            'inline_keyboard' => [
+                [['text' => 'AO', 'callback_data' => 'start_fallout_AO'], ['text' => 'MO', 'callback_data' => 'start_fallout_MO']],
+                [['text' => 'DO', 'callback_data' => 'start_fallout_DO'], ['text' => 'RO', 'callback_data' => 'start_fallout_RO']],
+                [['text' => 'SO', 'callback_data' => 'start_fallout_SO']],
+                [['text' => '« Kembali ke Menu Utama', 'callback_data' => 'back_to_main_menu']]
+            ]
+        ];
+        $this->sendMessage($chat_id, "Silakan pilih jenis Laporan Fallout:", $keyboard);
     }
 
     /**
@@ -278,29 +315,8 @@ class TelegramController extends Controller
         Cache::forget($chat_id);
         if ($messageText) {
             $this->showMainMenu($chat_id, $messageText);
-        } else {
-            $this->showMainMenu($chat_id);
         }
     }
-
-    /**
-     * Sends a message with an inline keyboard from a hardcoded array.
-     */
-    private function sendSelectionKeyboard($chat_id, $text, array $options, $callbackPrefix)
-    {
-        if (empty($options)) {
-            $this->sendMessage($chat_id, "Tidak ada data pilihan yang tersedia. Silakan hubungi admin.");
-            $this->resetStateAndShowMenu($chat_id, "Proses dibatalkan karena tidak ada data.");
-            return;
-        }
-
-        $keyboard = collect($options)->map(function ($option) use ($callbackPrefix) {
-            return ['text' => $option, 'callback_data' => $callbackPrefix . $option];
-        })->chunk(2)->toArray();
-
-        $this->sendMessage($chat_id, $text, ['inline_keyboard' => $keyboard]);
-    }
-
 
     /**
      * A helper function to send messages.
@@ -312,15 +328,14 @@ class TelegramController extends Controller
             'text' => $text,
             'parse_mode' => 'Markdown',
         ];
-
         if ($reply_markup) {
             $params['reply_markup'] = json_encode($reply_markup);
         }
-
         try {
-            Telegram::sendMessage($params);
+            return Telegram::sendMessage($params);
         } catch (TelegramSDKException $e) {
             Log::error("Failed to send message to chat_id {$chat_id}: " . $e->getMessage());
+            return null;
         }
     }
 }
