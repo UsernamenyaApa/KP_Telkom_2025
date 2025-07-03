@@ -44,8 +44,10 @@ class ProcessTelegramReport implements ShouldQueue
      */
     public function handle(): void
     {
+        \Illuminate\Support\Facades\Log::info('ProcessTelegramReport: Job handle method started.');
         $chat_id = $this->chat_id;
         $state = $this->state;
+        Log::info("ProcessTelegramReport: State received by job for chat_id {$chat_id}: " . json_encode($state));
         $reportData = $state['report_data'];
         $user = $state['user'];
         $createdBy = $user['username'] ? "@" . $user['username'] : $user['first_name'];
@@ -55,6 +57,7 @@ class ProcessTelegramReport implements ShouldQueue
         // This handles cases where a user was created before the telegram_user_id field was added.
         $telegramId = $user['id'];
         $telegramUsername = $user['username'] ?? null;
+        Log::info("ProcessTelegramReport: Processing user with telegram_user_id: {$telegramId} and telegram_username: {$telegramUsername}");
 
         $reporterUser = null;
 
@@ -111,8 +114,10 @@ class ProcessTelegramReport implements ShouldQueue
         $dbData['id_harian'] = $id_harian;
         $dbData['fallout_code'] = $fallout_code;
         $dbData['fallout_status_id'] = $status_fallout_id;
+        \Illuminate\Support\Facades\Log::info("ProcessTelegramReport: dbData['tipe_order_id'] before save: " . ($dbData['tipe_order_id'] ?? 'NULL'));
 
         // 2. Save to database
+        \Illuminate\Support\Facades\Log::info("ProcessTelegramReport: Attempting to save with dbData: " . json_encode($dbData));
         try {
             DB::transaction(function () use ($dbData) {
                 FalloutReport::create($dbData);

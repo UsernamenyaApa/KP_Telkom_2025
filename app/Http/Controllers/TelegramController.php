@@ -209,6 +209,7 @@ class TelegramController extends Controller
             ],
         ];
         // Save state to cache BEFORE asking the first question.
+        Log::info("startFalloutReport: State to be cached for chat_id {$chat_id} with tipe_order_id: {$state['report_data']['tipe_order_id']}");
         Cache::put($chat_id, $state, now()->addMinutes(30));
         Log::info("startFalloutReport: State cached for chat_id {$chat_id} with tipe_order_id: {$state['report_data']['tipe_order_id']}");
         $this->askQuestionForStep($chat_id, $state);
