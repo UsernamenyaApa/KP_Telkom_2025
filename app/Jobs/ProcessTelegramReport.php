@@ -15,6 +15,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Jobs\SendTelegramNotificationJob;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 
@@ -24,17 +25,20 @@ class ProcessTelegramReport implements ShouldQueue
 
     protected $chat_id;
     protected $state;
+    protected $tipe_order_id;
 
     /**
      * Create a new job instance.
      *
      * @param int $chat_id
      * @param array $state
+     * @param int $tipe_order_id
      */
-    public function __construct($chat_id, $state)
+    public function __construct($chat_id, $state, $tipe_order_id)
     {
         $this->chat_id = $chat_id;
         $this->state = $state;
+        $this->tipe_order_id = $tipe_order_id;
     }
 
     /**
@@ -92,7 +96,7 @@ class ProcessTelegramReport implements ShouldQueue
         }
 
         $dbData = [
-            'tipe_order_id' => $reportData['tipe_order_id'] ?? null,
+            'tipe_order_id' => $this->tipe_order_id,
             'order_id'      => $reportData['order_id'] ?? null,
             'reporter_user_id' => $reporterUser->id, // Use the internal user ID
             'nomer_layanan' => $reportData['nomer_layanan'] ?? null,
@@ -179,19 +183,6 @@ class ProcessTelegramReport implements ShouldQueue
      */
     private function sendMessage($chat_id, $text, $reply_markup = null)
     {
-        $params = [
-            'chat_id' => $chat_id,
-            'text' => $text,
-            'parse_mode' => 'Markdown',
-        ];
-        if ($reply_markup) {
-            $params['reply_markup'] = json_encode($reply_markup);
-        }
-        try {
-            return Telegram::sendMessage($params);
-        } catch (TelegramSDKException $e) {
-            Log::error("Failed to send message to chat_id {$chat_id}: " . $e->getMessage());
-            return null;
-        }
+        SendTelegramNotificationJob::dispatch($chat_id, $text, $reply_markup);
     }
 }

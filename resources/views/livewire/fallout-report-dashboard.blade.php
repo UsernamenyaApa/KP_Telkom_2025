@@ -47,10 +47,12 @@
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $report->assignedToUser?->name }}</td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $report->reporter?->name }}</td>
                                     <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                                        @if ($report->falloutStatus?->name !== 'OnProgress')
+                                        @if ($report->falloutStatus?->name === 'Open')
                                             <button wire:click="takeOrder({{ $report->id }})" class="text-indigo-600 hover:text-indigo-900">Ambil Order</button>
+                                        @elseif ($report->falloutStatus?->name === 'OnProgress' && $report->assigned_to_user_id == auth()->id())
+                                            <button wire:click="openStatusModal({{ $report->id }})" class="text-indigo-600 hover:text-indigo-900">Change Status</button>
                                         @else
-                                            <span class="text-gray-500">On Progress</span>
+                                            <span class="text-gray-400 italic">{{ $report->falloutStatus?->name }}</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -68,4 +70,35 @@
             </div>
         </div>
     </div>
+
+    @if($showStatusModal)
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-500 opacity-75" wire:click="$set('showStatusModal', false)"></div>
+
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white rounded-lg shadow-xl p-6 relative z-20 w-full max-w-md">
+                <h3 class="text-lg font-medium text-gray-900">Change Fallout Status</h3>
+                <div class="mt-4">
+                    <label for="status" class="sr-only">Status</label>
+                    <select wire:model="newStatusId" id="status" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        <option value="">Select Status</option>
+                        <option value="3">Input Ulang</option>
+                        <option value="4">Eskalasi</option>
+                        <option value="5">PI</option>
+                        <option value="6">FA</option>
+                    </select>
+                </div>
+                <div class="mt-6 flex justify-end space-x-4">
+                    <button wire:click="$set('showStatusModal', false)" type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button wire:click="changeStatus" type="button" class="px-4 py-2 bg-indigo-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

@@ -19,7 +19,7 @@ class FalloutReport extends Model
 
     public function orderType(): BelongsTo
     {
-        return $this->belongsTo(OrderType::class);
+        return $this->belongsTo(OrderType::class, 'tipe_order_id');
     }
 
     public function falloutStatus(): BelongsTo

@@ -8,6 +8,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\SendTelegramNotificationJob;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
 class FalloutReportDashboard extends Component
@@ -15,10 +16,57 @@ class FalloutReportDashboard extends Component
     use WithPagination;
 
     public $date;
+    public $showStatusModal = false;
+    public $selectedReport;
+    public $newStatusId;
 
     public function mount()
     {
         $this->date = Carbon::today()->format('Y-m-d');
+    }
+
+    public function openStatusModal($reportId)
+    {
+        $this->selectedReport = FalloutReport::find($reportId);
+        $this->showStatusModal = true;
+    }
+
+    public function changeStatus()
+    {
+        if ($this->selectedReport && $this->newStatusId && $this->selectedReport->assigned_to_user_id == auth()->id()) {
+            $this->selectedReport->fallout_status_id = $this->newStatusId;
+            $this->selectedReport->save();
+
+            $newStatus = FalloutStatus::find($this->newStatusId);
+
+            if (in_array($newStatus->name, ['input ulang', 'eskalasi', 'PI', 'FA'])) {
+                $message = "Laporan Fallout Selesai\n\n" .
+                           "Tipe Order: " . ($this->selectedReport->orderType ? $this->selectedReport->orderType->name : 'N/A') . "\n" .
+                           "OrderID: " . $this->selectedReport->order_id . "\n" .
+                           "Nomor Layanan: " . $this->selectedReport->nomer_layanan . "\n" .
+                           "SN ONT: " . $this->selectedReport->sn_ont . "\n" .
+                           "Datek ODP: " . $this->selectedReport->datek_odp . "\n" .
+                           "Port ODP: " . $this->selectedReport->port_odp . "\n\n" .
+                           "Keterangan:\n" . $this->selectedReport->keterangan . "\n\n" .
+                           "----------------------------------------\n" .
+                           "Created By: @" . ($this->selectedReport->reporter ? $this->selectedReport->reporter->telegram_username : 'N/A') . "\n" .
+                           "Create Order: " . $this->selectedReport->created_at->format('Y-m-d H:i:s') . "\n\n" .
+                           "Take by: @" . auth()->user()->telegram_username;
+
+                // Send to personal chat (reporter)
+                if ($this->selectedReport->reporter && $this->selectedReport->reporter->telegram_user_id) {
+                    SendTelegramNotificationJob::dispatch($this->selectedReport->reporter->telegram_user_id, $message);
+                }
+
+                // Send to group chat
+                $groupChatId = env('TELEGRAM_GROUP_ID');
+                if ($groupChatId) {
+                    SendTelegramNotificationJob::dispatch($groupChatId, $message);
+                }
+            }
+
+            $this->showStatusModal = false;
+        }
     }
 
     public function takeOrder($reportId)
@@ -33,10 +81,6 @@ class FalloutReportDashboard extends Component
                 $report->save();
 
                 $user = Auth::user();
-                \Illuminate\Support\Facades\Log::info('Authenticated user telegram_user_id: ' . $user->telegram_user_id);
-                \Illuminate\Support\Facades\Log::info('TELEGRAM_GROUP_ID from env: ' . env('TELEGRAM_GROUP_ID'));
-                \Illuminate\Support\Facades\Log::info('Fallout Report order_type_id: ' . $report->order_type_id);
-                \Illuminate\Support\Facades\Log::info('Fallout Report orderType object: ' . ($report->orderType ? 'Loaded' : 'NULL'));
 
                 $message = "Laporan Fallout On Progress\n\n" .
                            "Tipe Order: " . ($report->orderType ? $report->orderType->name : 'N/A') . "\n" .
@@ -52,43 +96,19 @@ class FalloutReportDashboard extends Component
                            "Take by: @" . $user->telegram_username;
 
                 // Send to personal chat (taker)
-                try {
-                    if ($user->telegram_user_id) {
-                        Telegram::sendMessage([
-                            'chat_id' => $user->telegram_user_id,
-                            'text' => $message,
-                        ]);
-                        \Illuminate\Support\Facades\Log::info('Telegram personal message sent to taker ID: ' . $user->telegram_user_id);
-                    }
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Error sending Telegram personal message to taker: ' . $e->getMessage());
+                if ($user->telegram_user_id) {
+                    SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
                 }
 
                 // Send to personal chat (reporter)
-                try {
-                    if ($report->reporter && $report->reporter->telegram_user_id) {
-                        Telegram::sendMessage([
-                            'chat_id' => $report->reporter->telegram_user_id,
-                            'text' => $message,
-                        ]);
-                        \Illuminate\Support\Facades\Log::info('Telegram personal message sent to reporter ID: ' . $report->reporter->telegram_user_id);
-                    }
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Error sending Telegram personal message to reporter: ' . $e->getMessage());
+                if ($report->reporter && $report->reporter->telegram_user_id) {
+                    SendTelegramNotificationJob::dispatch($report->reporter->telegram_user_id, $message);
                 }
 
                 // Send to group chat
-                try {
-                    $groupChatId = env('TELEGRAM_GROUP_ID');
-                    if ($groupChatId) {
-                        Telegram::sendMessage([
-                            'chat_id' => $groupChatId,
-                            'text' => $message,
-                        ]);
-                        \Illuminate\Support\Facades\Log::info('Telegram group message sent to chat ID: ' . $groupChatId);
-                    }
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Error sending Telegram group message: ' . $e->getMessage());
+                $groupChatId = env('TELEGRAM_GROUP_ID');
+                if ($groupChatId) {
+                    SendTelegramNotificationJob::dispatch($groupChatId, $message);
                 }
             }
         }
