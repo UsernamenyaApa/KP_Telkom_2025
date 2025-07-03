@@ -23,7 +23,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'date_of_birth',
+        'nik',
+        'telegram_username',
+        'telegram_user_id',
     ];
 
     /**

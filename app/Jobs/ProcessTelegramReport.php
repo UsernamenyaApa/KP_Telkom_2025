@@ -54,26 +54,36 @@ class ProcessTelegramReport implements ShouldQueue
         // Find user by telegram_id, then by email, and finally create if not found.
         // This handles cases where a user was created before the telegram_user_id field was added.
         $telegramId = $user['id'];
-        $dummyEmail = $telegramId . '@telegram.com';
+        $telegramUsername = $user['username'] ?? null;
 
-        $reporterUser = User::where('telegram_user_id', $telegramId)->first();
+        $reporterUser = null;
 
-        if (!$reporterUser) {
-            $reporterUser = User::where('email', $dummyEmail)->first();
-        }
-
-        if ($reporterUser) {
-            // If user was found (either by ID or email), ensure their telegram_id is up to date.
-            if (!$reporterUser->telegram_user_id) {
+        // 1. Try to find user by telegram_username first
+        if ($telegramUsername) {
+            $reporterUser = User::where('telegram_username', $telegramUsername)->first();
+            if ($reporterUser && !$reporterUser->telegram_user_id) {
                 $reporterUser->telegram_user_id = $telegramId;
                 $reporterUser->save();
             }
-        } else {
-            // User not found at all, create them.
+        }
+
+        // 2. If not found by username, try to find by telegram_user_id (for existing users without username or before username was primary)
+        if (!$reporterUser) {
+            $reporterUser = User::where('telegram_user_id', $telegramId)->first();
+            if ($reporterUser && !$reporterUser->telegram_username && $telegramUsername) {
+                $reporterUser->telegram_username = $telegramUsername;
+                $reporterUser->save();
+            }
+        }
+
+        // 3. If user still not found, create a new one
+        if (!$reporterUser) {
             $reporterUser = User::create([
                 'telegram_user_id' => $telegramId,
+                'telegram_username' => $telegramUsername,
                 'name'             => $user['first_name'] . ' ' . ($user['last_name'] ?? ''),
-                'email'            => $dummyEmail,
+                'email'            => null, // No @telegram.com email
+                'nik'              => null, // NIK is not provided by Telegram
                 'password'         => bcrypt(Str::random(10)),
             ]);
         }
@@ -139,19 +149,9 @@ class ProcessTelegramReport implements ShouldQueue
 
         // 4. Send confirmation to the user who created it
         $this->sendMessage($chat_id, "✅ Laporan berhasil dibuat dan dikirim!");
-        $sentMessage = $this->sendMessage($chat_id, $reportText);
+        $this->sendMessage($chat_id, $reportText);
 
-        // 5. Forward the message to the channel and group
-        if ($sentMessage) {
-            $this->forwardMessageToDestinations($chat_id, $sentMessage->message_id);
-        }
-    }
-
-    /**
-     * Forwards a message to predefined destinations from .env file.
-     */
-    private function forwardMessageToDestinations($from_chat_id, $message_id)
-    {
+        // 5. Send the message to the channel and group
         $destinations = [
             env('TELEGRAM_CHANNEL_ID'),
             env('TELEGRAM_GROUP_ID')
@@ -160,14 +160,10 @@ class ProcessTelegramReport implements ShouldQueue
         foreach ($destinations as $to_chat_id) {
             if ($to_chat_id) {
                 try {
-                    Telegram::forwardMessage([
-                        'chat_id'      => $to_chat_id,
-                        'from_chat_id' => $from_chat_id,
-                        'message_id'   => $message_id,
-                    ]);
-                    Log::info("Successfully forwarded message {$message_id} to {$to_chat_id}");
+                    $this->sendMessage($to_chat_id, $reportText);
+                    Log::info("Successfully sent report to {$to_chat_id}");
                 } catch (TelegramSDKException $e) {
-                    Log::error("Failed to forward message {$message_id} to {$to_chat_id}: " . $e->getMessage());
+                    Log::error("Failed to send report to {$to_chat_id}: " . $e->getMessage());
                 }
             }
         }

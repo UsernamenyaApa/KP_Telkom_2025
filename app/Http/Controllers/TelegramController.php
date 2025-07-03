@@ -44,6 +44,13 @@ class TelegramController extends Controller
      */
     private function handleMessage($update)
     {
+        $chatType = $update->getChat()->getType();
+        if ($chatType !== 'private') {
+            // Ignore messages from groups or channels
+            Log::info("Ignoring message from non-private chat type: {$chatType}");
+            return;
+        }
+
         $chat_id = $update->getChat()->getId();
         $text = $update->getMessage()->getText();
         $user = $update->getMessage()->getFrom();

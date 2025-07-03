@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('nik')->unique()->nullable();
-            $table->string('email')->unique();
+            $table->string('email')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->bigInteger('telegram_user_id')->nullable()->unique(); // Added telegram_user_id
+            $table->string('telegram_username')->nullable()->unique(); // Added telegram_username
             $table->rememberToken();
             $table->timestamps();
         });
@@ -46,5 +48,9 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('telegram_username');
+            $table->dropColumn('telegram_user_id');
+        });
     }
 };
