@@ -4,6 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
+date_default_timezone_set('Asia/Jakarta');
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         App\Providers\TelegramServiceProvider::class,

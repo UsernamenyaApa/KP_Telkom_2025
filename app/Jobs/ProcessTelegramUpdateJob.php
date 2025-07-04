@@ -122,7 +122,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                 $this->showFalloutMenu($chat_id);
                 break;
             case 'start_pelurusan':
-                $this->sendMessage($chat_id, "Fitur 'Pelurusan Data' sedang dalam pengembangan. Silakan pilih menu lain.", null);
+                SendTelegramNotificationJob::dispatch($chat_id, "Fitur 'Pelurusan Data' sedang dalam pengembangan. Silakan pilih menu lain.", null);
                 $this->showMainMenu($chat_id);
                 break;
             case 'back_to_main_menu':
@@ -247,7 +247,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     private function generateAndSendReport(int $chat_id, array $state)
     {
         ProcessTelegramReport::dispatch($chat_id, $state, $state['report_data']['tipe_order_id']);
-        $this->resetStateAndShowMenu($chat_id, "✅ Laporan berhasil dibuat dan sedang diproses. Anda akan menerima rekap laporan sebentar lagi.", null);
+        SendTelegramNotificationJob::dispatch($chat_id, "✅ Laporan berhasil dibuat dan sedang diproses. Anda akan menerima rekap laporan sebentar lagi.", null);
     }
 
     /**
@@ -305,7 +305,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     {
         Cache::forget($chat_id);
         if ($messageText) {
-            $this->showMainMenu($chat_id, $messageText, null);
+            $this->showMainMenu($chat_id, $messageText);
         }
     }
 }
