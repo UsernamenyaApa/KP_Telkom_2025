@@ -269,7 +269,11 @@ class ProcessTelegramUpdateJob implements ShouldQueue
      */
     private function showFalloutMenu(int $chat_id)
     {
-        $orderTypes = OrderType::all();
+        // Cache the order types for 60 minutes to reduce DB queries.
+        $orderTypes = Cache::remember('order_types_all', now()->addMinutes(60), function () {
+            return OrderType::all();
+        });
+
         $keyboard = [];
         $row = [];
 
