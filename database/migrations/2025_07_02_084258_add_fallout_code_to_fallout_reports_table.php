@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('fallout_reports', function (Blueprint $table) {
-            $table->string('fallout_code')->after('id_harian')->nullable()->unique();
+            $table->string('incident_ticket')->after('id_harian')->nullable();
+            $table->text('incident_fallout_description')->after('incident_ticket')->nullable();
         });
     }
 
@@ -22,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('fallout_reports', function (Blueprint $table) {
-            $table->dropColumn('fallout_code');
+            $table->dropColumn('incident_ticket');
+            $table->dropColumn('incident_fallout_description');
         });
     }
 };

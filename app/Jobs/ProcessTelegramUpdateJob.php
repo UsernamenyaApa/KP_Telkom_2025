@@ -153,7 +153,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     private function advanceStep(int $chat_id, array &$state)
     {
         $steps = [
-            'order_id', 'nomer_layanan', 'sn_ont',
+            'incident_ticket', 'incident_fallout_description', 'order_id', 'nomer_layanan', 'sn_ont',
             'datek_odp', 'port_odp', 'keterangan'
         ];
         $currentStepIndex = array_search($state['step'], $steps);
@@ -183,23 +183,29 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     private function askQuestionForStep(int $chat_id, array $state)
     {
         switch ($state['step']) {
+            case 'incident_ticket':
+                SendTelegramNotificationJob::dispatch($chat_id, "1/8: Masukkan Nomor Tiket Insiden:", null);
+                break;
+            case 'incident_fallout_description':
+                SendTelegramNotificationJob::dispatch($chat_id, "2/8: Masukkan Keterangan Insiden Fallout:", null);
+                break;
             case 'order_id':
-                SendTelegramNotificationJob::dispatch($chat_id, "1/6: Masukkan Order ID:", null);
+                SendTelegramNotificationJob::dispatch($chat_id, "3/8: Masukkan Order ID:", null);
                 break;
             case 'nomer_layanan':
-                SendTelegramNotificationJob::dispatch($chat_id, "2/6: Masukkan Nomor Layanan:", null);
+                SendTelegramNotificationJob::dispatch($chat_id, "4/8: Masukkan Nomor Layanan:", null);
                 break;
             case 'sn_ont':
-                SendTelegramNotificationJob::dispatch($chat_id, "3/6: Masukkan SN ONT:", null);
+                SendTelegramNotificationJob::dispatch($chat_id, "5/8: Masukkan SN ONT:", null);
                 break;
             case 'datek_odp':
-                SendTelegramNotificationJob::dispatch($chat_id, "4/6: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):");
+                SendTelegramNotificationJob::dispatch($chat_id, "6/8: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):");
                 break;
             case 'port_odp':
-                SendTelegramNotificationJob::dispatch($chat_id, "5/6: Masukkan Port ODP (contoh: 3):");
+                SendTelegramNotificationJob::dispatch($chat_id, "7/8: Masukkan Port ODP (contoh: 3):");
                 break;
             case 'keterangan':
-                SendTelegramNotificationJob::dispatch($chat_id, "6/6: Masukkan Keterangan Laporan:");
+                SendTelegramNotificationJob::dispatch($chat_id, "8/8: Masukkan Keterangan Laporan:");
                 break;
         }
     }
@@ -223,7 +229,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
 
         $state = [
             'process' => 'fallout',
-            'step' => 'order_id',
+            'step' => 'incident_ticket',
             'report_data' => [
                 'tipe_order_id' => $orderType->id // Store the order type ID
             ],

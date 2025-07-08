@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\FalloutReportDetail;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\TelegramController;
@@ -15,6 +16,10 @@ Route::view('dashboard', 'dashboard')
 Route::get('/fallout-reports', App\Livewire\FalloutReportDashboard::class)
     ->middleware(['auth', 'verified'])
     ->name('fallout-reports.index');
+
+Route::get('fallout-reports/{id}', FalloutReportDetail::class)
+    ->middleware(['auth', 'verified'])
+    ->name('fallout-reports.show');
 
 Route::view('pelurusan', 'pelurusan.index')
     ->middleware(['auth', 'verified'])

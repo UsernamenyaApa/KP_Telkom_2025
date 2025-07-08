@@ -104,20 +104,22 @@ class ProcessTelegramReport implements ShouldQueue
             'sn_ont'        => $reportData['sn_ont'] ?? null,
             'datek_odp'     => $reportData['datek_odp'] ?? null,
             'port_odp'      => $reportData['port_odp'] ?? null,
+            'incident_ticket' => $reportData['incident_ticket'] ?? null,
+            'incident_fallout_description' => $reportData['incident_fallout_description'] ?? null,
             'keterangan'    => $reportData['keterangan'] ?? null,
         ];
 
-        // Generate id_harian and fallout_code
+        
+
+        // Generate id_harian
         $today = Carbon::today();
         $id_harian = FalloutReport::whereDate('created_at', $today)->count() + 1;
-        $fallout_code = 'FA' . $today->format('Ymd') . str_pad($id_harian, 2, '0', STR_PAD_LEFT);
-
-        // Get 'Open' status ID
         $openStatus = FalloutStatus::where('name', 'Open')->first();
         $status_fallout_id = $openStatus ? $openStatus->id : null;
 
+        
         $dbData['id_harian'] = $id_harian;
-        $dbData['fallout_code'] = $fallout_code;
+        $dbData['incident_ticket'] = $reportData['incident_ticket'] ?? null;
         $dbData['fallout_status_id'] = $status_fallout_id;
         \Illuminate\Support\Facades\Log::info("ProcessTelegramReport: dbData['tipe_order_id'] before save: " . ($dbData['tipe_order_id'] ?? 'NULL'));
 
@@ -150,8 +152,11 @@ class ProcessTelegramReport implements ShouldQueue
             . "*Nomor Layanan:* `" . $escapeForMarkdown($dbData['nomer_layanan'] ?? '-') . "`\n"
             . "*SN ONT:* `" . $escapeForMarkdown($dbData['sn_ont'] ?? '-') . "`\n"
             . "*Datek ODP:* `" . $escapeForMarkdown($dbData['datek_odp'] ?? '-') . "`\n"
-            . "*Port ODP:* `" . $escapeForMarkdown($dbData['port_odp'] ?? '-') . "`\n\n"
+            . "*Port ODP:* `" . $escapeForMarkdown($dbData['port_odp'] ?? '-') . "`\n"
+            . "*Incident Ticket:* `" . $escapeForMarkdown($dbData['incident_ticket'] ?? '-') . "`\n"
+            . "*Keterangan Insiden Fallout:* `" . $escapeForMarkdown($dbData['incident_fallout_description'] ?? '-') . "`\n\n"
             . "*Keterangan:*\n" . $escapeForMarkdown($dbData['keterangan'] ?? '-') . "\n\n"
+
             . "----------------------------------------\n"
             . "*Created By:* " . $escapeForMarkdown($createdBy) . "\n"
             . "*Create Order:* " . now()->format('Y-m-d H:i:s');

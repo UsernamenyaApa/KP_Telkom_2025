@@ -30,12 +30,13 @@ class FalloutReportSeeder extends Seeder
         foreach ($dates as $date) {
             for ($i = 0; $i < 10; $i++) {
                 $id_harian = FalloutReport::whereDate('created_at', $date)->count() + 1;
-                $fallout_code = 'FA' . $date->format('Ymd') . str_pad($id_harian, 2, '0', STR_PAD_LEFT);
+                $incident_ticket = 'INC' . $date->format('Ymd') . str_pad($i + 1, 2, '0', STR_PAD_LEFT);
                 $status_id = $falloutStatuses[array_rand($falloutStatuses)];
 
                 $dataToInsert = [
                     'id_harian' => $id_harian,
-                    'fallout_code' => $fallout_code,
+                    'incident_ticket' => $incident_ticket,
+                    'incident_fallout_description' => 'Deskripsi Insiden Fallout ' . $i,
                     'tipe_order_id' => $orderTypes[array_rand($orderTypes)],
                     'order_id' => 'ORD' . $date->format('Ymd') . str_pad($i + 1, 3, '0', STR_PAD_LEFT),
                     'reporter_user_id' => 1, // Assuming user with ID 1 exists
@@ -45,6 +46,7 @@ class FalloutReportSeeder extends Seeder
                     'port_odp' => rand(1, 16),
                     'fallout_status_id' => $status_id,
                     'keterangan' => 'Keterangan ' . $i,
+                    'resolution_notes' => 'Catatan resolusi ' . $i,
                     'created_at' => $date,
                     'updated_at' => $date,
                 ];
