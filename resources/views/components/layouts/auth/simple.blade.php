@@ -13,7 +13,7 @@
 
                 <div class="z-10 my-auto w-full max-w-md">
                     <h1 class="text-3xl font-bold">
-                        Welcome back!
+                        HALOOOOOO!
                     </h1>
                     <p class="mt-2 text-neutral-400">
                         Log in to access your dashboard and manage your fallout reports.

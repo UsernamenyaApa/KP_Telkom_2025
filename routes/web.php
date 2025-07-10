@@ -45,5 +45,9 @@ Route::middleware(['auth', 'role:super-admin'])->group(function () {
     Route::get('/fallout-statuses', FalloutStatusManager::class)->name('fallout-statuses.index');
 });
 
-require __DIR__.'/auth.php';
 
+// ▼▼▼ TAMBAHKAN RUTE BARU DI SINI ▼▼▼
+Volt::route('verify-otp', 'auth.verify-otp')->name('otp.verify');
+
+
+require __DIR__.'/auth.php';
