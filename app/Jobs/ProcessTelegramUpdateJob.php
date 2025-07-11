@@ -73,6 +73,11 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         $text = $update->getMessage()->getText();
         $user = $update->getMessage()->getFrom();
 
+        if ($text === '/register') {
+            $this->startRegistration($chat_id);
+            return;
+        }
+
         if ($text === '/start') {
             $this->resetStateAndShowMenu($chat_id, "Halo " . $user->getFirstName() . "! Selamat datang. Silakan pilih menu.");
             return;
@@ -131,20 +136,62 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         }
     }
 
+    private function startRegistration(int $chat_id)
+    {
+        $state = [
+            'process' => 'register',
+            'step' => 'awaiting_nik',
+        ];
+        Cache::put($chat_id, $state, now()->addMinutes(5));
+        SendTelegramNotificationJob::dispatch($chat_id, "Silakan masukkan NIK Anda untuk melanjutkan registrasi.", null);
+    }
+
     /**
      * Guides the user through the conversation steps (handles text input).
      */
     private function continueConversation(int $chat_id, string $text, array &$state)
     {
-        $currentStep = $state['step'];
-        $state['report_data'][$currentStep] = $text;
+        if (($state['process'] ?? null) === 'register') {
+            $this->handleRegistrationSteps($chat_id, $text, $state);
+        } else {
+            $currentStep = $state['step'];
+            $state['report_data'][$currentStep] = $text;
 
-        // Ensure tipe_order_id is carried over
-        if (isset($state['report_data']['tipe_order_id'])) {
-            $state['report_data']['tipe_order_id'] = $state['report_data']['tipe_order_id'];
+            // Ensure tipe_order_id is carried over
+            if (isset($state['report_data']['tipe_order_id'])) {
+                $state['report_data']['tipe_order_id'] = $state['report_data']['tipe_order_id'];
+            }
+
+            $this->advanceStep($chat_id, $state);
         }
+    }
 
-        $this->advanceStep($chat_id, $state);
+    private function handleRegistrationSteps(int $chat_id, string $text, array &$state)
+    {
+        $user = $this->update->getMessage()->getFrom();
+
+        if ($state['step'] === 'awaiting_nik') {
+            $nik = trim($text);
+            $userRecord = User::where('nik', $nik)->first();
+
+            if ($userRecord) {
+                $userRecord->update([
+                    'telegram_user_id' => $user->getId(),
+                    'telegram_username' => $user->getUsername(),
+                ]);
+
+                $message = "Registrasi berhasil! Berikut adalah detail akun Anda:\n"
+                    . "Email: " . $userRecord->email . "\n"
+                    . "Password: " . $userRecord->nik . "\n\n"
+                    . "Demi keamanan, harap segera ubah password Anda setelah login.";
+
+                SendTelegramNotificationJob::dispatch($chat_id, $message, null);
+                Cache::forget($chat_id); // Clear state after successful registration
+            } else {
+                SendTelegramNotificationJob::dispatch($chat_id, "NIK tidak ditemukan. Silakan coba lagi atau hubungi admin.", null);
+                // We don't forget the cache here so they can try again
+            }
+        }
     }
 
     /**
@@ -233,7 +280,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             'report_data' => [
                 'tipe_order_id' => $orderType->id // Store the order type ID
             ],
-            'user' => [ // Store user info in the state
+            'user' => [
                 'id' => $user->getId(),
                 'first_name' => $user->getFirstName(),
                 'last_name' => $user->getLastName(),

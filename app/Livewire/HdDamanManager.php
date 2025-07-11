@@ -16,12 +16,10 @@ class HdDamanManager extends Component
     // Properti untuk pengguna baru
     public $name;
     public $nik;
-    public $telegram_username;
 
     protected $rules = [
         'name' => 'required|string|max:255',
         'nik' => 'required|string|unique:users,nik',
-        'telegram_username' => 'nullable|string|max:255|unique:users,telegram_username',
     ];
 
     public function mount()
@@ -74,13 +72,12 @@ class HdDamanManager extends Component
             'name' => $this->name,
             'email' => $email,
             'nik' => $this->nik,
-            'telegram_username' => $this->telegram_username,
             'password' => Hash::make($password),
         ]);
 
         $user->assignRole('hd-daman');
 
-        $this->reset('name', 'nik', 'telegram_username');
+        $this->reset('name', 'nik');
         $this->loadUsers();
 
         session()->flash('message', "Pengguna {$user->name} berhasil dibuat dengan email: {$email}. Passwordnya adalah NIK pengguna.");
