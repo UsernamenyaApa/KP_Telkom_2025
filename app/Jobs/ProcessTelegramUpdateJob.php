@@ -153,6 +153,8 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     {
         if (($state['process'] ?? null) === 'register') {
             $this->handleRegistrationSteps($chat_id, $text, $state);
+        } elseif (($state['step'] ?? null) === 'awaiting_fallout_password') {
+            $this->handleFalloutPassword($chat_id, $text, $state);
         } else {
             $currentStep = $state['step'];
             $state['report_data'][$currentStep] = $text;
@@ -192,6 +194,43 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                 // We don't forget the cache here so they can try again
             }
         }
+    }
+
+    private function handleFalloutPassword(int $chat_id, string $text, array &$state)
+    {
+        $password = trim($text);
+        $correctPassword = config('telegram.field_report_password');
+
+        if ($password === $correctPassword) {
+            // Correct password, proceed to the actual report.
+            $this->initiateFalloutReport($chat_id, $state);
+        } else {
+            // Incorrect password, reset and show main menu.
+            SendTelegramNotificationJob::dispatch($chat_id, "Kata sandi salah. Silakan coba lagi dari menu utama.", null);
+            $this->resetStateAndShowMenu($chat_id);
+        }
+    }
+
+    private function initiateFalloutReport(int $chat_id, array &$state)
+    {
+        $orderTypeName = $state['order_type_name'];
+        $orderType = OrderType::where('name', $orderTypeName)->first();
+
+        if (!$orderType) {
+            Log::error("ProcessTelegramUpdateJob: Invalid order type '{$orderTypeName}' after password auth.");
+            SendTelegramNotificationJob::dispatch($chat_id, "Terjadi kesalahan: Tipe order tidak valid. Silakan coba lagi.", null);
+            $this->resetStateAndShowMenu($chat_id);
+            return;
+        }
+
+        // Update state to start the actual report
+        $state['step'] = 'incident_ticket';
+        $state['report_data'] = [
+            'tipe_order_id' => $orderType->id
+        ];
+
+        Cache::put($chat_id, $state, now()->addMinutes(30));
+        $this->askQuestionForStep($chat_id, $state);
     }
 
     /**
@@ -262,24 +301,10 @@ class ProcessTelegramUpdateJob implements ShouldQueue
      */
     private function startFalloutReport(int $chat_id, object $user, string $orderTypeName)
     {
-        Log::info("ProcessTelegramUpdateJob: startFalloutReport: Received orderTypeName: {$orderTypeName} for chat_id: {$chat_id}");
-        $orderType = OrderType::where('name', $orderTypeName)->first();
-
-        if (!$orderType) {
-            Log::error("ProcessTelegramUpdateJob: Invalid order type '{$orderTypeName}' selected by user in chat {$chat_id}. OrderType not found in DB.");
-            SendTelegramNotificationJob::dispatch($chat_id, "Terjadi kesalahan: Tipe order tidak valid. Silakan coba lagi.", null);
-            $this->showMainMenu($chat_id);
-            return;
-        }
-
-        Log::info("ProcessTelegramUpdateJob: startFalloutReport: Found OrderType ID: {$orderType->id} for name: {$orderTypeName}");
-
         $state = [
             'process' => 'fallout',
-            'step' => 'incident_ticket',
-            'report_data' => [
-                'tipe_order_id' => $orderType->id // Store the order type ID
-            ],
+            'step' => 'awaiting_fallout_password',
+            'order_type_name' => $orderTypeName, // Save for later
             'user' => [
                 'id' => $user->getId(),
                 'first_name' => $user->getFirstName(),
@@ -287,11 +312,9 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                 'username' => $user->getUsername(),
             ],
         ];
-        // Save state to cache BEFORE asking the first question.
-        Log::info("ProcessTelegramUpdateJob: startFalloutReport: State to be cached for chat_id {$chat_id} with tipe_order_id: {$state['report_data']['tipe_order_id']}");
-        Cache::put($chat_id, $state, now()->addMinutes(30));
-        Log::info("ProcessTelegramUpdateJob: startFalloutReport: State cached for chat_id {$chat_id} with tipe_order_id: {$state['report_data']['tipe_order_id']}");
-        $this->askQuestionForStep($chat_id, $state);
+
+        Cache::put($chat_id, $state, now()->addMinutes(5));
+        SendTelegramNotificationJob::dispatch($chat_id, "Untuk melanjutkan, silakan masukkan kata sandi laporan lapangan:", null);
     }
 
     /**

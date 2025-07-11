@@ -50,20 +50,32 @@ return [
         //        ],
     ],
 
+    return [
     /*
     |--------------------------------------------------------------------------
     | Default Bot Name
     |--------------------------------------------------------------------------
     |
-    | Here you may specify which of the bots you wish to use as
-    | your default bot for regular use.
+    | Here you may specify which of the bots below you wish to use as
+    | your default bot for regular use. Of course, you may use many
+    | bots at once using the BotManager class.
     |
     */
     'default' => 'mybot',
 
     /*
     |--------------------------------------------------------------------------
-    | Asynchronous Requests [Optional]
+    | Telegram Field Report Password
+    |--------------------------------------------------------------------------
+    |
+    | This password is required for field users to start a new report.
+    |
+    */
+    'field_report_password' => env('FIELD_REPORT_PASSWORD', 'TIFTANG'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Telegram Bots
     |--------------------------------------------------------------------------
     |
     | When set to True, All the requests would be made non-blocking (Async).
