@@ -3,9 +3,32 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-            <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
+    <body class="min-h-screen bg-white dark:bg-zinc-800" x-data="{
+            sidebarOpen: false,
+            darkMode: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+            toggleDarkMode() {
+                this.darkMode = !this.darkMode;
+                if (this.darkMode) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        }" x-init="toggleDarkMode()">
+        <flux:sidebar
+            class="fixed inset-y-0 left-0 z-50 w-64 border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900"
+            x-show="sidebarOpen"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="-translate-x-full"
+            x-transition:enter-end="translate-x-0"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="-translate-x-full"
+            @click.outside="sidebarOpen = false"
+        >
+            <flux:sidebar.toggle icon="x-mark" @click="sidebarOpen = false" />
 
             <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                 <x-app-logo />
@@ -30,6 +53,19 @@
             <flux:spacer />
 
             <flux:navlist variant="outline">
+                <flux:navlist.item
+                    @click="toggleDarkMode()"
+                    icon="sun"
+                    x-show="darkMode"
+                >
+                </flux:navlist.item>
+                <flux:navlist.item
+                    @click="toggleDarkMode()"
+                    icon="moon"
+                    x-show="!darkMode"
+                >
+                </flux:navlist.item>
+
                 <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
                 {{ __('Repository') }}
                 </flux:navlist.item>
@@ -86,8 +122,8 @@
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+        <flux:header class="fixed top-0 w-full z-40 bg-white dark:bg-zinc-800 shadow">
+            <flux:sidebar.toggle icon="bars-2" inset="left" @click="sidebarOpen = true" />
 
             <flux:spacer />
 
@@ -135,7 +171,9 @@
             </flux:dropdown>
         </flux:header>
 
-        {{ $slot }}
+                <div class="pt-16" :class="{'lg:ms-64': sidebarOpen, 'lg:ms-0': !sidebarOpen}">
+            {{ $slot }}
+        </div>
 
         @fluxScripts
     </body>

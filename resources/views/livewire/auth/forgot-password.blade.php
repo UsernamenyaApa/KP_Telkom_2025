@@ -4,7 +4,10 @@ use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component {
+// Logika PHP untuk reset password tetap ada di file,
+// meskipun tampilan saat ini tidak lagi menggunakan form input email.
+new #[Layout('components.layouts.minimal')] class extends Component
+{
     public string $email = '';
 
     /**
@@ -22,29 +25,31 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />
+<div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-rose-100 to-sky-200">
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+    <div class="w-full max-w-xl p-6 space-y-6 bg-white/70 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200/80">
 
-    <form wire:submit="sendPasswordResetLink" class="flex flex-col gap-6">
-        <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('Email Address')"
-            type="email"
-            required
-            autofocus
-            placeholder="email@example.com"
-            viewable
-        />
+        <div class="flex items-center justify-center gap-3">
+            <p class="text-sm text-slate-800">
+                Pembuatan akun dapat dilakukan melalui bot Telegram
+            </p>
+            <a href="https://t.me/nama_bot" target="_blank"
+               class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 transition-colors">
+                @nama_bot
+            </a>
+        </div>
 
-        <flux:button variant="primary" type="submit" class="w-full">{{ __('Email password reset link') }}</flux:button>
-    </form>
+        <hr class="border-t border-gray-500/70 shadow-[0px_1px_5px_rgba(0,0,0,0.6)]">
 
-    <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-400">
-        {{ __('Or, return to') }}
-        <flux:link :href="route('login')" wire:navigate>{{ __('log in') }}</flux:link>
+        <div class="flex items-center justify-between">
+            <a href="{{ route('login') }}" wire:navigate
+               class="px-4 py-1.5 text-sm font-semibold text-white bg-gray-500 rounded-md shadow-sm hover:bg-gray-600 transition-colors">
+                Kembali
+            </a>
+            <a href="{{ route('otp.verify') }}" wire:navigate
+               class="px-4 py-1.5 text-sm font-semibold text-white bg-slate-700 rounded-md shadow-sm hover:bg-slate-800 transition-colors">
+                Berikutnya
+            </a>
+        </div>
     </div>
 </div>
