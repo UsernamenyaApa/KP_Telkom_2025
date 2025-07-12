@@ -82,10 +82,14 @@ new #[Layout('components.layouts.auth')] class extends Component {
 </style> -->
 
 <div class="w-full max-w-sm mx-auto">
-    <!-- Updated h2 tag with the new font -->
-    <h2 class="text-center text-3xl font-bold tracking-wider text-gray-800 mb-8 [text-shadow:0_4px_4px_rgba(0,0,0,0.25)]" style="font-family: 'Myanmar Khyay', sans-serif;">
-        LOGIN USER
-    </h2>
+    <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold text-slate-800">
+            Selamat Datang Kembali
+        </h2>
+        <p class="mt-2 text-sm text-slate-600">
+            Silakan masuk untuk melanjutkan
+        </p>
+    </div>
 
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -104,7 +108,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     type="email"
                     required
                     autofocus
-                    placeholder="email@example.com"
+                    placeholder="email@tif.co.id"
                     class="block w-full pl-10 pr-3 py-3 bg-gray-100 border-transparent rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
             </div>
@@ -133,19 +137,19 @@ new #[Layout('components.layouts.auth')] class extends Component {
         </div>
 
         <div>
-            <button type="submit" class="w-full px-4 py-3 bg-zinc-700 hover:bg-zinc-800 text-white font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-600 transition duration-150 shadow-[0_5px_15px_rgba(0,0,0,0.2)]">
-                LOGIN
+            <button type="submit" class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 shadow-[0_5px_15px_rgba(0,0,0,0.2)]">
+                Masuk
             </button>
         </div>
 
         <div class="text-center text-sm">
-            <a href="{{ route('password.request') }}" wire:navigate class="font-medium text-blue-600 hover:underline">
+            <a href="{{ route('password.request') }}" wire:navigate class="font-medium text-blue-600 hover:text-blue-700">
                 Reset password
             </a>
         </div>
         <div class="text-center text-sm text-gray-600">
             No account?
-            <a href="{{ route('register') }}" wire:navigate class="font-medium text-blue-600 hover:underline">
+            <a href="{{ route('register') }}" wire:navigate class="font-medium text-blue-600 hover:text-blue-700">
                 Create one
             </a>
         </div>

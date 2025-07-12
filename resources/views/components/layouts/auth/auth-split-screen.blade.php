@@ -14,15 +14,15 @@
 </head>
 <body class="font-sans text-gray-900 antialiased">
     <div class="min-h-screen flex flex-col md:flex-row">
-        
+
+
         <div class="hidden lg:block md:w-1/2 bg-cover bg-center" style="background-image: url('{{ asset('images/image telkom.png') }}');">
-            {{-- Bagian ini akan menampilkan gambar gedung --}}
         </div>
 
-        {{-- BARIS DI BAWAH INI TELAH DIPERBARUI --}}
-        <div class="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 
-                    bg-gradient-conic from-rose-100 via-gray-100 to-blue-200">
-            {{ $slot }}
+        <div class="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-gradient-to-br from-rose-200 via-white to-blue-200">
+            <div class="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg p-8">
+                {{ $slot }}
+            </div>
         </div>
 
     </div>
