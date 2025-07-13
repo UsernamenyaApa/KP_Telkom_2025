@@ -1,99 +1,33 @@
-<?php
-
-use App\Models\User;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
-use Livewire\Attributes\Layout;
-use Livewire\Volt\Component;
-
-new #[Layout('components.layouts.auth')] class extends Component {
-    public string $name = '';
-    public string $email = '';
-    public string $password = '';
-    public string $password_confirmation = '';
-
-    /**
-     * Handle an incoming registration request.
-     */
-    public function register(): void
-    {
-        $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        $validated['password'] = Hash::make($validated['password']);
-
-        event(new Registered(($user = User::create($validated))));
-
-        Auth::login($user);
-
-        $this->redirectIntended(route('dashboard', absolute: false), navigate: true);
-    }
-}; ?>
-
-<div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
-
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
-
-    <form wire:submit="register" class="flex flex-col gap-6">
-        <!-- Name -->
-        <flux:input
-            wire:model="name"
-            :label="__('Name')"
-            type="text"
-            required
-            autofocus
-            autocomplete="name"
-            :placeholder="__('Full name')"
-        />
-
-        <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('Email address')"
-            type="email"
-            required
-            autocomplete="email"
-            placeholder="email@example.com"
-        />
-
-        <!-- Password -->
-        <flux:input
-            wire:model="password"
-            :label="__('Password')"
-            type="password"
-            required
-            autocomplete="new-password"
-            :placeholder="__('Password')"
-            viewable
-        />
-
-        <!-- Confirm Password -->
-        <flux:input
-            wire:model="password_confirmation"
-            :label="__('Confirm password')"
-            type="password"
-            required
-            autocomplete="new-password"
-            :placeholder="__('Confirm password')"
-            viewable
-        />
-
-        <div class="flex items-center justify-end">
-            <flux:button type="submit" variant="primary" class="w-full">
-                {{ __('Create account') }}
-            </flux:button>
+<div class="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-100 dark:bg-gray-900">
+    <div class="w-full max-w-md px-8 py-10 space-y-6 bg-white rounded-lg shadow-xl dark:bg-gray-800">
+        <div class="flex justify-center">
+            <x-app-logo />
         </div>
-    </form>
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Registrasi via Telegram</h2>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Pendaftaran akun baru dilakukan sepenuhnya melalui bot Telegram kami untuk kemudahan dan keamanan.</p>
+        </div>
 
-    <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-        {{ __('Already have an account?') }}
-        <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
+        <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Langkah-langkah Registrasi:</p>
+            <ol class="mt-2 space-y-1 text-sm text-gray-700 list-decimal list-inside dark:text-gray-300">
+                <li>Buka aplikasi Telegram Anda.</li>
+                <li>Cari bot dengan username <span class="font-bold text-gray-900 dark:text-white">@kp_telkom_2025_bot</span>.</li>
+                <li>Kirim perintah <code>/start</code> untuk memulai percakapan.</li>
+                <li>Ikuti instruksi yang diberikan oleh bot untuk menyelesaikan pendaftaran.</li>
+            </ol>
+        </div>
+
+        <div class="pt-6">
+            <a href="https://t.me/kp_telkom_2025_bot" target="_blank" class="flex items-center justify-center w-full px-4 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
+                Lanjutkan ke Telegram
+            </a>
+        </div>
+
+        <div class="pt-4 text-sm text-center border-t border-gray-200 dark:border-gray-700">
+            <a wire:navigate href="{{ route('login') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">
+                Sudah punya akun? Login di sini
+            </a>
+        </div>
     </div>
 </div>

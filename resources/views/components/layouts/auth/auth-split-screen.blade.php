@@ -19,7 +19,7 @@
         <div class="hidden lg:block md:w-1/2 bg-cover bg-center" style="background-image: url('{{ asset('images/image telkom.png') }}');">
         </div>
 
-        <div class="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-gradient-to-br from-rose-200 via-white to-blue-200">
+        <div class="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-gradient-to-b from-blue-200 to-white">
             <div class="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg p-8">
                 {{ $slot }}
             </div>

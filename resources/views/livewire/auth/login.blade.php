@@ -13,7 +13,7 @@ use Livewire\Volt\Component;
 
 // The layout is set to a new custom layout 'auth-split-screen'
 // which should be created to accommodate the two-column design.
-new #[Layout('components.layouts.auth')] class extends Component {
+new #[Layout('components.layouts.auth.auth-split-screen')] class extends Component {
     // The validation remains for 'email' as requested, even though the placeholder is 'NIK'.
     #[Validate('required|string|email')]
     public string $email = '';
@@ -84,7 +84,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 <div class="w-full max-w-sm mx-auto">
     <div class="text-center mb-8">
         <h2 class="text-3xl font-bold text-slate-800">
-            Selamat Datang Kembali
+            Login
         </h2>
         <p class="mt-2 text-sm text-slate-600">
             Silakan masuk untuk melanjutkan
@@ -129,7 +129,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     type="password"
                     required
                     autocomplete="current-password"
-                    placeholder="masukkan password"
+                    placeholder="password"
                     class="block w-full pl-10 pr-3 py-3 bg-gray-100 border-transparent rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
             </div>
@@ -138,7 +138,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         <div>
             <button type="submit" class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 shadow-[0_5px_15px_rgba(0,0,0,0.2)]">
-                Masuk
+                Login
             </button>
         </div>
 
