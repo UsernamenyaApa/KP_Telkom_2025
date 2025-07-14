@@ -70,6 +70,26 @@
                                         <dt class="text-sm font-medium text-gray-500">Reporter</dt>
                                         <dd class="mt-1 text-sm text-gray-900">{{ $report->reporter?->name }}</dd>
                                     </div>
+                                    <div class="sm:col-span-1">
+                                        <dt class="text-sm font-medium text-gray-500">Order Create</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $report->created_at->format('d M Y, H:i') }}</dd>
+                                    </div>
+                                    <div class="sm:col-span-1">
+                                        <dt class="text-sm font-medium text-gray-500">Order Take</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $report->taken_at ? $report->taken_at->format('d M Y, H:i') : '-' }}</dd>
+                                    </div>
+                                    <div class="sm:col-span-1">
+                                        <dt class="text-sm font-medium text-gray-500">Order Complete</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $report->completed_at ? $report->completed_at->format('d M Y, H:i') : '-' }}</dd>
+                                    </div>
+                                    <div class="sm:col-span-1">
+                                        <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $report->updated_at->format('d M Y, H:i') }}</dd>
+                                    </div>
+                                    <div class="sm:col-span-1">
+                                        <dt class="text-sm font-medium text-gray-500">Duration</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $report->taken_at && $report->completed_at ? $report->completed_at->diffForHumans($report->taken_at, true) : '-' }}</dd>
+                                    </div>
                                 </dl>
                             </div>
                             <div class="px-4 py-5 sm:p-6 sm:col-span-2">

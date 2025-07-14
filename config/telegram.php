@@ -64,6 +64,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Telegram System Password
+    |--------------------------------------------------------------------------
+    |
+    | This password is required for users to access the bot via /start command.
+    |
+    */
+    'system_password' => env('TELEGRAM_SYSTEM_PASSWORD', 'TIFTANG'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Telegram Field Report Password
     |--------------------------------------------------------------------------
     |

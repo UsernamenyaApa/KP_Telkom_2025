@@ -31,6 +31,7 @@ class FalloutReportDashboard extends Component
             if ($onProgressStatus) {
                 $report->fallout_status_id = $onProgressStatus->id;
                 $report->assigned_to_user_id = Auth::id(); // Store user ID
+                $report->taken_at = now();
                 $report->save();
 
                 $user = Auth::user();

@@ -22,6 +22,11 @@
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Order ID</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status Fallout</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Assigned To</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Order Create</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Order Take</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Order Complete</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Last Updated</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Duration</th>
                                 <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                                     <span class="sr-only">Actions</span>
                                 </th>
@@ -36,6 +41,11 @@
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $report->order_id }}</td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $report->falloutStatus?->name }}</td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $report->assignedToUser?->name }}</td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $report->created_at->format('d M Y, H:i') }}</td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $report->taken_at ? $report->taken_at->format('d M Y, H:i') : '-' }}</td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $report->completed_at ? $report->completed_at->format('d M Y, H:i') : '-' }}</td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $report->updated_at->format('d M Y, H:i') }}</td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $report->taken_at && $report->completed_at ? $report->completed_at->diffForHumans($report->taken_at, true) : '-' }}</td>
                                     <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                                         <a href="{{ route('fallout-reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">Details</a>
                                         @if ($report->falloutStatus?->name === 'Open')

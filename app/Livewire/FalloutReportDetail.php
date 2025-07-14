@@ -38,9 +38,13 @@ class FalloutReportDetail extends Component
         if ($this->newStatusId && $this->report->assigned_to_user_id == auth()->id()) {
             $this->report->fallout_status_id = $this->newStatusId;
             $this->report->resolution_notes = $this->keterangan;
-            $this->report->save();
 
             $newStatus = FalloutStatus::find($this->newStatusId);
+            if ($newStatus && in_array($newStatus->name, ['FA', 'eskalasi', 'input ulang', 'PI'])) {
+                $this->report->completed_at = now();
+            }
+
+            $this->report->save();
 
             $message = "🔔 *Update Status Laporan Fallout* 🔔\n\n" .
                        "*Status Baru: {$newStatus->name}*\n\n" .

@@ -33,9 +33,9 @@ new #[Layout('components.layouts.minimal')] class extends Component
             <p class="text-sm text-slate-800">
                 Pembuatan akun dapat dilakukan melalui bot Telegram
             </p>
-            <a href="https://t.me/nama_bot" target="_blank"
+            <a href="https://t.me/kp_telkom_2025_bot" target="_blank"
                class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 transition-colors">
-                @nama_bot
+                @kp_telkom_2025_bot
             </a>
         </div>
 

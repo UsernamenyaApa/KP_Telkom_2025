@@ -12,6 +12,11 @@ class FalloutReport extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'taken_at' => 'datetime',
+        'completed_at' => 'datetime',
+    ];
+
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reporter_user_id');
