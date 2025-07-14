@@ -60,6 +60,17 @@ class FalloutReportDetail extends Component
                        "Create Order: " . $this->report->created_at->format('Y-m-d H:i:s') . "\n" .
                        "Updated By: @" . auth()->user()->telegram_username;
 
+            // Add completed_at and duration if available
+            if ($this->report->completed_at) {
+                $message .= "\n\n" .
+                            "✅ *Selesai pada:* " . $this->report->completed_at->format('Y-m-d H:i:s') . "\n";
+
+                if ($this->report->created_at) {
+                    $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
+                    $message .= "⏳ *Durasi:* " . $duration . "\n";
+                }
+            }
+
             // Send to personal chat (reporter)
             if ($this->report->reporter && $this->report->reporter->telegram_user_id) {
                 SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $message);
