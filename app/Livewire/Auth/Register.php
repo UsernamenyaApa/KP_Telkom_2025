@@ -9,7 +9,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\Attributes\Rule;
 
-#[Layout('components.layouts.auth')]
+#[Layout('components.layouts.minimal')]
 class Register extends Component
 {
     public function render()

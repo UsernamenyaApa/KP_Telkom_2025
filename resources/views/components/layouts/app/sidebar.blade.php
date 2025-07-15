@@ -35,7 +35,7 @@
             </a>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
+                <flux:navlist.group :heading="__('Platorm')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
                     <flux:navlist.item icon="exclamation-circle" :href="route('fallout-reports.index')" :current="request()->routeIs('fallout-reports.index')" wire:navigate>{{ __('Fallout Reports') }}</flux:navlist.item>
                     <flux:navlist.item icon="check-circle" :href="route('pelurusan.index')" :current="request()->routeIs('pelurusan.index')" wire:navigate>{{ __('Pelurusan') }}</flux:navlist.item>
@@ -53,19 +53,42 @@
             <flux:spacer />
 
             <flux:navlist variant="outline">
-                <flux:navlist.item
-                    @click="toggleDarkMode()"
-                    icon="sun"
-                    x-show="darkMode"
-                >
-                </flux:navlist.item>
-                <flux:navlist.item
-                    @click="toggleDarkMode()"
-                    icon="moon"
-                    x-show="!darkMode"
-                >
-                </flux:navlist.item>
+                
+                <div class="p-2">
+                    <button
+                        type="button"
+                        @click="toggleDarkMode()"
+                        class="flex w-full items-center rounded-lg p-1 transition-colors duration-200"
+                        :class="darkMode ? 'bg-zinc-800' : 'bg-zinc-200'"
+                        :aria-label="darkMode ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'"
+                    >
+                        {{-- Opsi Mode Terang (Light) --}}
+                        <span
+                            class="flex w-full items-center justify-center rounded-md py-1.5 text-sm font-medium transition-all"
+                            :class="{
+                                'bg-white text-zinc-800 shadow-sm': !darkMode,
+                                'text-zinc-400': darkMode
+                            }"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.95-4.243-1.59-1.59M3 12h2.25m.386-6.364 1.591 1.591M12 12a2.25 2.25 0 0 0-2.25 2.25 2.25 2.25 0 0 0 2.25 2.25c.69 0 1.323-.28 1.767-.733.444-.453.733-1.077.733-1.767a2.25 2.25 0 0 0-2.25-2.25Z" />
+                            </svg>
+                        </span>
 
+                        {{-- Opsi Mode Gelap (Dark) --}}
+                        <span
+                            class="flex w-full items-center justify-center rounded-md py-1.5 text-sm font-medium transition-all"
+                            :class="{
+                                'bg-zinc-950 text-white shadow-sm': darkMode,
+                                'text-zinc-500': !darkMode
+                            }"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                            </svg>
+                        </span>
+                    </button>
+                </div>
                 <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
                 {{ __('Repository') }}
                 </flux:navlist.item>
@@ -75,7 +98,6 @@
                 </flux:navlist.item>
             </flux:navlist>
 
-            <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
                 <flux:profile
                     :name="auth()->user()->name"
@@ -121,7 +143,6 @@
             </flux:dropdown>
         </flux:sidebar>
 
-        <!-- Mobile User Menu -->
         <flux:header class="fixed top-0 w-full z-40 bg-white dark:bg-zinc-800 shadow">
             <flux:sidebar.toggle icon="bars-2" inset="left" @click="sidebarOpen = true" />
 
