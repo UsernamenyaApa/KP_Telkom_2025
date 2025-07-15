@@ -58,6 +58,7 @@ class FalloutReportDetail extends Component
                        "----------------------------------------\n" .
                        "Created By: @" . ($this->report->reporter ? $this->report->reporter->telegram_username : 'N/A') . "\n" .
                        "Create Order: " . $this->report->created_at->format('Y-m-d H:i:s') . "\n" .
+                       "Taken at: " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
                        "Updated By: @" . auth()->user()->telegram_username;
 
             // Add completed_at and duration if available

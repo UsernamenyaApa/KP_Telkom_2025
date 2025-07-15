@@ -31,23 +31,26 @@ class FalloutReportDashboard extends Component
             if ($onProgressStatus) {
                 $report->fallout_status_id = $onProgressStatus->id;
                 $report->assigned_to_user_id = Auth::id(); // Store user ID
+                if (is_null($report->assigned_at)) {
+                    $report->assigned_at = now();
+                }
                 $report->taken_at = now();
                 $report->save();
 
                 $user = Auth::user();
 
-                $message = "Laporan Fallout On Progress\n\n" .
-                           "Tipe Order: " . ($report->orderType ? $report->orderType->name : 'N/A') . "\n" .
-                           "OrderID: " . $report->order_id . "\n" .
-                           "Nomor Layanan: " . $report->nomer_layanan . "\n" .
-                           "SN ONT: " . $report->sn_ont . "\n" .
-                           "Datek ODP: " . $report->datek_odp . "\n" .
-                           "Port ODP: " . $report->port_odp . "\n\n" .
-                           "Keterangan:\n" . $report->keterangan . "\n\n" .
-                           "----------------------------------------\n" .
-                           "Created By: @" . ($report->reporter ? $report->reporter->telegram_username : 'N/A') . "\n" .
-                           "Create Order: " . $report->created_at->format('Y-m-d H:i:s') . "\n\n" .
-                           "Take by: @" . $user->telegram_username;
+                $message = "✅ *Laporan Fallout Diambil!* ✅\n\n" .
+                           "*ID Laporan:* `" . ($report->id ?? 'N/A') . "`\n" .
+                           "*Kode Fallout:* `" . ($report->fallout_code ?? 'N/A') . "`\n" .
+                           "*Tipe Order:* `" . ($report->orderType ? $report->orderType->name : 'N/A') . "`\n" .
+                           "*OrderID:* `" . ($report->order_id ?? 'N/A') . "`\n" .
+                           "*Nomor Layanan:* `" . ($report->nomer_layanan ?? 'N/A') . "`\n" .
+                           "*SN ONT:* `" . ($report->sn_ont ?? 'N/A') . "`\n" .
+                           "*Datek ODP:* `" . ($report->datek_odp ?? 'N/A') . "`\n" .
+                           "*Port ODP:* `" . ($report->port_odp ?? 'N/A') . "`\n\n" .
+                           "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "\n" .
+                           "*Waktu Diambil:* " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n\n" .
+                           "Mohon pantau status laporan ini.";
 
                 // Send to personal chat (taker)
                 if ($user->telegram_user_id) {

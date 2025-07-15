@@ -15,6 +15,9 @@ class FalloutReport extends Model
     protected $casts = [
         'taken_at' => 'datetime',
         'completed_at' => 'datetime',
+        'assigned_at' => 'datetime',
+        'notified_unassigned_at' => 'datetime',
+        'notified_uncompleted_at' => 'datetime',
     ];
 
     public function reporter(): BelongsTo

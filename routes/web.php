@@ -38,11 +38,24 @@ Route::post('telegram/webhook', [TelegramController::class, 'handle'])->name('te
 use App\Livewire\HdDamanManager;
 use App\Livewire\OrderTypeManager;
 use App\Livewire\FalloutStatusManager;
+use Illuminate\Support\Facades\Artisan;
 
 Route::middleware(['auth', 'role:super-admin'])->group(function () {
     Route::get('/hd-damans', HdDamanManager::class)->name('hd-damans.index');
     Route::get('/order-types', OrderTypeManager::class)->name('order-types.index');
     Route::get('/fallout-statuses', FalloutStatusManager::class)->name('fallout-statuses.index');
+});
+
+// Webhook for checking unassigned fallout reports
+Route::get('/bot/check-unassigned', function () {
+    Artisan::call('app:check-unassigned-fallout-reports');
+    return response('Unassigned reports checked.', 200);
+});
+
+// Webhook for checking uncompleted fallout reports
+Route::get('/bot/check-uncompleted', function () {
+    Artisan::call('app:check-uncompleted-fallout-reports');
+    return response('Uncompleted reports checked.', 200);
 });
 
 
