@@ -25,6 +25,9 @@ return new class extends Migration
 
         Schema::create('fallout_reports', function (Blueprint $table) {
         $table->id(); // id_fallout
+        $table->integer('id_harian')->default(0);
+        $table->string('incident_ticket')->nullable();
+        $table->text('incident_fallout_description')->nullable();
         $table->foreignId('tipe_order_id')->constrained('order_types');
         $table->string('order_id'); 
         $table->string('nomer_layanan'); 
@@ -32,10 +35,16 @@ return new class extends Migration
         $table->string('datek_odp');
         $table->integer('port_odp'); 
         $table->foreignId('fallout_status_id')->nullable()->constrained('fallout_statuses');
+        $table->foreignId('assigned_to_user_id')->nullable()->constrained('users');
+        $table->timestamp('notified_unassigned_at')->nullable();
+        $table->timestamp('assigned_at')->nullable();
+        $table->timestamp('notified_uncompleted_at')->nullable();
         $table->string('keterangan')->nullable();
         $table->text('resolution_notes')->nullable(); // new column for hd_daman notes
         $table->foreignId('reporter_user_id')->nullable()->constrained('users');
         $table->timestamps();
+        $table->timestamp('taken_at')->nullable();
+        $table->timestamp('completed_at')->nullable();
     });
 }
 
