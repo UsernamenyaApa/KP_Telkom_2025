@@ -3,10 +3,10 @@
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-// 1. Layout diubah ke 'minimal' agar tidak ada gambar gedung
+// Layout diubah ke 'minimal' agar tidak ada gambar gedung
 new #[Layout('components.layouts.minimal')] class extends Component
 {
-    // 2. Properti untuk menampung kode OTP
+    // Properti untuk menampung kode OTP
     public string $otp_code = '';
 
     /**
@@ -14,21 +14,21 @@ new #[Layout('components.layouts.minimal')] class extends Component
      */
     public function verifyOtp(): void
     {
-        // 3. Validasi untuk memeriksa OTP
+        // 1. Validasi format input (harus 6 karakter)
         $this->validate([
             'otp_code' => ['required', 'string', 'min:6', 'max:6'],
         ]);
 
-        //
-        // TODO: Implementasikan logika verifikasi OTP Anda di sini.
-        // Cek apakah $this->otp_code cocok dengan yang ada di database atau cache.
-        //
-        // Jika berhasil, arahkan ke halaman ganti password.
-        // Contoh: return $this->redirect('/ganti-password-baru', navigate: true);
-        //
-        // Jika gagal, tampilkan pesan error.
-        // Contoh: $this->addError('otp_code', 'Kode OTP salah.');
-        //
+        // 2. Logika sementara untuk memeriksa OTP default
+        if ($this->otp_code === '123456') {
+            // Jika benar, arahkan ke halaman berikutnya (contoh: dashboard).
+            // Anda bisa mengganti 'dashboard' dengan route lain jika perlu.
+            $this->redirect(route('password.reset'), navigate: true);
+        } else {
+            // Jika salah, kosongkan input dan tampilkan pesan error.
+            $this->reset('otp_code');
+            $this->addError('otp_code', 'Kode OTP yang Anda masukkan salah. Masukkan "123456" untuk melanjutkan.');
+        }
     }
 
     /**
@@ -47,10 +47,9 @@ new #[Layout('components.layouts.minimal')] class extends Component
     }
 }; ?>
 
-<!-- Tampilan Halaman OTP -->
-<div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-rose-100 to-sky-200">
+<div class="flex items-center justify-center w-full h-full p-4">
 
-    <div class="w-full max-w-xl p-8 space-y-8 bg-white/70 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200/80">
+    <div class="w-full max-w-xl p-8 space-y-8 bg-zinc-300/70 rounded-2xl border border-black/20 dark:bg-gray-800">
 
         <form wire:submit="verifyOtp">
 
@@ -60,9 +59,7 @@ new #[Layout('components.layouts.minimal')] class extends Component
                 </p>
             </div>
 
-            <!-- Bagian Input OTP -->
             <div class="py-8 relative">
-                <!-- Input asli yang tidak terlihat, tempat pengguna mengetik -->
                 <input
                     id="otp_input"
                     type="text"
@@ -73,25 +70,18 @@ new #[Layout('components.layouts.minimal')] class extends Component
                     autofocus
                 >
 
-                <!-- Input palsu (label) yang terlihat, menampilkan bintang dan angka -->
-                <label for="otp_input" class="block w-full px-4 py-3 text-center bg-gray-100/60 border-gray-300/80 rounded-lg shadow-inner text-3xl tracking-[0.5em] text-slate-800 cursor-text">
-                    {{ $this->maskedOtp }}
-                </label>
+                <div class="flex justify-center">
+                    <label for="otp_input" class="block w-md px-4 py-3 text-center bg-gray-100/60 border-gray-300/80 rounded-lg shadow-inner text-2xl tracking-[0.5em] text-slate-800 cursor-text">
+                        {{ $this->maskedOtp }}
+                    </label>
+                </div>
 
                 @error('otp_code') <div class="mt-2 text-sm text-red-600 text-center">{{ $message }}</div> @enderror
             </div>
             
-            <!-- ▼▼▼ BAGIAN TOMBOL YANG DIPERBARUI ▼▼▼ -->
-            <div class="flex items-center justify-between">
-                <!-- Tombol Batal di sebelah kiri -->
-                <a href="{{ route('password.request') }}" wire:navigate
-                   class="px-5 py-2 text-sm font-semibold text-white bg-gray-500 rounded-lg shadow-md hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">
-                    Batal
-                </a>
-
-                <!-- Tombol Kirim di sebelah kanan -->
+            <div class="flex items-center justify-end">
                 <button type="submit"
-                   class="px-5 py-2 text-sm font-semibold text-white bg-slate-800 rounded-lg shadow-md hover:bg-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
+                    class="px-5 py-2 text-sm font-semibold text-white bg-slate-800 rounded-lg shadow-md hover:bg-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
                     Kirim
                 </button>
             </div>

@@ -59,8 +59,16 @@ Route::get('/bot/check-uncompleted', function () {
 });
 
 
-// ▼▼▼ TAMBAHKAN RUTE BARU DI SINI ▼▼▼
+// ▼▼▼ PENYESUAIAN RUTE OTENTIKASI ▼▼▼
+
+// Route untuk halaman OTP
 Volt::route('verify-otp', 'auth.verify-otp')->name('otp.verify');
 
+// Route untuk halaman verifikasi NIK
+// Komponen 'auth.nik-verification' merujuk ke file:
+// resources/views/livewire/auth/nik-verification.blade.php
+Volt::route('verifikasi-nik', 'auth.nik-verification')->name('nik.verify');
 
+// Route BARU untuk halaman sukses setelah ganti password
+Volt::route('password/success', 'auth.password-success')->name('password.success');
 require __DIR__.'/auth.php';

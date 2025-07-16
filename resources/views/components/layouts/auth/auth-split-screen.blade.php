@@ -14,7 +14,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans text-gray-900 antialiased">
-    <div class="h-screen flex flex-col md:flex-row">
+    <div class="min-h-screen flex flex-col md:flex-row">
 
 
         <div class="hidden lg:block md:w-1/2 bg-cover bg-center" style="background-image: url('{{ asset('images/image telkom.png') }}');">
