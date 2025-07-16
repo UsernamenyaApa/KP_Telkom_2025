@@ -1,35 +1,49 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Events\PasswordReset;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-// Menggunakan layout minimal yang sama
 new #[Layout('components.layouts.minimal')] class extends Component
 {
-    // Properti untuk menampung password baru dan konfirmasinya
     public string $password = '';
     public string $password_confirmation = '';
 
-    /**
-     * Fungsi untuk menyimpan password baru.
-     */
-    public function savePassword(): void
+    public function resetPassword(): void
     {
-        // 1. Validasi input: harus diisi, minimal 8 karakter, dan harus cocok.
         $this->validate([
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        // 2. Logika sementara untuk memeriksa password default
-        if ($this->password === 'KPMAGANG') {
-            // FIX: Arahkan ke halaman 'dashboard'
-            $this->redirect(route('password.success'), navigate: true);
-        } else {
-            // Jika salah, kosongkan input dan tampilkan pesan error.
-            $this->reset('password', 'password_confirmation');
-            $this->addError('password', 'Password tidak valid. Gunakan "KPMAGANG" untuk melanjutkan.');
+        $userId = session('otp_verified_user_id');
+
+        if (!$userId) {
+            // Handle case where user is not verified
+            $this->addError('password', 'Verifikasi OTP tidak berhasil. Silakan coba lagi.');
+            return;
         }
+
+        $user = User::find($userId);
+
+        if (!$user) {
+            $this->addError('password', 'User tidak ditemukan.');
+            return;
+        }
+
+        $user->forceFill([
+            'password' => Hash::make($this->password),
+        ])->save();
+
+        event(new PasswordReset($user));
+
+        // Clear the session variable
+        session()->forget('otp_verified_user_id');
+
+        // Redirect to the success page
+        $this->redirect(route('password.success'), navigate: true);
     }
 }; ?>
 
@@ -47,7 +61,7 @@ new #[Layout('components.layouts.minimal')] class extends Component
             </p>
         </div>
 
-        <form wire:submit="savePassword" class="space-y-6">
+        <form wire:submit="resetPassword" class="space-y-6">
             @csrf
             
             {{-- Input Password Baru dengan Ikon Gambar --}}

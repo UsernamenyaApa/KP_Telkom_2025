@@ -1,35 +1,40 @@
 <?php
 
+use App\Models\User;
+use App\Jobs\SendTelegramNotificationJob;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-// Menentukan file layout utama. Diasumsikan layout ini sudah ada
-// dan memiliki background yang sesuai (misalnya, gradien biru).
 new #[Layout('components.layouts.minimal')] class extends Component
 {
-    /**
-     * Properti untuk menampung data NIK dari input form.
-     * `wire:model="nik"` akan mengikat data ke properti ini secara real-time.
-     */
     public string $nik = '';
 
-    /**
-     * Method yang akan dipanggil saat form di-submit (`wire:submit`).
-     * Logika di dalamnya diatur untuk hanya menerima NIK default "nik123"
-     * sebagai nilai yang valid untuk keperluan pengembangan.
-     */
     public function verifyNik(): void
     {
-        // Memeriksa apakah NIK yang diinput adalah "nik123"
-        if ($this->nik === 'nik123') {
-            // Jika benar, lanjutkan ke halaman berikutnya.
-            // Arahkan ke route utama '/' sebagai contoh.
-            $this->redirect(route('otp.verify'), navigate: true);
-        } else {
-            // Jika salah, bersihkan input dan tampilkan pesan error.
-            $this->reset('nik');
-            $this->addError('nik', 'NIK tidak valid. Masukkan "nik123" untuk melanjutkan.');
+        $this->validate([
+            'nik' => ['required', 'string', 'exists:users,nik'],
+        ]);
+
+        $user = User::where('nik', $this->nik)->first();
+
+        if (!$user || !$user->telegram_user_id) {
+            $this->addError('nik', 'User tidak ditemukan atau belum terhubung dengan Telegram.');
+            return;
         }
+
+        // Generate a 6-digit OTP
+        $otp = random_int(100000, 999999);
+
+        // Store OTP in cache for 5 minutes, associated with the user's ID
+        Cache::put('otp_for_user_' . $user->id, $otp, now()->addMinutes(5));
+
+        // Send OTP to user via Telegram
+        $message = "Kode OTP untuk reset password Anda adalah: *{$otp}*.\nJangan berikan kode ini kepada siapa pun.";
+        SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
+
+        // Redirect to OTP verification page, passing user ID
+        $this->redirect(route('password.verify-otp', ['userId' => $user->id]), navigate: true);
     }
 }; ?>
 

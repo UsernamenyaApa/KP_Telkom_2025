@@ -62,7 +62,7 @@ Route::get('/bot/check-uncompleted', function () {
 // ▼▼▼ PENYESUAIAN RUTE OTENTIKASI ▼▼▼
 
 // Route untuk halaman OTP
-Volt::route('verify-otp', 'auth.verify-otp')->name('otp.verify');
+Volt::route('verify-otp/{userId}', 'auth.verify-otp')->name('password.verify-otp');
 
 // Route untuk halaman verifikasi NIK
 // Komponen 'auth.nik-verification' merujuk ke file:
