@@ -16,11 +16,24 @@ class FalloutReportDashboard extends Component
     use WithPagination;
 
     public $date;
+    public $search = '';
 
     public function mount()
     {
-        $this->date = Carbon::today()->format('Y-m-d');
+        $this->date = Carbon::today()->format('Y-m-d'); // Default to today's date
     }
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedDate()
+    {
+        $this->resetPage();
+    }
+
+    // Removed public function clearDate()
 
     public function takeOrder($reportId)
     {
@@ -30,7 +43,7 @@ class FalloutReportDashboard extends Component
             $onProgressStatus = FalloutStatus::where('name', 'OnProgress')->first();
             if ($onProgressStatus) {
                 $report->fallout_status_id = $onProgressStatus->id;
-                $report->assigned_to_user_id = Auth::id(); // Store user ID
+                $report->assigned_to_user_id = Auth::id();
                 if (is_null($report->assigned_at)) {
                     $report->assigned_at = now();
                 }
@@ -52,17 +65,14 @@ class FalloutReportDashboard extends Component
                            "*Waktu Diambil:* " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n\n" .
                            "Mohon pantau status laporan ini.";
 
-                // Send to personal chat (taker)
                 if ($user->telegram_user_id) {
                     SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
                 }
 
-                // Send to personal chat (reporter)
                 if ($report->reporter && $report->reporter->telegram_user_id) {
                     SendTelegramNotificationJob::dispatch($report->reporter->telegram_user_id, $message);
                 }
 
-                // Send to group chat
                 $groupChatId = env('TELEGRAM_GROUP_ID');
                 if ($groupChatId) {
                     SendTelegramNotificationJob::dispatch($groupChatId, $message);
@@ -74,7 +84,13 @@ class FalloutReportDashboard extends Component
     public function render()
     {
         $reports = FalloutReport::with(['reporter', 'orderType', 'falloutStatus', 'assignedToUser'])
-            ->whereDate('created_at', $this->date)
+            ->when($this->date, function ($query) {
+                $query->whereDate('created_at', $this->date);
+            })
+            ->when($this->search, function ($query) {
+                $query->where('incident_ticket', 'like', '%' . $this->search . '%')
+                      ->orWhere('order_id', 'like', '%' . $this->search . '%');
+            })
             ->orderBy('created_at', 'asc')
             ->paginate(10);
 

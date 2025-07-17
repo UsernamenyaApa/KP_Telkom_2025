@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Dashboard;
 
 use App\Models\FalloutReport;
+use App\Models\PelurusanReport;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -48,10 +49,9 @@ class DailyReportDashboard extends Component
         $this->users = $userQuery->get();
         $filterDate = Carbon::parse($this->selectedDate);
 
-        // Define the rows for our report table
         $this->reportRows = [
-            'reports_completed_today' => 'Laporan Selesai (Hari Ini)',
-            'reports_on_progress' => 'Laporan Dalam Pengerjaan',
+            'fallout_completed' => 'Fallout Reports',
+            'pelurusan_completed' => 'Pelurusan',
         ];
 
         // Reset data arrays
@@ -62,16 +62,21 @@ class DailyReportDashboard extends Component
 
         // --- QUERIES ---
 
-        // 1. Reports that were COMPLETED on the selected date.
-        // "Completed" means the status changed to a final state (not 'Open' or 'OnProgress').
-        $completedCounts = FalloutReport::whereDate('updated_at', $filterDate)
-            ->whereIn('fallout_status_id', [3, 4, 5, 6]) // 'input ulang', 'eskalasi', 'PI', 'FA'
+        // 1. Fallout reports considered "completed" for the selected date.
+        // "Completed" means the status is NOT 'Open' or 'OnProgress'.
+        $falloutCounts = FalloutReport::whereDate('updated_at', $filterDate)
+            ->whereHas('falloutStatus', function ($query) {
+                $query->where('name', '!=', 'Open')->where('name', '!=', 'OnProgress');
+            })
             ->groupBy('assigned_to_user_id')
             ->select('assigned_to_user_id', DB::raw('count(*) as total'))
             ->pluck('total', 'assigned_to_user_id');
 
-        // 2. Reports currently 'OnProgress' (regardless of date).
-        $onProgressCounts = FalloutReport::where('fallout_status_id', 2) // ID for 'OnProgress'
+        // 2. Pelurusan reports considered "completed" for the selected date.
+        $pelurusanCounts = PelurusanReport::whereDate('updated_at', $filterDate)
+            ->whereHas('falloutStatus', function ($query) {
+                $query->where('name', '!=', 'Open')->where('name', '!=', 'OnProgress');
+            })
             ->groupBy('assigned_to_user_id')
             ->select('assigned_to_user_id', DB::raw('count(*) as total'))
             ->pluck('total', 'assigned_to_user_id');
@@ -79,17 +84,17 @@ class DailyReportDashboard extends Component
         // --- DATA PROCESSING ---
 
         foreach ($this->users as $user) {
-            // Populate data for 'Laporan Selesai (Hari Ini)'
-            $countCompleted = $completedCounts->get($user->id, 0);
-            $this->reportData['reports_completed_today'][$user->id] = $countCompleted;
-            $this->rowTotals['reports_completed_today'] += $countCompleted;
-            $this->userTotals[$user->id] += $countCompleted;
+            // Populate data for 'Laporan Fallout Selesai'
+            $countFallout = $falloutCounts->get($user->id, 0);
+            $this->reportData['fallout_completed'][$user->id] = $countFallout;
+            $this->rowTotals['fallout_completed'] += $countFallout;
+            $this->userTotals[$user->id] += $countFallout;
 
-            // Populate data for 'Laporan Dalam Pengerjaan'
-            $countOnProgress = $onProgressCounts->get($user->id, 0);
-            $this->reportData['reports_on_progress'][$user->id] = $countOnProgress;
-            $this->rowTotals['reports_on_progress'] += $countOnProgress;
-            $this->userTotals[$user->id] += $countOnProgress;
+            // Populate data for 'Laporan Pelurusan Selesai'
+            $countPelurusan = $pelurusanCounts->get($user->id, 0);
+            $this->reportData['pelurusan_completed'][$user->id] = $countPelurusan;
+            $this->rowTotals['pelurusan_completed'] += $countPelurusan;
+            $this->userTotals[$user->id] += $countPelurusan;
         }
 
         $this->grandTotal = $this->userTotals ? array_sum($this->userTotals) : 0;
@@ -97,6 +102,6 @@ class DailyReportDashboard extends Component
 
     public function render(): View
     {
-        return view('livewire.daily-report-dashboard');
+        return view('livewire.dashboard.daily-report-dashboard');
     }
 }
