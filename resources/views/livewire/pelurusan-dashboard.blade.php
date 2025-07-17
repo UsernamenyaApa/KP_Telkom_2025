@@ -145,7 +145,7 @@
                           <a href="#" class="relative inline-flex items-center px-2 py-2 text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <span class="sr-only">Next</span>&gt;
                           </a>
-                          <a href="#" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                          <a href="#" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-sm font-medium text-gray-700 dark:text-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             Last
                           </a>
                         </nav>

@@ -94,12 +94,12 @@
                             </div>
                             <div class="px-4 py-5 sm:p-6 sm:col-span-2">
                                 <h3 class="text-base font-semibold leading-6 text-gray-900">Descriptions</h3>
-                                <dl class="mt-5 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                                    <div class="sm:col-span-2">
+                                <dl class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-8">
+                                    <div>
                                         <dt class="text-sm font-medium text-gray-500">Keterangan Insiden Fallout</dt>
                                         <dd class="mt-1 text-sm text-gray-900">{{ $report->incident_fallout_description }}</dd>
                                     </div>
-                                    <div class="sm:col-span-2">
+                                    <div>
                                         <dt class="text-sm font-medium text-gray-500">Catatan Resolusi</dt>
                                         <dd class="mt-1 text-sm text-gray-900">{{ $report->resolution_notes }}</dd>
                                     </div>
@@ -134,7 +134,7 @@
                     <textarea wire:model="keterangan" id="keterangan" rows="4" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Tambahkan catatan..."></textarea>
                 </div>
                 <div class="mt-6 flex justify-end space-x-4">
-                    <button wire:click="closeStatusModal" type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    <button wire:click="closeStatusModal" type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50">
                         Cancel
                     </button>
                     <button wire:click="changeStatus" type="button" class="px-4 py-2 bg-indigo-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700">

@@ -74,7 +74,7 @@ new #[Layout('components.layouts.minimal')] class extends Component
                 >
 
                 <!-- Input palsu (label) yang terlihat, menampilkan bintang dan angka -->
-                <label for="otp_input" class="block w-full px-4 py-3 text-center bg-gray-100/60 border-gray-300/80 rounded-lg shadow-inner text-3xl tracking-[0.5em] text-slate-800 cursor-text">
+                <label for="otp_input" class="block w-full px-4 py-3 text-center bg-gray-100/60 border-gray-300/80 rounded-lg shadow-inner text-3xl tracking-[0.5em] text-slate-800 dark:text-white cursor-text">
                     {{ $this->maskedOtp }}
                 </label>
 

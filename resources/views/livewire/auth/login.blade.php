@@ -146,7 +146,7 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
                         Reset password
                     </a>
                 </div>
-                <div class="text-center text-sm text-gray-600 mt-0">
+                <div class="text-center text-sm text-gray-600 dark:text-white mt-0">
                     No account?
                     <a href="{{ route('register') }}" wire:navigate class="font-medium text-blue-600 hover:text-blue-700">
                         Create one

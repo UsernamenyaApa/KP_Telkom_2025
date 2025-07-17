@@ -19,6 +19,7 @@ class DailyReportDashboard extends Component
     public $grandTotal = 0;
 
     public $selectedDate;
+    public $search = '';
 
     public function mount(): void
     {
@@ -31,9 +32,20 @@ class DailyReportDashboard extends Component
         $this->loadReportData();
     }
 
+    public function updatedSearch(): void
+    {
+        $this->loadReportData();
+    }
+
     public function loadReportData(): void
     {
-        $this->users = User::role('hd-daman')->get();
+        $userQuery = User::role('hd-daman');
+
+        if (!empty($this->search)) {
+            $userQuery->where('name', 'like', '%' . $this->search . '%');
+        }
+
+        $this->users = $userQuery->get();
         $filterDate = Carbon::parse($this->selectedDate);
 
         // Define the rows for our report table

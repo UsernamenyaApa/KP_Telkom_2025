@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-200/40 dark:bg-gray-900">
+<html lang="en" class="h-full bg-slate-200/40">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,7 +46,7 @@
 
         <div class="pt-4 text-sm text-center border-t border-gray-200 dark:border-gray-700">
             Sudah punya akun?
-            <a href="{{ route('login') }}" wire:navigate class="font-medium text-blue-600 hover:text-blue-700">
+            <a href="{{ route('login') }}" wire:navigate class="font-medium text-blue-600 hover:text-blue-700 dark:text-white">
                 Login di sini
             </a>
         </div>

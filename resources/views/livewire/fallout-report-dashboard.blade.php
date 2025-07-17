@@ -26,7 +26,7 @@
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Order Take</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Order Complete</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Last Updated</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Duration</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Duration</th>
                                 <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                                     <span class="sr-only">Actions</span>
                                 </th>
@@ -55,7 +55,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="whitespace-nowrap py-4 text-center text-sm font-medium text-gray-900">No fallout reports found.</td>
+                                    <td colspan="9" class="whitespace-nowrap py-4 text-center text-sm font-medium text-gray-900 dark:text-gray-100">No fallout reports found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -66,7 +66,7 @@
                 </div>
             </div>
         </div>
+        <div class="mt-4 flex justify-end">
+            {{ $reports->links('livewire.pagination-links') }}
+        </div>
     </div>
-
-    
-</div>
