@@ -21,9 +21,13 @@ Route::get('fallout-reports/{id}', FalloutReportDetail::class)
     ->middleware(['auth', 'verified'])
     ->name('fallout-reports.show');
 
-Route::view('pelurusan', 'pelurusan.index')
+Route::get('/pelurusan', App\Livewire\PelurusanReportDashboard::class)
     ->middleware(['auth', 'verified'])
     ->name('pelurusan.index');
+
+Route::get('pelurusan-reports/{id}', App\Livewire\PelurusanReportDetail::class)
+    ->middleware(['auth', 'verified'])
+    ->name('pelurusan-reports.show');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -59,8 +63,16 @@ Route::get('/bot/check-uncompleted', function () {
 });
 
 
-// ▼▼▼ TAMBAHKAN RUTE BARU DI SINI ▼▼▼
-Volt::route('verify-otp', 'auth.verify-otp')->name('otp.verify');
+// ▼▼▼ PENYESUAIAN RUTE OTENTIKASI ▼▼▼
 
+// Route untuk halaman OTP
+Volt::route('verify-otp/{userId}', 'auth.verify-otp')->name('password.verify-otp');
 
+// Route untuk halaman verifikasi NIK
+// Komponen 'auth.nik-verification' merujuk ke file:
+// resources/views/livewire/auth/nik-verification.blade.php
+Volt::route('verifikasi-nik', 'auth.nik-verification')->name('nik.verify');
+
+// Route BARU untuk halaman sukses setelah ganti password
+Volt::route('password/success', 'auth.password-success')->name('password.success');
 require __DIR__.'/auth.php';

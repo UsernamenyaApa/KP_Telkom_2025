@@ -1,101 +1,69 @@
 <?php
 
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-// 1. Layout diubah ke 'minimal' agar tidak ada gambar gedung
 new #[Layout('components.layouts.minimal')] class extends Component
 {
-    // 2. Properti untuk menampung kode OTP
-    public string $otp_code = '';
+    public int $userId;
+    public string $otp = '';
 
-    /**
-     * Fungsi ini dijalankan saat tombol "Kirim" ditekan.
-     */
+    public function mount($userId): void
+    {
+        $this->userId = $userId;
+    }
+
     public function verifyOtp(): void
     {
-        // 3. Validasi untuk memeriksa OTP
         $this->validate([
-            'otp_code' => ['required', 'string', 'min:6', 'max:6'],
+            'otp' => ['required', 'string', 'digits:6'],
         ]);
 
-        //
-        // TODO: Implementasikan logika verifikasi OTP Anda di sini.
-        // Cek apakah $this->otp_code cocok dengan yang ada di database atau cache.
-        //
-        // Jika berhasil, arahkan ke halaman ganti password.
-        // Contoh: return $this->redirect('/ganti-password-baru', navigate: true);
-        //
-        // Jika gagal, tampilkan pesan error.
-        // Contoh: $this->addError('otp_code', 'Kode OTP salah.');
-        //
+        $cachedOtp = Cache::get('otp_for_user_' . $this->userId);
+
+        if (!$cachedOtp || $this->otp !== (string) $cachedOtp) {
+            $this->addError('otp', 'Kode OTP tidak valid atau telah kedaluwarsa.');
+            return;
+        }
+
+        // Clear the OTP from cache
+        Cache::forget('otp_for_user_' . $this->userId);
+
+        // Store user ID in session to indicate OTP verification success
+        session()->put('otp_verified_user_id', $this->userId);
+
+        // Redirect to the password reset page
+        $this->redirect(route('password.reset'), navigate: true);
     }
+};
+?>
 
-    /**
-     * Computed property untuk membuat tampilan OTP yang dinamis (misal: 1 2 3 * * *)
-     */
-    public function getMaskedOtpProperty(): string
-    {
-        $length = 6;
-        $codeLength = strlen($this->otp_code);
+<div class="flex items-center justify-center w-full h-full p-4">
+    <div class="w-full max-w-md p-8 space-y-6 bg-gray-200/50 backdrop-blur-sm rounded-xl shadow-lg border border-gray-300/60">
+        <div class="text-center">
+            <h2 class="text-2xl font-bold text-slate-900">Verifikasi OTP</h2>
+            <p class="mt-2 text-sm text-slate-700">Masukkan kode OTP yang telah kami kirim ke akun Telegram Anda.</p>
+        </div>
 
-        // Membuat string dengan angka yang sudah diinput, sisanya diisi '*'
-        $masked = str_pad(substr($this->otp_code, 0, $codeLength), $length, '*');
-
-        // Mengubah string "123***" menjadi "1 2 3 * * *"
-        return implode(' ', str_split($masked));
-    }
-}; ?>
-
-<!-- Tampilan Halaman OTP -->
-<div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-rose-100 to-sky-200">
-
-    <div class="w-full max-w-xl p-8 space-y-8 bg-white/70 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200/80">
-
-        <form wire:submit="verifyOtp">
-
-            <div class="text-center">
-                <p class="text-sm text-slate-800">
-                    Silakan masukkan kode OTP yang telah dikirimkan melalui bot @nama_bot
-                </p>
+        <form wire:submit="verifyOtp" class="space-y-6">
+            <div>
+                <label for="otp" class="block text-sm font-medium text-slate-700">Kode OTP</label>
+                <div class="mt-1">
+                    <input wire:model="otp" id="otp" name="otp" type="text" required
+                        class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                @error('otp')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
-            <!-- Bagian Input OTP -->
-            <div class="py-8 relative">
-                <!-- Input asli yang tidak terlihat, tempat pengguna mengetik -->
-                <input
-                    id="otp_input"
-                    type="text"
-                    wire:model.live="otp_code"
-                    maxlength="6"
-                    inputmode="numeric"
-                    class="absolute inset-0 w-full h-full opacity-0 cursor-text"
-                    autofocus
-                >
-
-                <!-- Input palsu (label) yang terlihat, menampilkan bintang dan angka -->
-                <label for="otp_input" class="block w-full px-4 py-3 text-center bg-gray-100/60 border-gray-300/80 rounded-lg shadow-inner text-3xl tracking-[0.5em] text-slate-800 dark:text-white cursor-text">
-                    {{ $this->maskedOtp }}
-                </label>
-
-                @error('otp_code') <div class="mt-2 text-sm text-red-600 text-center">{{ $message }}</div> @enderror
-            </div>
-            
-            <!-- ▼▼▼ BAGIAN TOMBOL YANG DIPERBARUI ▼▼▼ -->
-            <div class="flex items-center justify-between">
-                <!-- Tombol Batal di sebelah kiri -->
-                <a href="{{ route('password.request') }}" wire:navigate
-                   class="px-5 py-2 text-sm font-semibold text-white bg-gray-500 rounded-lg shadow-md hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">
-                    Batal
-                </a>
-
-                <!-- Tombol Kirim di sebelah kanan -->
+            <div>
                 <button type="submit"
-                   class="px-5 py-2 text-sm font-semibold text-white bg-slate-800 rounded-lg shadow-md hover:bg-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
-                    Kirim
+                    class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-slate-800 border border-transparent rounded-md shadow-sm hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-700 transition-colors">
+                    Verifikasi
                 </button>
             </div>
-
         </form>
     </div>
 </div>

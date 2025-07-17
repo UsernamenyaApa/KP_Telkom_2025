@@ -76,11 +76,6 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
     }
 }; ?>
 
-<!-- Import Google Font for Myanmar Khyay -->
-<!-- <style>
-    @import url('https://fonts.googleapis.com/css2?family=Myanmar+Khyay&display=swap');
-</style> -->
-
 <div class="w-full max-w-md mx-auto">
     <div class="p-6 bg-slate-200/40 rounded-2xl border border-black/30 backdrop-blur-[2px]">
         <div class="text-center mb-4">
@@ -92,6 +87,7 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
         <x-auth-session-status class="mb-4" :status="session('status')" />
 
         <form wire:submit="login" class="flex flex-col gap-4">
+            {{-- Email Input --}}
             <div>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -113,7 +109,8 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
                 @error('email') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
             </div>
 
-            <div>
+            {{-- Password Input dengan Ikon Mata --}}
+            <div x-data="{ showPassword: false }">
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -124,12 +121,22 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
                         wire:model="password"
                         id="password"
                         name="password"
-                        type="password"
+                        :type="showPassword ? 'text' : 'password'"
                         required
                         autocomplete="current-password"
                         placeholder="password"
-                        class="block w-full pl-10 pr-3 py-3 bg-gray-100 border-transparent rounded-md shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] focus:ring-blue-500 focus:border-blue-500"
+                        class="block w-full pl-10 pr-10 py-3 bg-gray-100 border-transparent rounded-md shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] focus:ring-blue-500 focus:border-blue-500"
                     />
+                    {{-- Tombol untuk Toggle Ikon --}}
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+                        <button type="button" @click="showPassword = !showPassword" class="text-gray-500 hover:text-gray-700">
+                            {{-- Ikon untuk MENAMPILKAN password (mata terbuka) --}}
+                            <img x-show="!showPassword" src="{{ asset('images/show icon logo.png') }}" alt="Show Password" class="h-5 w-5">
+                            
+                            {{-- Ikon untuk MENYEMBUNYIKAN password (mata tercoret) --}}
+                            <img x-show="showPassword" src="{{ asset('images/hidden icon logo.png') }}" alt="Hide Password" class="h-5 w-5" style="display: none;">
+                        </button>
+                    </div>
                 </div>
                 @error('password') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
             </div>
@@ -143,7 +150,7 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
             <div>
                 <div class="text-center text-sm mt-1">
                     <a href="{{ route('password.request') }}" wire:navigate class="font-medium text-blue-600 hover:text-blue-700">
-                        Reset password
+                        Forget password
                     </a>
                 </div>
                 <div class="text-center text-sm text-gray-600 dark:text-white mt-0">

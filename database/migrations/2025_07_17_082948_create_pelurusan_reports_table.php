@@ -11,23 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->timestamps();
-        });
-
-        Schema::create('fallout_statuses', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->timestamps();
-        });
-
-        Schema::create('fallout_reports', function (Blueprint $table) {
-            $table->id(); // id_fallout
+        Schema::create('pelurusan_reports', function (Blueprint $table) {
+            $table->id(); // id_pelurusan
             $table->integer('id_harian')->default(0);
-            $table->string('fallout_code')->nullable();
-            $table->string('incident_ticket')->nullable();
+            $table->string('pelurusan_code')->nullable();
             $table->text('incident_fallout_description')->nullable();
             $table->foreignId('tipe_order_id')->constrained('order_types');
             $table->string('order_id');
@@ -54,9 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fallout_reports');
-        Schema::dropIfExists('fallout_statuses');
-        Schema::dropIfExists('order_types');
-        Schema::dropIfExists('hd_damans');
+        Schema::dropIfExists('pelurusan_reports');
     }
 };

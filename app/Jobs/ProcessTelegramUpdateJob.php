@@ -22,6 +22,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
 
     private const PROCESS_AUTH = 'auth';
     private const PROCESS_FALLOUT = 'fallout';
+    private const PROCESS_PELURUSAN = 'pelurusan';
     private const PROCESS_REGISTER = 'register';
     private const STEP_AWAITING_PASSWORD = 'awaiting_password';
     private const STEP_AWAITING_NIK = 'awaiting_nik';
@@ -75,17 +76,21 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             return;
         }
 
+        if (str_starts_with($data, 'start_pelurusan_')) {
+            $orderTypeName = substr($data, strlen('start_pelurusan_'));
+            $this->editMessage($telegram, $chatId, $messageId, "✅ Tipe laporan dipilih: *{$orderTypeName}*");
+            $this->startPelurusanReport($chatId, $state, $orderTypeName);
+            return;
+        }
+
         match ($data) {
             'show_fallout_menu' => $this->showFalloutMenu($telegram, $chatId, $messageId),
-            'start_pelurusan' => $this->handlePelurusanData($telegram, $chatId, $messageId),
+            'lapor_pelurusan' => $this->showPelurusanMenu($telegram, $chatId, $messageId),
             'back_to_main_menu' => $this->showMainMenu($telegram, $chatId, "↩️ Kembali ke menu utama. Pilih opsi:", $messageId),
             default => SendTelegramNotificationJob::dispatch($chatId, "⚠️ Aksi tidak valid."),
         };
     }
     
-    /**
-     * FUNGSI YANG DIPERBAIKI: Logika pembuatan keyboard sudah benar.
-     */
     private function showFalloutMenu(Api $telegram, int $chatId, ?int $messageId = null): void
     {
         $orderTypes = Cache::remember('order_types_all', now()->addMinutes(60), fn() => OrderType::all());
@@ -96,7 +101,6 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             return;
         }
 
-        // Membangun keyboard dengan struktur yang benar
         $keyboardArray = [];
         $row = [];
         foreach ($orderTypes as $type) {
@@ -110,20 +114,48 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             $keyboardArray[] = $row;
         }
         
-        // Menambahkan tombol "Kembali" di baris baru
         $keyboardArray[] = [['text' => '« Kembali ke Menu Utama', 'callback_data' => 'back_to_main_menu']];
 
-        // Membungkusnya dalam format yang benar untuk API
         $finalKeyboard = ['inline_keyboard' => $keyboardArray];
         
         $this->editMessage($telegram, $chatId, $messageId, "Pilih jenis Laporan Fallout:", $finalKeyboard);
+    }
+
+    private function showPelurusanMenu(Api $telegram, int $chatId, ?int $messageId = null): void
+    {
+        $orderTypes = Cache::remember('order_types_all', now()->addMinutes(60), fn() => OrderType::all());
+        
+        if ($orderTypes->isEmpty()) {
+            SendTelegramNotificationJob::dispatch($chatId, "⚠️ Maaf, belum ada tipe order yang tersedia di sistem.");
+            $this->showMainMenu($telegram, $chatId, 'Silakan hubungi admin untuk menambahkan tipe order.', $messageId);
+            return;
+        }
+
+        $keyboardArray = [];
+        $row = [];
+        foreach ($orderTypes as $type) {
+            $row[] = ['text' => $type->name, 'callback_data' => 'start_pelurusan_' . $type->name];
+            if (count($row) == 2) {
+                $keyboardArray[] = $row;
+                $row = [];
+            }
+        }
+        if (!empty($row)) {
+            $keyboardArray[] = $row;
+        }
+        
+        $keyboardArray[] = [['text' => '« Kembali ke Menu Utama', 'callback_data' => 'back_to_main_menu']];
+
+        $finalKeyboard = ['inline_keyboard' => $keyboardArray];
+        
+        $this->editMessage($telegram, $chatId, $messageId, "Pilih jenis Laporan Pelurusan:", $finalKeyboard);
     }
     
     private function showMainMenu(Api $telegram, int $chatId, string $messageText = "Silakan pilih menu:", ?int $messageId = null): void
     {
         $keyboard = ['inline_keyboard' => [
             [['text' => '📊 Laporan Fallout', 'callback_data' => 'show_fallout_menu']],
-            [['text' => '✏️ Pelurusan Data', 'callback_data' => 'start_pelurusan']],
+            [['text' => '✏️ Pelurusan Data', 'callback_data' => 'lapor_pelurusan']],
         ]];
 
         if ($messageId) {
@@ -151,8 +183,6 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             Log::error("Gagal mengedit pesan (Exception): " . $e->getMessage(), ['chat_id' => $chatId]);
         }
     }
-    
-    // --- (Sisa fungsi di bawah ini sama seperti sebelumnya, tidak perlu diubah) ---
 
     private function handleMessage(Update $update): void
     {
@@ -191,6 +221,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         match ($state['process'] ?? null) {
             self::PROCESS_AUTH => $this->handlePassword($chatId, $text, $state),
             self::PROCESS_FALLOUT => $this->handleFalloutSteps($chatId, $text, $state),
+            self::PROCESS_PELURUSAN => $this->handlePelurusanSteps($chatId, $text, $state),
             self::PROCESS_REGISTER => $this->handleRegistrationSteps($chatId, $text, $state),
             default => $this->sendUnrecognizedMessage($chatId),
         };
@@ -291,6 +322,18 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         $state['report_data'][$currentStep] = $trimmedText;
         $this->advanceFalloutStep($chatId, $state);
     }
+
+    private function handlePelurusanSteps(int $chatId, string $text, array &$state): void
+    {
+        $currentStep = $state['step'];
+        $trimmedText = trim($text);
+        if ($currentStep === 'port_odp' && !is_numeric($trimmedText)) {
+            SendTelegramNotificationJob::dispatch($chatId, "❌ Port ODP harus berupa angka. Silakan masukkan kembali:");
+            return;
+        }
+        $state['report_data'][$currentStep] = $trimmedText;
+        $this->advancePelurusanStep($chatId, $state);
+    }
     
     private function handleRegistrationSteps(int $chatId, string $text, array &$state): void
     {
@@ -321,6 +364,20 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
         SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step']));
     }
+
+    private function startPelurusanReport(int $chatId, array $state, string $orderTypeName): void
+    {
+        $orderType = OrderType::where('name', $orderTypeName)->first();
+        if (!$orderType) {
+            SendTelegramNotificationJob::dispatch($chatId, "❌ Tipe order tidak valid.");
+            return;
+        }
+        $state['process'] = self::PROCESS_PELURUSAN;
+        $state['step'] = 'incident_fallout_description';
+        $state['report_data'] = ['tipe_order_id' => $orderType->id];
+        Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
+        SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan'));
+    }
     
     private function advanceFalloutStep(int $chatId, array &$state): void
     {
@@ -335,6 +392,20 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             $this->generateAndSendReport($chatId, $state);
         }
     }
+
+    private function advancePelurusanStep(int $chatId, array &$state): void
+    {
+        $steps = ['incident_fallout_description', 'order_id', 'nomer_layanan', 'sn_ont', 'datek_odp', 'port_odp', 'keterangan'];
+        $currentStepIndex = array_search($state['step'], $steps);
+        $nextStepIndex = $currentStepIndex + 1;
+        if ($nextStepIndex < count($steps)) {
+            $state['step'] = $steps[$nextStepIndex];
+            Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
+            SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan'));
+        } else {
+            $this->generateAndSendPelurusanReport($chatId, $state);
+        }
+    }
     
     private function generateAndSendReport(int $chatId, array $state): void
     {
@@ -342,19 +413,39 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         Cache::forget($chatId);
         SendTelegramNotificationJob::dispatch($chatId, "✅ Laporan Anda telah diterima dan sedang diproses. Anda akan segera menerima konfirmasi akhir.");
     }
-    
-    private function getQuestionForStep(string $step): string
+
+    private function generateAndSendPelurusanReport(int $chatId, array $state): void
     {
-        $questions = [
-            'incident_ticket' => "1/8: Masukkan Nomor Tiket Insiden:",
-            'incident_fallout_description' => "2/8: Masukkan Keterangan Insiden Fallout:",
-            'order_id' => "3/8: Masukkan Order ID:",
-            'nomer_layanan' => "4/8: Masukkan Nomor Layanan:",
-            'sn_ont' => "5/8: Masukkan SN ONT:",
-            'datek_odp' => "6/8: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):",
-            'port_odp' => "7/8: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):",
-            'keterangan' => "8/8: Masukkan Keterangan Tambahan Laporan:",
-        ];
+        ProcessTelegramPelurusanReport::dispatch($chatId, $state, $state['report_data']['tipe_order_id']);
+        Cache::forget($chatId);
+        SendTelegramNotificationJob::dispatch($chatId, "✅ Laporan Anda telah diterima dan sedang diproses. Anda akan segera menerima konfirmasi akhir.");
+    }
+    
+    private function getQuestionForStep(string $step, string $process = 'fallout'): string
+    {
+        if ($process === 'pelurusan') {
+            $questions = [
+                'incident_fallout_description' => "1/7: Masukkan Keterangan Insiden Pelurusan:",
+                'order_id' => "2/7: Masukkan Order ID:",
+                'nomer_layanan' => "3/7: Masukkan Nomor Layanan:",
+                'sn_ont' => "4/7: Masukkan SN ONT:",
+                'datek_odp' => "5/7: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):",
+                'port_odp' => "6/7: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):",
+                'keterangan' => "7/7: Masukkan Keterangan Tambahan Laporan:",
+            ];
+        } else {
+            $questions = [
+                'incident_ticket' => "1/8: Masukkan Nomor Tiket Insiden:",
+                'incident_fallout_description' => "2/8: Masukkan Keterangan Insiden Fallout:",
+                'order_id' => "3/8: Masukkan Order ID:",
+                'nomer_layanan' => "4/8: Masukkan Nomor Layanan:",
+                'sn_ont' => "5/8: Masukkan SN ONT:",
+                'datek_odp' => "6/8: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):",
+                'port_odp' => "7/8: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):",
+                'keterangan' => "8/8: Masukkan Keterangan Tambahan Laporan:",
+            ];
+        }
+
         return $questions[$step] ?? 'Langkah tidak diketahui.';
     }
 

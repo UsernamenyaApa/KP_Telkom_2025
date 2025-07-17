@@ -1,5 +1,7 @@
+{{-- resources/views/components/layouts/minimal.blade.php --}}
+
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,9 +9,21 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        {{-- Pastikan baris ini tetap dalam komentar jika Anda hanya menggunakan Tailwind CDN --}}
+        {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
+
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                darkMode: 'class',
+                theme: {
+                    extend: {}
+                }
+            }
+        </script>
     </head>
-    <body>
+    {{-- Body ini adalah 'kanvas' untuk gradien --}}
+    <body class="h-full bg-gradient-to-b from-sky-700 to-slate-300 backdrop-blur-[2px]">
         {{ $slot }}
     </body>
 </html>
