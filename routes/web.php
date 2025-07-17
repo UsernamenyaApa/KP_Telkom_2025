@@ -21,9 +21,13 @@ Route::get('fallout-reports/{id}', FalloutReportDetail::class)
     ->middleware(['auth', 'verified'])
     ->name('fallout-reports.show');
 
-Route::view('pelurusan', 'pelurusan.index')
+Route::get('/pelurusan', App\Livewire\PelurusanReportDashboard::class)
     ->middleware(['auth', 'verified'])
     ->name('pelurusan.index');
+
+Route::get('pelurusan-reports/{id}', App\Livewire\PelurusanReportDetail::class)
+    ->middleware(['auth', 'verified'])
+    ->name('pelurusan-reports.show');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
