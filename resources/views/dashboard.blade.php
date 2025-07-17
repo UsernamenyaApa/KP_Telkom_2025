@@ -1,12 +1,80 @@
 <x-layouts.app>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+    <div class="p-6 bg-gray-100 dark:bg-gray-900">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200 font-sans tracking-wide">Dashboard</h1>
+            
+        </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <!-- OPEN Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 font-akatab tracking-wider">5 Order</p>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 font-akatab tracking-wider">OPEN</h3>
+                    </div>
+                    <div class="text-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                </div>
+                <a href="#" class="text-sm text-blue-500 dark:text-blue-400 underline mt-4 block font-akatab tracking-wider">view details</a>
+            </div>
+
+            <!-- PROGRES Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 font-akatab tracking-wider">5 Order</p>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 font-akatab tracking-wider">PROGRES</h3>
+                    </div>
+                    <div class="text-yellow-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                </div>
+                <a href="#" class="text-sm text-yellow-500 dark:text-yellow-400 underline mt-4 block font-akatab tracking-wider">view details</a>
+            </div>
+
+            <!-- ESKALASI Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 font-akatab tracking-wider">5 Order</p>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 font-akatab tracking-wider">ESKALASI</h3>
+                    </div>
+                    <div class="text-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </div>
+                </div>
+                <a href="#" class="text-sm text-red-500 dark:text-red-400 underline mt-4 block font-akatab tracking-wider">view details</a>
+            </div>
+
+            <!-- CLOSE Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 font-akatab tracking-wider">5 Order</p>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 font-akatab tracking-wider">CLOSE</h3>
+                    </div>
+                    <div class="text-green-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <a href="#" class="text-sm text-green-500 dark:text-green-400 underline mt-4 block font-akatab tracking-wider">view details</a>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 font-akatab tracking-widest">Daily work report HD Daman</h2>
             @livewire('daily-report-dashboard')
         </div>
     </div>

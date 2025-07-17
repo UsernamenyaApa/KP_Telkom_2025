@@ -1,159 +1,525 @@
-<div class="p-4 sm:p-6 lg:p-8 h-screen">
-    <div class="mb-6">
-        <h1 class="text-2xl font-semibold leading-6 text-gray-900">Data Pelurusan</h1>
-        <p class="mt-2 text-sm text-gray-700">A list of all the Pelurusan from the field.</p>
+<div style="width: 100%; height: 100%; position: relative; background: #F2F4F6; overflow: hidden">
+    <div style="width: 1512px; height: 67px; left: 0px; top: 0px; position: absolute; background: #071F43; box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25)"></div>
+    <div style="width: 37px; height: 37px; left: 22px; top: 15px; position: absolute; overflow: hidden">
+        <div style="width: 30.83px; height: 21.58px; left: 3.08px; top: 7.71px; position: absolute; background: white"></div>
     </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 items-end">
-        <div>
-            <label for="filter-by" class="block text-sm font-medium text-gray-700">Filter by</label>
-            <select id="filter-by" name="filter-by" class="mt-1 block w-full rounded-md border-gray-300 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                <option selected disabled>Pilih Opsi</option>
-                <option>Tipe Order</option>
-                <option>Status</option>
-                <option>Assigned To</option>
-            </select>
-        </div>
-        <div>
-             <label for="filter-periode" class="block text-sm font-medium text-gray-700">Filter Periode</label>
-            <select id="filter-periode" class="mt-1 block w-full rounded-md border-gray-300 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                <option>Pilih Periode</option>
-            </select>
-        </div>
-        <div class="flex gap-2 items-end">
-             <div class="w-full">
-                <label for="search" class="sr-only">Search</label>
-                <input type="search" id="search" placeholder="Search..." class="block w-full rounded-md border-gray-300 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-             </div>
-             <button type="button" class="flex-shrink-0 rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
-                Search
-             </button>
-        </div>
+    <div style="width: 1512px; height: 0px; left: 0px; top: 155px; position: absolute; box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.25); outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="left: 66px; top: 97px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 32px; font-family: Instrument Sans; font-weight: 700; letter-spacing: 0.96px; word-wrap: break-word">Fallout Report</div>
+    <div style="width: 440px; height: 40px; left: 914px; top: 92px; position: absolute; background: #F2F2F2; border-radius: 5px; border: 1px rgba(0, 0, 0, 0.20) solid; backdrop-filter: blur(2px)"></div>
+    <div style="width: 250px; left: 927px; top: 101px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.35); font-size: 15px; font-family: Akatab; font-weight: 400; word-wrap: break-word">Search...</div>
+    <div style="width: 76px; left: 1415px; top: 112px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.80); font-size: 15px; font-family: Akatab; font-weight: 400; word-wrap: break-word">Filter</div>
+    <div style="width: 119px; height: 40px; left: 1235px; top: 92px; position: absolute; background: rgba(3, 62, 138, 0.80); border-radius: 5px; border: 1px rgba(0, 0, 0, 0.10) solid; backdrop-filter: blur(2px)"></div>
+    <div style="width: 30px; height: 30px; left: 1280px; top: 97px; position: absolute; overflow: hidden">
+        <div style="width: 21.86px; height: 21.86px; left: 3.75px; top: 3.75px; position: absolute; background: white"></div>
     </div>
-
-
-    <div class="flow-root">
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-300">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">NO</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">TIPE ORDER</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ORDER ID</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">STATUS</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ASSIGNED TO</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            <tr>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">1</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">SO</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">ODP-6</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <span class="inline-flex items-center rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Completed</span>
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Ignasius Jonathan</td>
-                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-6">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Details</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">2</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">DO</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">2344</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                     <span class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">Eskalasi</span>
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Test User</td>
-                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-6">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Details</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">3</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">AO</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Order 1</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <span class="inline-flex items-center rounded-md bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">OnProgress</span>
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Test User</td>
-                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-6">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Details</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">4</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">AO</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">1112</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <span class="inline-flex items-center rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Open</span>
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">-</td>
-                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-6">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Details</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">5</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">SO</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">ODP-12</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <span class="inline-flex items-center rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Completed</span>
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">User Baru</td>
-                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-6">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Details</a>
-                                </td>
-                            </tr>
-                            
-                            </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-2 flex items-center justify-between">
-                    <div class="flex flex-1 justify-between sm:hidden">
-                      <a href="#" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</a>
-                      <a href="#" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</a>
-                    </div>
-                    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                      <div>
-                        <p class="text-sm text-gray-700">
-                          Menampilkan
-                          <span class="font-medium">1</span>
-                          sampai
-                          <span class="font-medium">5</span>
-                          dari
-                          <span class="font-medium">9</span>
-                          data
-                        </p>
-                      </div>
-                      <div>
-                        <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                          <span class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300">
-                            First
-                          </span>
-                          <span class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 cursor-not-allowed">
-                            <span class="sr-only">Previous</span>&lt;
-                          </span>
-                          
-                          <a href="#" aria-current="page" class="relative z-10 inline-flex items-center bg-indigo-600 px-4 py-2 text-sm font-semibold text-white focus:z-20">1</a>
-                          <a href="#" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20">2</a>
-                          
-                          <a href="#" class="relative inline-flex items-center px-2 py-2 text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                            <span class="sr-only">Next</span>&gt;
-                          </a>
-                          <a href="#" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-sm font-medium text-gray-700 dark:text-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                            Last
-                          </a>
-                        </nav>
-                      </div>
-                    </div>
-                  </div>
-
-            </div>
+    <div style="width: 378px; height: 45px; left: 1621px; top: 169px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 15px; font-family: Akatab; font-weight: 400; letter-spacing: 0.75px; word-wrap: break-word">A list of all the fallout reports from the field.</div>
+    <div style="width: 378px; height: 45px; left: 68px; top: 170px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 15px; font-family: Akatab; font-weight: 400; letter-spacing: 0.75px; word-wrap: break-word">A list of all the fallout reports from the field.</div>
+    <div style="width: 40px; height: 40px; left: 1380px; top: 92px; position: absolute; overflow: hidden">
+        <div style="width: 36px; height: 40px; left: 2px; top: 0px; position: absolute; background: black"></div>
+    </div>
+    <div style="width: 233px; height: 40px; left: 1217px; top: 173px; position: absolute; background: #F2F2F2; border-radius: 5px; border: 1px rgba(0, 0, 0, 0.20) solid; backdrop-filter: blur(2px)"></div>
+    <div style="width: 171px; left: 1235px; top: 182px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.50); font-size: 15px; font-family: Akatab; font-weight: 400; word-wrap: break-word">Filter Periode</div>
+    <div style="width: 24px; height: 24px; left: 1406px; top: 181px; position: absolute; overflow: hidden">
+        <div style="width: 20px; height: 19.50px; left: 2px; top: 2.50px; position: absolute; outline: 1.50px rgba(0, 0, 0, 0.50) solid; outline-offset: -0.75px"></div>
+        <div style="width: 12px; height: 6px; left: 6px; top: 12px; position: absolute; background: rgba(0, 0, 0, 0.50)"></div>
+    </div>
+    <div style="width: 1512px; height: 89px; left: 0px; top: 893px; position: absolute; background: #F2F4F6"></div>
+    <div style="width: 1421px; height: 595px; left: 45px; top: 295px; position: absolute; background: rgba(136.78, 153.37, 178.25, 0); border: 1px rgba(0, 0, 0, 0.25) solid"></div>
+    <div style="width: 1421px; height: 67px; left: 45px; top: 229px; position: absolute; background: #33629F; border-top-left-radius: 25px; border-top-right-radius: 25px; border: 1px rgba(0, 0, 0, 0.25) solid"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 350px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 404px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 458px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 512px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 566px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 620px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 674px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 728px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 782px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 836px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="left: 45px; top: 903px; position: absolute; color: rgba(0, 0, 0, 0.50); font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Show 1 to 100 from 567 data</div>
+    <div style="width: 3px; height: 593px; left: 1462px; top: 296px; position: absolute; background: rgba(217, 217, 217, 0.50)"></div>
+    <div style="width: 3px; height: 61px; left: 1462px; top: 296px; position: absolute; background: rgba(69.88, 69.88, 69.88, 0.60); border-radius: 50px"></div>
+    <div style="width: 1416px; height: 66px; left: 46px; top: 229px; position: absolute">
+        <div style="width: 43.88px; height: 66px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">No</div>
+        <div style="width: 130.09px; height: 66px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Incident Ticket</div>
+        <div style="width: 86.21px; height: 66px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Tipe Order</div>
+        <div style="width: 117.70px; height: 66px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Order ID</div>
+        <div style="width: 117.70px; height: 66px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Status Fallout</div>
+        <div style="width: 164.68px; height: 66px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Assigned To</div>
+        <div style="width: 131.12px; height: 66px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Order Create</div>
+        <div style="width: 131.12px; height: 66px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Order Take</div>
+        <div style="width: 131.12px; height: 66px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Order Complete</div>
+        <div style="width: 131.12px; height: 66px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Last Updated</div>
+        <div style="width: 87.24px; height: 66px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Duration</div>
+        <div style="width: 87.24px; height: 66px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Action</div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 350px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(211, 47, 47, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">2</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">111</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">DO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">222</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Eskalasi</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Test User</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:35</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:36</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:12</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:12</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">36 minutees</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
         </div>
     </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 296px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(102, 187, 106, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">1</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">69</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">SO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">111</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">FA</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Ignasius Jonathan</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:30</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:36</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:12</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:12</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">36 minutes</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 404px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(255, 202, 40, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">3</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">455sfv5</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">AO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">333</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">OnProgress</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Test User</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:36</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:16</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:17</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:17</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">21 second</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 458px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(179, 136, 255, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">4</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">233</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">AO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">444</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">PI</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Test User</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:37</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:17</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:19</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:19</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">2 minutes</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 512px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(100, 181, 246, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">5</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">INF004296201</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">SO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">555</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Open</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:39</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 566px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(231, 156, 86, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">6</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">fj5522h</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">DO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">666</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Re-Input</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Test User</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:40</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:17</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:36</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:36</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">19 minutes</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 620px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(29, 129, 11, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">7</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">hjk58631</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">DO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">777</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Completed</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">kahfi fauzan habibi</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:11</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:36</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:40</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:40</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">4 minutes</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 674px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(100, 181, 246, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">8</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">yhj41125</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">SO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">888</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Open</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:19</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 728px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(100, 181, 246, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">9</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">yjj78526</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">AO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">999</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Open</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:35</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 782px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(100, 181, 246, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">10</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">yhj52963</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">AO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">101</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Open</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:50</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 836px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(100, 181, 246, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">11</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">eds85296</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">SO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">102</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Open</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 15:03</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 24px; height: 24px; left: 1383px; top: 908px; position: absolute; overflow: hidden">
+        <div style="width: 5.66px; height: 8.48px; left: 9.34px; top: 7.76px; position: absolute; background: rgba(0, 0, 0, 0.65)"></div>
+    </div>
+    <div style="width: 24px; height: 24px; left: 1275px; top: 908px; position: absolute; overflow: hidden">
+        <div style="width: 5.66px; height: 8.49px; left: 9px; top: 7.76px; position: absolute; background: rgba(0, 0, 0, 0.65)"></div>
+    </div>
+    <div style="width: 55px; height: 24px; left: 1220px; top: 910px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.65); font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">First</div>
+    <div style="width: 55px; height: 24px; left: 1407px; top: 908px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.65); font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Last</div>
+    <div style="width: 28px; height: 24px; left: 1299px; top: 908px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">1</div>
+    <div style="width: 28px; height: 24px; left: 1327px; top: 908px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.65); font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">2</div>
+    <div style="width: 28px; height: 24px; left: 1355px; top: 908px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.65); font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">...</div>
+    <div style="width: 10px; height: 2px; left: 1309px; top: 928px; position: absolute; background: #0078B7; border-radius: 3px"></div>
+    <div style="width: 25px; height: 25px; left: 1466px; top: 21px; position: absolute; overflow: hidden">
+        <div style="width: 16.55px; height: 16.57px; left: 4.23px; top: 4.27px; position: absolute; background: white"></div>
+    </div>
+    <div style="width: 177px; height: 25px; left: 1224px; top: 21px; position: absolute; text-align: right; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 20px; font-family: Mplus 1p; font-weight: 800; word-wrap: break-word">TEST USER</div>
+    <div style="width: 25px; height: 25px; left: 1411px; top: 21px; position: absolute; overflow: hidden">
+        <div style="width: 10.42px; height: 5.21px; left: 7.29px; top: 10.42px; position: absolute; background: white"></div>
+    </div>
+    <div style="width: 35px; height: 0px; left: 1444px; top: 16px; position: absolute; transform: rotate(90deg); transform-origin: top left; outline: 1px white solid; outline-offset: -0.50px"></div>
+</div><div style="width: 100%; height: 100%; position: relative; background: #F2F4F6; overflow: hidden">
+    <div style="width: 1512px; height: 67px; left: 0px; top: 0px; position: absolute; background: #071F43; box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25)"></div>
+    <div style="width: 37px; height: 37px; left: 22px; top: 15px; position: absolute; overflow: hidden">
+        <div style="width: 30.83px; height: 21.58px; left: 3.08px; top: 7.71px; position: absolute; background: white"></div>
+    </div>
+    <div style="width: 1512px; height: 0px; left: 0px; top: 155px; position: absolute; box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.25); outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="left: 66px; top: 97px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 32px; font-family: Instrument Sans; font-weight: 700; letter-spacing: 0.96px; word-wrap: break-word">Fallout Report</div>
+    <div style="width: 440px; height: 40px; left: 914px; top: 92px; position: absolute; background: #F2F2F2; border-radius: 5px; border: 1px rgba(0, 0, 0, 0.20) solid; backdrop-filter: blur(2px)"></div>
+    <div style="width: 250px; left: 927px; top: 101px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.35); font-size: 15px; font-family: Akatab; font-weight: 400; word-wrap: break-word">Search...</div>
+    <div style="width: 76px; left: 1415px; top: 112px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.80); font-size: 15px; font-family: Akatab; font-weight: 400; word-wrap: break-word">Filter</div>
+    <div style="width: 119px; height: 40px; left: 1235px; top: 92px; position: absolute; background: rgba(3, 62, 138, 0.80); border-radius: 5px; border: 1px rgba(0, 0, 0, 0.10) solid; backdrop-filter: blur(2px)"></div>
+    <div style="width: 30px; height: 30px; left: 1280px; top: 97px; position: absolute; overflow: hidden">
+        <div style="width: 21.86px; height: 21.86px; left: 3.75px; top: 3.75px; position: absolute; background: white"></div>
+    </div>
+    <div style="width: 378px; height: 45px; left: 1621px; top: 169px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 15px; font-family: Akatab; font-weight: 400; letter-spacing: 0.75px; word-wrap: break-word">A list of all the fallout reports from the field.</div>
+    <div style="width: 378px; height: 45px; left: 68px; top: 170px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 15px; font-family: Akatab; font-weight: 400; letter-spacing: 0.75px; word-wrap: break-word">A list of all the fallout reports from the field.</div>
+    <div style="width: 40px; height: 40px; left: 1380px; top: 92px; position: absolute; overflow: hidden">
+        <div style="width: 36px; height: 40px; left: 2px; top: 0px; position: absolute; background: black"></div>
+    </div>
+    <div style="width: 233px; height: 40px; left: 1217px; top: 173px; position: absolute; background: #F2F2F2; border-radius: 5px; border: 1px rgba(0, 0, 0, 0.20) solid; backdrop-filter: blur(2px)"></div>
+    <div style="width: 171px; left: 1235px; top: 182px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.50); font-size: 15px; font-family: Akatab; font-weight: 400; word-wrap: break-word">Filter Periode</div>
+    <div style="width: 24px; height: 24px; left: 1406px; top: 181px; position: absolute; overflow: hidden">
+        <div style="width: 20px; height: 19.50px; left: 2px; top: 2.50px; position: absolute; outline: 1.50px rgba(0, 0, 0, 0.50) solid; outline-offset: -0.75px"></div>
+        <div style="width: 12px; height: 6px; left: 6px; top: 12px; position: absolute; background: rgba(0, 0, 0, 0.50)"></div>
+    </div>
+    <div style="width: 1512px; height: 89px; left: 0px; top: 893px; position: absolute; background: #F2F4F6"></div>
+    <div style="width: 1421px; height: 595px; left: 45px; top: 295px; position: absolute; background: rgba(136.78, 153.37, 178.25, 0); border: 1px rgba(0, 0, 0, 0.25) solid"></div>
+    <div style="width: 1421px; height: 67px; left: 45px; top: 229px; position: absolute; background: #33629F; border-top-left-radius: 25px; border-top-right-radius: 25px; border: 1px rgba(0, 0, 0, 0.25) solid"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 350px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 404px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 458px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 512px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 566px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 620px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 674px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 728px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 782px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="width: 1419px; height: 0px; left: 46px; top: 836px; position: absolute; outline: 1px rgba(0, 0, 0, 0.20) solid; outline-offset: -0.50px"></div>
+    <div style="left: 45px; top: 903px; position: absolute; color: rgba(0, 0, 0, 0.50); font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Show 1 to 100 from 567 data</div>
+    <div style="width: 3px; height: 593px; left: 1462px; top: 296px; position: absolute; background: rgba(217, 217, 217, 0.50)"></div>
+    <div style="width: 3px; height: 61px; left: 1462px; top: 296px; position: absolute; background: rgba(69.88, 69.88, 69.88, 0.60); border-radius: 50px"></div>
+    <div style="width: 1416px; height: 66px; left: 46px; top: 229px; position: absolute">
+        <div style="width: 43.88px; height: 66px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">No</div>
+        <div style="width: 130.09px; height: 66px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Incident Ticket</div>
+        <div style="width: 86.21px; height: 66px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Tipe Order</div>
+        <div style="width: 117.70px; height: 66px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Order ID</div>
+        <div style="width: 117.70px; height: 66px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Status Fallout</div>
+        <div style="width: 164.68px; height: 66px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Assigned To</div>
+        <div style="width: 131.12px; height: 66px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Order Create</div>
+        <div style="width: 131.12px; height: 66px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Order Take</div>
+        <div style="width: 131.12px; height: 66px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Order Complete</div>
+        <div style="width: 131.12px; height: 66px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Last Updated</div>
+        <div style="width: 87.24px; height: 66px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Duration</div>
+        <div style="width: 87.24px; height: 66px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 15px; font-family: Istok Web; font-weight: 700; word-wrap: break-word">Action</div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 350px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(211, 47, 47, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">2</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">111</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">DO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">222</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Eskalasi</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Test User</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:35</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:36</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:12</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:12</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">36 minutees</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 296px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(102, 187, 106, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">1</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">69</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">SO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">111</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">FA</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Ignasius Jonathan</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:30</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:36</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:12</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:12</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">36 minutes</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 404px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(255, 202, 40, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">3</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">455sfv5</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">AO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">333</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">OnProgress</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Test User</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:36</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:16</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:17</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:17</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">21 second</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 458px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(179, 136, 255, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">4</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">233</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">AO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">444</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">PI</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Test User</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:37</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:17</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:19</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:19</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">2 minutes</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 512px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(100, 181, 246, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">5</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">INF004296201</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">SO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">555</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Open</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:39</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 566px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(231, 156, 86, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">6</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">fj5522h</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">DO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">666</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Re-Input</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Test User</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 13:40</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:17</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:36</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:36</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">19 minutes</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 620px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(29, 129, 11, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">7</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">hjk58631</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">DO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">777</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Completed</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">kahfi fauzan habibi</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:11</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:36</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:40</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:40</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">4 minutes</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 674px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(100, 181, 246, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">8</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">yhj41125</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">SO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">888</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Open</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:19</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 728px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(100, 181, 246, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">9</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">yjj78526</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">AO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">999</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Open</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:35</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 782px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(100, 181, 246, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">10</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">yhj52963</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">AO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">101</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Open</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 14:50</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 1416px; height: 53px; left: 46px; top: 836px; position: absolute">
+        <div style="width: 122px; height: 34px; left: 399px; top: 10px; position: absolute; background: rgba(100, 181, 246, 0.50); border-radius: 50px; border: 1px rgba(0, 0, 0, 0.05) solid"></div>
+        <div style="width: 1416px; height: 53px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 43.88px; height: 53px; left: 0px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">11</div>
+            <div style="width: 130.09px; height: 53px; left: 49.04px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">eds85296</div>
+            <div style="width: 86.21px; height: 53px; left: 184.29px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">SO</div>
+            <div style="width: 117.70px; height: 53px; left: 275.66px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">102</div>
+            <div style="width: 117.70px; height: 53px; left: 398.52px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Open</div>
+            <div style="width: 164.68px; height: 53px; left: 521.39px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 691.22px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">14 Jul 2025, 15:03</div>
+            <div style="width: 131.12px; height: 53px; left: 827.51px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 963.79px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 131.12px; height: 53px; left: 1100.07px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1236.35px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">-</div>
+            <div style="width: 87.24px; height: 53px; left: 1328.76px; top: 0px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 12px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Details</div>
+        </div>
+    </div>
+    <div style="width: 24px; height: 24px; left: 1383px; top: 908px; position: absolute; overflow: hidden">
+        <div style="width: 5.66px; height: 8.48px; left: 9.34px; top: 7.76px; position: absolute; background: rgba(0, 0, 0, 0.65)"></div>
+    </div>
+    <div style="width: 24px; height: 24px; left: 1275px; top: 908px; position: absolute; overflow: hidden">
+        <div style="width: 5.66px; height: 8.49px; left: 9px; top: 7.76px; position: absolute; background: rgba(0, 0, 0, 0.65)"></div>
+    </div>
+    <div style="width: 55px; height: 24px; left: 1220px; top: 910px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.65); font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">First</div>
+    <div style="width: 55px; height: 24px; left: 1407px; top: 908px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.65); font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">Last</div>
+    <div style="width: 28px; height: 24px; left: 1299px; top: 908px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #0078B7; font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">1</div>
+    <div style="width: 28px; height: 24px; left: 1327px; top: 908px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.65); font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">2</div>
+    <div style="width: 28px; height: 24px; left: 1355px; top: 908px; position: absolute; text-align: center; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.65); font-size: 16px; font-family: Istok Web; font-weight: 400; word-wrap: break-word">...</div>
+    <div style="width: 10px; height: 2px; left: 1309px; top: 928px; position: absolute; background: #0078B7; border-radius: 3px"></div>
+    <div style="width: 25px; height: 25px; left: 1466px; top: 21px; position: absolute; overflow: hidden">
+        <div style="width: 16.55px; height: 16.57px; left: 4.23px; top: 4.27px; position: absolute; background: white"></div>
+    </div>
+    <div style="width: 177px; height: 25px; left: 1224px; top: 21px; position: absolute; text-align: right; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 20px; font-family: Mplus 1p; font-weight: 800; word-wrap: break-word">TEST USER</div>
+    <div style="width: 25px; height: 25px; left: 1411px; top: 21px; position: absolute; overflow: hidden">
+        <div style="width: 10.42px; height: 5.21px; left: 7.29px; top: 10.42px; position: absolute; background: white"></div>
+    </div>
+    <div style="width: 35px; height: 0px; left: 1444px; top: 16px; position: absolute; transform: rotate(90deg); transform-origin: top left; outline: 1px white solid; outline-offset: -0.50px"></div>
 </div>

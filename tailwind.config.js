@@ -15,6 +15,8 @@ export default {
         },
         fontFamily: {
             sans: ['Instrument Sans', 'ui-sans-serif', 'system-ui', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'],
+            akatab: ['Akatab', 'sans-serif'],
+            'istok-web': ['Istok Web', 'sans-serif'],
         },
         colors: {
             zinc: {
