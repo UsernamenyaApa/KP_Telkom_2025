@@ -22,19 +22,16 @@ class DailyReportDashboard extends Component
     public $selectedDate;
     public $search = '';
 
+    protected $listeners = ['dateUpdated'];
+
     public function mount(): void
     {
-        $this->selectedDate = now()->format('Y-m-d');
         $this->loadReportData();
     }
 
-    public function updatedSelectedDate(): void
+    public function dateUpdated($date)
     {
-        $this->loadReportData();
-    }
-
-    public function updatedSearch(): void
-    {
+        $this->selectedDate = $date;
         $this->loadReportData();
     }
 
@@ -46,8 +43,7 @@ class DailyReportDashboard extends Component
             $userQuery->where('name', 'like', '%' . $this->search . '%');
         }
 
-        $this->users = $userQuery->get();
-        $filterDate = Carbon::parse($this->selectedDate);
+        $this->users = $userQuery->get() ?? collect();
 
         $this->reportRows = [
             'fallout_completed' => 'Fallout Reports',
@@ -64,20 +60,30 @@ class DailyReportDashboard extends Component
 
         // 1. Fallout reports considered "completed" for the selected date.
         // "Completed" means the status is NOT 'Open' or 'OnProgress'.
-        $falloutCounts = FalloutReport::whereDate('updated_at', $filterDate)
+        $falloutQuery = FalloutReport::query()
             ->whereHas('falloutStatus', function ($query) {
                 $query->where('name', '!=', 'Open')->where('name', '!=', 'OnProgress');
-            })
-            ->groupBy('assigned_to_user_id')
+            });
+
+        if ($this->selectedDate) {
+            $falloutQuery->whereDate('updated_at', $this->selectedDate);
+        }
+
+        $falloutCounts = $falloutQuery->groupBy('assigned_to_user_id')
             ->select('assigned_to_user_id', DB::raw('count(*) as total'))
             ->pluck('total', 'assigned_to_user_id');
 
         // 2. Pelurusan reports considered "completed" for the selected date.
-        $pelurusanCounts = PelurusanReport::whereDate('updated_at', $filterDate)
+        $pelurusanQuery = PelurusanReport::query()
             ->whereHas('falloutStatus', function ($query) {
                 $query->where('name', '!=', 'Open')->where('name', '!=', 'OnProgress');
-            })
-            ->groupBy('assigned_to_user_id')
+            });
+
+        if ($this->selectedDate) {
+            $pelurusanQuery->whereDate('updated_at', $this->selectedDate);
+        }
+
+        $pelurusanCounts = $pelurusanQuery->groupBy('assigned_to_user_id')
             ->select('assigned_to_user_id', DB::raw('count(*) as total'))
             ->pluck('total', 'assigned_to_user_id');
 
@@ -102,6 +108,7 @@ class DailyReportDashboard extends Component
 
     public function render(): View
     {
+        $this->loadReportData();
         return view('livewire.dashboard.daily-report-dashboard');
     }
 }
