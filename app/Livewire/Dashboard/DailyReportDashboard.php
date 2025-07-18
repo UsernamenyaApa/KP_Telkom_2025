@@ -13,6 +13,7 @@ use Livewire\Component;
 class DailyReportDashboard extends Component
 {
     public $users;
+    public $userCount = 0;
     public $reportRows = [];
     public $reportData = [];
     public $userTotals = [];
@@ -26,6 +27,7 @@ class DailyReportDashboard extends Component
     public function mount(): void
     {
         $this->loadReportData();
+        $this->userCount = \App\Models\User::role('hd-daman')->count();
     }
 
     public function dateUpdated($date)
@@ -39,6 +41,7 @@ class DailyReportDashboard extends Component
         $userQuery = User::role('hd-daman');
 
         $this->users = $userQuery->get() ?? collect();
+        $this->userCount = $this->users->count();
 
         $this->reportRows = [
             'fallout_completed' => 'Fallout Reports',

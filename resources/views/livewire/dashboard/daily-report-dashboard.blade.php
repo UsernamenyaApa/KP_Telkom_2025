@@ -48,14 +48,14 @@
             </table>
         </div>
 
-        <div wire:loading.delay.short wire:target="selectedDate, search" class="overflow-x-auto animate-pulse">
+        <div wire:loading.delay.short class="overflow-x-auto animate-pulse">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead style="background-color: #005AB2;">
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-black uppercase tracking-wider">
                             <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
                         </th>
-                        @foreach(range(1, 3) as $i)
+                        @foreach(range(1, $userCount) as $i)
                             <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-black uppercase tracking-wider">
                                 <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mx-auto"></div>
                             </th>
@@ -71,7 +71,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                                 <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-full"></div>
                             </td>
-                            @foreach(range(1, 3) as $j)
+                            @foreach(range(1, $userCount) as $j)
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
                                     <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/3 mx-auto"></div>
                                 </td>
@@ -87,7 +87,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100">
                             <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
                         </td>
-                        @foreach(range(1, 3) as $i)
+                        @foreach(range(1, $userCount) as $i)
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700 dark:text-gray-100 text-center">
                                 <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/3 mx-auto"></div>
                             </td>
