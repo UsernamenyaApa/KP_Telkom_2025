@@ -5,19 +5,25 @@ namespace App\Livewire;
 use App\Models\FalloutReport;
 use App\Models\FalloutStatus;
 use Livewire\Component;
+use Livewire\Attributes\Url;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendTelegramNotificationJob;
 
 class FalloutReportDetail extends Component
 {
+    #[Url]
+    public $date;
     public FalloutReport $report;
     public $showStatusModal = false;
     public $newStatusId;
     public $keterangan = '';
 
-    public function mount($id)
+    public function mount($id, $date = null)
     {
         $this->report = FalloutReport::with(['orderType', 'falloutStatus', 'reporter', 'assignedToUser'])->findOrFail($id);
+        if ($date) {
+            $this->date = $date;
+        }
     }
 
     public function openStatusModal()

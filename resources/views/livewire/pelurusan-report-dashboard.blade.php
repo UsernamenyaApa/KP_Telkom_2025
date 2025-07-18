@@ -4,7 +4,7 @@
 
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800 dark:text-white font-sans tracking-wide">Pelurusan Report</h1>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4" x-data="{ openFilter: false }">
                 <div class="relative">
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search Order ID..." class="w-full px-4 py-2 rounded-md border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -16,12 +16,53 @@
                 <div class="relative">
                     <input type="date" wire:model.live="date" class="px-4 py-2 rounded-md border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <button class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md flex items-center space-x-2">
+                <button @click="openFilter = !openFilter" class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md flex items-center space-x-2">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                     </svg>
                     <span>Filter</span>
                 </button>
+
+                <!-- Filter Dropdown -->
+                <div x-show="openFilter" @click.away="openFilter = false" class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10">
+                    <div class="py-1">
+                        <div class="block px-4 py-2 text-xs text-gray-400">Filter by</div>
+
+                        <div class="px-4 py-2">
+                            <label for="orderType" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipe Order</label>
+                            <select wire:model.live="selectedOrderType" id="orderType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="">All</option>
+                                @foreach($orderTypes as $type)
+                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="px-4 py-2">
+                            <label for="falloutStatus" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status Pelurusan</label>
+                            <select wire:model.live="selectedFalloutStatus" id="falloutStatus" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="">All</option>
+                                @foreach($falloutStatuses as $status)
+                                    <option value="{{ $status->id }}">{{ $status->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="px-4 py-2">
+                            <label for="assignedTo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Assigned To</label>
+                            <select wire:model.live="selectedAssignedTo" id="assignedTo" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="">All</option>
+                                @foreach($assignedToUsers as $user)
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="px-4 py-2">
+                            <button wire:click="resetFilters" @click="openFilter = false" class="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white py-2 px-4 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600">Reset Filters</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -135,7 +176,7 @@
                                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-white font-istok-web">{{ $report->updated_at->format('d M Y, H:i') }}</td>
                                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-white font-istok-web">{{ $report->taken_at && $report->completed_at ? $report->completed_at->diffForHumans($report->taken_at, true) : '-' }}</td>
                                         <td class="relative py-4 pl-6 pr-8 text-right text-sm font-medium font-istok-web min-w-[120px]">
-                                            <a href="{{ route('pelurusan-reports.show', $report->id) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 px-2">Details</a>
+                                            <a href="{{ route('pelurusan-reports.show', ['id' => $report->id, 'date' => $date]) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 px-2">Details</a>
                                             @if ($report->falloutStatus?->name === 'Open')
                                                 <button wire:click="takeOrder({{ $report->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 px-2">Ambil Order</button>
                                             @endif

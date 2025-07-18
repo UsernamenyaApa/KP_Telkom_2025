@@ -4,8 +4,11 @@ namespace App\Livewire;
 
 use App\Models\FalloutReport;
 use App\Models\FalloutStatus;
+use App\Models\OrderType;
+use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Url;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendTelegramNotificationJob;
@@ -15,12 +18,28 @@ class FalloutReportDashboard extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $date;
     public $search = '';
+    #[Url]
+    public $selectedOrderType = '';
+    #[Url]
+    public $selectedFalloutStatus = '';
+    #[Url]
+    public $selectedAssignedTo = '';
+
+    public $orderTypes;
+    public $falloutStatuses;
+    public $assignedToUsers;
 
     public function mount()
     {
-        $this->date = Carbon::today()->format('Y-m-d'); // Default to today's date
+        if (empty($this->date)) {
+            $this->date = Carbon::today()->format('Y-m-d');
+        }
+        $this->orderTypes = OrderType::all();
+        $this->falloutStatuses = FalloutStatus::all();
+        $this->assignedToUsers = User::role('hd-daman')->get();
     }
 
     public function updatedSearch()
@@ -33,7 +52,28 @@ class FalloutReportDashboard extends Component
         $this->resetPage();
     }
 
-    // Removed public function clearDate()
+    public function resetFilters()
+    {
+        $this->selectedOrderType = '';
+        $this->selectedFalloutStatus = '';
+        $this->selectedAssignedTo = '';
+        $this->resetPage();
+    }
+
+    public function updatedSelectedOrderType()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedFalloutStatus()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedAssignedTo()
+    {
+        $this->resetPage();
+    }
 
     public function takeOrder($reportId)
     {
@@ -90,6 +130,15 @@ class FalloutReportDashboard extends Component
             ->when($this->search, function ($query) {
                 $query->where('incident_ticket', 'like', '%' . $this->search . '%')
                       ->orWhere('order_id', 'like', '%' . $this->search . '%');
+            })
+            ->when($this->selectedOrderType, function ($query) {
+                $query->where('tipe_order_id', $this->selectedOrderType);
+            })
+            ->when($this->selectedFalloutStatus, function ($query) {
+                $query->where('fallout_status_id', $this->selectedFalloutStatus);
+            })
+            ->when($this->selectedAssignedTo, function ($query) {
+                $query->where('assigned_to_user_id', $this->selectedAssignedTo);
             })
             ->orderBy('created_at', 'asc')
             ->paginate(10);

@@ -20,7 +20,6 @@ class DailyReportDashboard extends Component
     public $grandTotal = 0;
 
     public $selectedDate;
-    public $search = '';
 
     protected $listeners = ['dateUpdated'];
 
@@ -38,10 +37,6 @@ class DailyReportDashboard extends Component
     public function loadReportData(): void
     {
         $userQuery = User::role('hd-daman');
-
-        if (!empty($this->search)) {
-            $userQuery->where('name', 'like', '%' . $this->search . '%');
-        }
 
         $this->users = $userQuery->get() ?? collect();
 
