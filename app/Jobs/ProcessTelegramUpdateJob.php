@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Objects\Update;
@@ -42,6 +43,11 @@ class ProcessTelegramUpdateJob implements ShouldQueue
 
         if ($this->update->has('message') && $this->update->getMessage()->has('text')) {
             $this->handleMessage($this->update);
+            return;
+        }
+
+        if ($this->update->has('message') && $this->update->getMessage()->has('photo')) {
+            $this->handlePhoto($this->update);
             return;
         }
     }
@@ -87,6 +93,8 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             'show_fallout_menu' => $this->showFalloutMenu($telegram, $chatId, $messageId),
             'lapor_pelurusan' => $this->showPelurusanMenu($telegram, $chatId, $messageId),
             'back_to_main_menu' => $this->showMainMenu($telegram, $chatId, "↩️ Kembali ke menu utama. Pilih opsi:", $messageId),
+            'image_yes' => $this->handleImageYes($telegram, $chatId, $messageId),
+            'image_no' => $this->handleImageNo($telegram, $chatId, $messageId, $state),
             default => SendTelegramNotificationJob::dispatch($chatId, "⚠️ Aksi tidak valid."),
         };
     }
@@ -292,14 +300,8 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     
     private function handlePassword(int $chatId, string $text, array &$state): void
     {
-        if (trim($text) === config('telegram.system_password')) {
-            $state['authenticated'] = true;
-            $state['process'] = null;
-            $state['step'] = self::STEP_MAIN_MENU;
-            Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
-            $firstName = $state['user_info']['first_name'] ?? 'User';
-            $this->showMainMenu(new Api(config('telegram.bots.mybot.token')), $chatId, "✅ Login berhasil! Halo {$firstName}, silakan pilih menu:");
-        } else {
+        // For all bot users (Office or Field), authentication is done via a single shared password.
+        if (trim($text) !== config('telegram.system_password')) {
             $attemptsKey = $chatId . '_attempts';
             $attempts = Cache::increment($attemptsKey);
             if ($attempts >= 3) {
@@ -308,7 +310,27 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             } else {
                 SendTelegramNotificationJob::dispatch($chatId, "❌ Kata sandi salah. Sisa percobaan: " . (3 - $attempts));
             }
+            return; // Exit if password is wrong
         }
+
+        // Password is correct. Now, identify the user for reporting purposes.
+        $state['authenticated'] = true;
+        $state['process'] = null;
+        $state['step'] = self::STEP_MAIN_MENU;
+        
+        $userName = $state['user_info']['first_name'] ?? 'User'; // Default to Telegram name
+
+        // Check if the user is a registered Office Staff to link their reports.
+        $userRecord = User::where('telegram_user_id', $chatId)->first();
+        if ($userRecord) {
+            // If found, use their real name and store their actual user_id for logging reports.
+            $userName = $userRecord->name;
+            $state['user_info']['db_user_id'] = $userRecord->id;
+            $state['user_info']['name'] = $userRecord->name; // Store the real name in the state
+        }
+
+        Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
+        $this->showMainMenu(new Api(config('telegram.bots.mybot.token')), $chatId, "✅ Login berhasil! Halo {$userName}, silakan pilih menu:");
     }
 
     private function handleFalloutSteps(int $chatId, string $text, array &$state): void
@@ -340,13 +362,22 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         if ($state['step'] === self::STEP_AWAITING_NIK) {
             $nik = trim($text);
             $userRecord = User::where('nik', $nik)->first();
+
             if ($userRecord) {
                 $userInfo = $state['user_info'];
-                $userRecord->update(['telegram_user_id' => $userInfo['id'], 'telegram_username' => $userInfo['username'], 'name' => trim(($userInfo['first_name'] ?? '') . ' ' . ($userInfo['last_name'] ?? ''))]);
-                SendTelegramNotificationJob::dispatch($chatId, "✅ Registrasi berhasil! Akun Anda telah terhubung.\n\nGunakan /start untuk login.");
+                $userRecord->update([
+                    'telegram_user_id' => $userInfo['id'],
+                    'telegram_username' => $userInfo['username'],
+                ]);
+
+                $message = "✅ Registrasi berhasil! Akun Telegram Anda telah terhubung ke sistem.\n\n"
+                         . "Password default Anda untuk login di aplikasi web adalah NIK Anda: `{$nik}`\n\n"
+                         . "Demi keamanan, harap segera ganti password Anda setelah berhasil login di web.";
+
+                SendTelegramNotificationJob::dispatch($chatId, $message, null, 'Markdown');
                 Cache::forget($chatId);
             } else {
-                SendTelegramNotificationJob::dispatch($chatId, "❌ NIK tidak ditemukan. Silakan coba lagi atau hubungi admin.");
+                SendTelegramNotificationJob::dispatch($chatId, "❌ NIK tidak ditemukan. Pastikan NIK Anda benar atau hubungi Super Admin.");
             }
         }
     }
@@ -381,13 +412,26 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     
     private function advanceFalloutStep(int $chatId, array &$state): void
     {
-        $steps = ['incident_ticket', 'incident_fallout_description', 'order_id', 'nomer_layanan', 'sn_ont', 'datek_odp', 'port_odp', 'keterangan'];
+        $steps = ['incident_ticket', 'incident_fallout_description', 'order_id', 'nomer_layanan', 'sn_ont', 'datek_odp', 'port_odp', 'keterangan', 'awaiting_image'];
         $currentStepIndex = array_search($state['step'], $steps);
         $nextStepIndex = $currentStepIndex + 1;
         if ($nextStepIndex < count($steps)) {
             $state['step'] = $steps[$nextStepIndex];
             Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
-            SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step']));
+
+            if ($state['step'] === 'awaiting_image') {
+                $keyboard = [
+                    'inline_keyboard' => [
+                        [
+                            ['text' => 'Ya', 'callback_data' => 'image_yes'],
+                            ['text' => 'Tidak', 'callback_data' => 'image_no'],
+                        ]
+                    ]
+                ];
+                SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step']), $keyboard);
+            } else {
+                SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step']));
+            }
         } else {
             $this->generateAndSendReport($chatId, $state);
         }
@@ -443,6 +487,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                 'datek_odp' => "6/8: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):",
                 'port_odp' => "7/8: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):",
                 'keterangan' => "8/8: Masukkan Keterangan Tambahan Laporan:",
+                'awaiting_image' => "Apakah Anda ingin menambahkan gambar?",
             ];
         }
 
@@ -457,5 +502,40 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     private function sendUnrecognizedMessage(int $chatId): void
     {
         SendTelegramNotificationJob::dispatch($chatId, "❓ Pesan tidak dikenali. Gunakan /help untuk panduan atau /start untuk memulai.");
+    }
+
+    private function handlePhoto(Update $update): void
+    {
+        $message = $update->getMessage();
+        $chatId = $message->getChat()->id;
+        $state = Cache::get($chatId);
+
+        if (isset($state['process']) && $state['process'] === self::PROCESS_FALLOUT && $state['step'] === 'awaiting_image') {
+            $telegram = new Api(config('telegram.bots.mybot.token'));
+            $photo = $message->photo[count($message->photo) - 1]; // Get the highest resolution photo
+            $file = $telegram->getFile(['file_id' => $photo->fileId]);
+            $fileContents = file_get_contents("https://api.telegram.org/file/bot" . config('telegram.bots.mybot.token') . "/{$file->filePath}");
+
+            $fileName = 'fallout-images/' . uniqid() . '_' . time() . '.jpg';
+            Storage::disk('public')->put($fileName, $fileContents);
+
+            $state['report_data']['image'] = $fileName;
+            Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
+
+            $this->generateAndSendReport($chatId, $state);
+        } else {
+            SendTelegramNotificationJob::dispatch($chatId, "Tidak sedang dalam proses unggah gambar.");
+        }
+    }
+
+    private function handleImageYes(Api $telegram, int $chatId, int $messageId): void
+    {
+        $this->editMessage($telegram, $chatId, $messageId, "Silakan kirim gambar Anda.");
+    }
+
+    private function handleImageNo(Api $telegram, int $chatId, int $messageId, array $state): void
+    {
+        $this->editMessage($telegram, $chatId, $messageId, "Baik, laporan akan diproses tanpa gambar.");
+        $this->generateAndSendReport($chatId, $state);
     }
 }

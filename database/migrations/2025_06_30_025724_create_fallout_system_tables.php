@@ -42,7 +42,10 @@ return new class extends Migration
             $table->timestamp('notified_uncompleted_at')->nullable();
             $table->string('keterangan')->nullable();
             $table->text('resolution_notes')->nullable(); // new column for hd_daman notes
+            $table->string('image')->nullable();
             $table->foreignId('reporter_user_id')->nullable()->constrained('users');
+            $table->bigInteger('reporter_telegram_id')->nullable();
+            $table->string('reporter_telegram_username')->nullable();
             $table->timestamps();
             $table->timestamp('taken_at')->nullable();
             $table->timestamp('completed_at')->nullable();

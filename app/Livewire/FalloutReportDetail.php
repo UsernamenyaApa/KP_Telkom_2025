@@ -5,18 +5,22 @@ namespace App\Livewire;
 use App\Models\FalloutReport;
 use App\Models\FalloutStatus;
 use Livewire\Component;
+
 use Livewire\Attributes\Url;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendTelegramNotificationJob;
 
 class FalloutReportDetail extends Component
 {
+    
+
     #[Url]
     public $date;
     public FalloutReport $report;
     public $showStatusModal = false;
     public $newStatusId;
     public $keterangan = '';
+    public $availableStatuses = [];
 
     public function mount($id, $date = null)
     {
@@ -28,6 +32,20 @@ class FalloutReportDetail extends Component
 
     public function openStatusModal()
     {
+        $allStatuses = FalloutStatus::all();
+        $currentStatusName = $this->report->falloutStatus?->name;
+
+        $this->availableStatuses = $allStatuses->filter(function ($status) use ($currentStatusName) {
+            if ($currentStatusName === 'Open') {
+                return true; // All statuses available from Open
+            } elseif ($currentStatusName === 'OnProgress') {
+                return $status->name !== 'Open'; // Exclude Open
+            } else {
+                // For any other status, exclude Open and OnProgress
+                return $status->name !== 'Open' && $status->name !== 'OnProgress';
+            }
+        });
+
         $this->newStatusId = $this->report->fallout_status_id;
         $this->keterangan = $this->report->resolution_notes;
         $this->showStatusModal = true;
@@ -45,6 +63,8 @@ class FalloutReportDetail extends Component
             $this->report->fallout_status_id = $this->newStatusId;
             $this->report->resolution_notes = $this->keterangan;
 
+            
+
             $newStatus = FalloutStatus::find($this->newStatusId);
             if ($newStatus && in_array($newStatus->name, ['FA', 'eskalasi', 'input ulang', 'PI'])) {
                 $this->report->completed_at = now();
@@ -52,44 +72,96 @@ class FalloutReportDetail extends Component
 
             $this->report->save();
 
+            $esc = fn(?string $text) => str_replace(
+                ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
+                ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
+                $text ?? '-'
+            );
+
             $message = "🔔 *Update Status Laporan Fallout* 🔔\n\n" .
-                       "*Status Baru: {$newStatus->name}*\n\n" .
-                       "Tipe Order: " . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "\n" .
-                       "OrderID: " . $this->report->order_id . "\n" .
-                       "Nomor Layanan: " . $this->report->nomer_layanan . "\n" .
-                       "SN ONT: " . $this->report->sn_ont . "\n" .
-                       "Datek ODP: " . $this->report->datek_odp . "\n" .
-                       "Port ODP: " . $this->report->port_odp . "\n\n" .
-                       "📝 *Catatan Resolusi:*\n" . $this->keterangan . "\n\n" .
+                       "*Status Baru:* " . $esc($newStatus->name) . "\n\n" .
+                       "*Tipe Order:* " . $esc($this->report->orderType ? $this->report->orderType->name : 'N/A') . "\n" .
+                       "*OrderID:* `" . $esc($this->report->order_id) . "`\n" .
+                       "*Nomor Layanan:* `" . $esc($this->report->nomer_layanan) . "`\n" .
+                       "*SN ONT:* `" . $esc($this->report->sn_ont) . "`\n" .
+                       "*Datek ODP:* `" . $esc($this->report->datek_odp) . "`\n" .
+                       "*Port ODP:* `" . $esc($this->report->port_odp) . "`\n\n" .
+                       "📝 *Catatan Resolusi:*\n" . $esc($this->keterangan) . "\n\n" .
                        "----------------------------------------\n" .
-                       "Created By: @" . ($this->report->reporter ? $this->report->reporter->telegram_username : 'N/A') . "\n" .
-                       "Create Order: " . $this->report->created_at->format('Y-m-d H:i:s') . "\n" .
-                       "Taken at: " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
-                       "Updated By: @" . auth()->user()->telegram_username;
+                       "*Created By:* @" . $esc($this->report->reporter ? $this->report->reporter->telegram_username : 'N/A') . "\n" .
+                       "*Create Order:* " . $esc($this->report->created_at->format('Y-m-d H:i:s')) . "\n" .
+                       "*Taken at:* " . $esc($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
+                       "*Updated By:* @" . $esc(auth()->user()->telegram_username);
 
             // Add completed_at and duration if available
             if ($this->report->completed_at) {
                 $message .= "\n\n" .
-                            "✅ *Selesai pada:* " . $this->report->completed_at->format('Y-m-d H:i:s') . "\n";
+                            "✅ *Selesai pada:* " . $esc($this->report->completed_at->format('Y-m-d H:i:s')) . "\n";
 
                 if ($this->report->created_at) {
                     $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
-                    $message .= "⏳ *Durasi:* " . $duration . "\n";
+                    $message .= "⏳ *Durasi:* " . $esc($duration) . "\n";
                 }
             }
 
             // Send to personal chat (reporter)
             if ($this->report->reporter && $this->report->reporter->telegram_user_id) {
-                SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $message);
+                SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $message, null, 'MarkdownV2');
             }
 
             // Send to group chat
             $groupChatId = env('TELEGRAM_GROUP_ID');
             if ($groupChatId) {
-                SendTelegramNotificationJob::dispatch($groupChatId, $message);
+                SendTelegramNotificationJob::dispatch($groupChatId, $message, null, 'MarkdownV2');
             }
 
             $this->closeStatusModal();
+        }
+    }
+
+    public function takeOrder()
+    {
+        if ($this->report->falloutStatus?->name === 'Open') {
+            $onProgressStatus = FalloutStatus::where('name', 'OnProgress')->first();
+            if ($onProgressStatus) {
+                $this->report->fallout_status_id = $onProgressStatus->id;
+                $this->report->assigned_to_user_id = Auth::id();
+                $this->report->taken_at = now();
+                $this->report->save();
+
+                // Send Telegram notification
+                $message = "
+
+" .
+                           "*ID Laporan:* `" . $this->report->id . "`
+" .
+                           "*Kode Fallout:* `" . $this->report->fallout_code . "`
+" .
+                           "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
+" .
+                           "*OrderID:* `" . $this->report->order_id . "`
+" .
+                           "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
+" .
+                           "*Waktu Diambil:* " . $this->report->taken_at->format('Y-m-d H:i:s') . "
+
+" .
+                           "Mohon segera ditindaklanjuti.";
+
+                $groupChatId = env('TELEGRAM_GROUP_ID');
+                if ($groupChatId) {
+                    SendTelegramNotificationJob::dispatch($groupChatId, $message, null, 'MarkdownV2');
+                }
+
+                // Send to personal chat (reporter)
+                if ($this->report->reporter && $this->report->reporter->telegram_user_id) {
+                    $personalMessage = "🔔 Laporan Anda dengan ID #{$this->report->id} telah diambil oleh @" . auth()->user()->telegram_username . " pada " . $this->report->taken_at->format('Y-m-d H:i:s') . ".";
+                    SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $personalMessage);
+                }
+
+                // Refresh the component to reflect changes
+                $this->report = $this->report->fresh(['orderType', 'falloutStatus', 'reporter', 'assignedToUser']);
+            }
         }
     }
 
