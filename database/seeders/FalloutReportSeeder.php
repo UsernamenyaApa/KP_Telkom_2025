@@ -29,22 +29,15 @@ class FalloutReportSeeder extends Seeder
             return;
         }
 
-        // Truncate table before seeding to avoid duplicate data on re-run
-        // Schema::disableForeignKeyConstraints();
-        // FalloutReport::truncate();
-        // Schema::enableForeignKeyConstraints();
+        $startDate = Carbon::create(2025, 7, 1);
+        $endDate = Carbon::create(2025, 7, 31);
+        $totalReports = 700;
+        $days = $startDate->diffInDays($endDate);
+        $reportsPerDay = floor($totalReports / $days);
 
-        // Generate data for today and yesterday
-        $today = Carbon::today();
-        $yesterday = Carbon::yesterday();
-
-        $datesToSeed = [
-            $today,
-            $yesterday,
-        ];
-
-        foreach ($datesToSeed as $date) {
-            for ($j = 0; $j < 100; $j++) { // 100 records for each specific day
+        for ($day = 0; $day <= $days; $day++) {
+            $date = $startDate->copy()->addDays($day);
+            for ($i = 0; $i < $reportsPerDay; $i++) {
                 $status_id = $falloutStatuses[array_rand($falloutStatuses)];
                 $assignedUserId = $hdDamanUsers[array_rand($hdDamanUsers)];
                 $reporterUserId = $hdDamanUsers[array_rand($hdDamanUsers)];

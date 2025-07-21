@@ -26,6 +26,61 @@ class PelurusanReportDetail extends Component
         }
     }
 
+    public function takeOrder()
+    {
+        $onProgressStatus = FalloutStatus::where('name', 'OnProgress')->first();
+        if ($onProgressStatus) {
+            $this->report->fallout_status_id = $onProgressStatus->id;
+            $this->report->assigned_to_user_id = Auth::id();
+            if (is_null($this->report->assigned_at)) {
+                $this->report->assigned_at = now();
+            }
+            $this->report->taken_at = now();
+            $this->report->save();
+
+            $user = Auth::user();
+
+            $message = "✅ *Laporan Pelurusan Diambil!* ✅
+
+" .
+                       "*ID Laporan:* `" . ($this->report->id ?? 'N/A') . "`
+" .
+                       "*Kode Pelurusan:* `" . ($this->report->pelurusan_code ?? 'N/A') . "`
+" .
+                       "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
+" .
+                       "*OrderID:* `" . ($this->report->order_id ?? 'N/A') . "`\n" .
+                       "*Nomor Layanan:* `" . ($this->report->nomer_layanan ?? 'N/A') . "`
+" .
+                       "*SN ONT:* `" . ($this->report->sn_ont ?? 'N/A') . "`
+" .
+                       "*Datek ODP:* `" . ($this->report->datek_odp ?? 'N/A') . "`
+" .
+                       "*Port ODP:* `" . ($this->report->port_odp ?? 'N/A') . "`
+
+" .
+                       "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "
+" .
+                       "*Waktu Diambil:* " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "
+
+" .
+                       "Mohon pantau status laporan ini.";
+
+            if ($user->telegram_user_id) {
+                SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
+            }
+
+            if ($this->report->reporter && $this->report->reporter->telegram_user_id) {
+                SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $message);
+            }
+
+            $groupChatId = env('TELEGRAM_GROUP_ID');
+            if ($groupChatId) {
+                SendTelegramNotificationJob::dispatch($groupChatId, $message);
+            }
+        }
+    }
+
     public function openStatusModal()
     {
         $this->newStatusId = $this->report->fallout_status_id;
