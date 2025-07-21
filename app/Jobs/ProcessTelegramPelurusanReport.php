@@ -65,6 +65,7 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
             'port_odp' => is_numeric($portOdp) ? (int) $portOdp : null,
             'incident_fallout_description' => data_get($reportData, 'incident_fallout_description'),
             'keterangan' => data_get($reportData, 'keterangan'),
+            'image' => data_get($reportData, 'image'),
         ];
 
         // If it's an Office Staff, link to their user account.

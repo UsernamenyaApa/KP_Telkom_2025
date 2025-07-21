@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('pelurusan_reports', function (Blueprint $table) {
             $table->id(); // id_pelurusan
             $table->integer('id_harian')->default(0);
-            $table->string('pelurusan_code')->nullable();
+            $table->string('pelurusan_code')->unique();
+            $table->string('image')->nullable();
+            $table->string('image')->nullable();
             $table->text('incident_fallout_description')->nullable();
             $table->foreignId('tipe_order_id')->constrained('order_types');
             $table->string('order_id');
