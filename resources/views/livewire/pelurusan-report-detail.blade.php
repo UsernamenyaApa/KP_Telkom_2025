@@ -120,7 +120,7 @@
                     <label for="status" class="sr-only">Status</label>
                     <select wire:model="newStatusId" id="status" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         <option value="">Select Status</option>
-                        @foreach(App\Models\FalloutStatus::all() as $status)
+                        @foreach(App\Models\FalloutStatus::whereNotIn('name', ['Open', 'OnProgress'])->get() as $status)
                             <option value="{{ $status->id }}">{{ $status->name }}</option>
                         @endforeach
                     </select>

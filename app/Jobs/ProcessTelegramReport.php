@@ -114,10 +114,7 @@ class ProcessTelegramReport implements ShouldQueue
 
         // Sanitize input for the code block to prevent parsing errors.
         // Within `pre` blocks, all `` and `` ` `` characters must be escaped.
-        $description = $report->incident_fallout_description ?? '-';
-        $keterangan = $report->keterangan ?? '-';
-        $sanitizedDescription = str_replace(['\', '`'], ['/', '\`'], $description);
-        $sanitizedKeterangan = str_replace(['\', '`'], ['/', '\`'], $keterangan);
+        $description = $report->incident_fallout_description ?? '-';        $keterangan = $report->keterangan ?? '-';        $sanitizedDescription = str_replace(['\\', '`'], ['/', '\\`'], $description);        $sanitizedKeterangan = str_replace(['\\', '`'], ['/', '\\`'], $keterangan);
 
         $lines = [
             "📊 *Laporan Fallout Baru*",

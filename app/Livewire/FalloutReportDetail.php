@@ -38,12 +38,9 @@ class FalloutReportDetail extends Component
         $this->availableStatuses = $allStatuses->filter(function ($status) use ($currentStatusName) {
             if ($currentStatusName === 'Open') {
                 return true; // All statuses available from Open
-            } elseif ($currentStatusName === 'OnProgress') {
-                return $status->name !== 'Open'; // Exclude Open
-            } else {
-                // For any other status, exclude Open and OnProgress
-                return $status->name !== 'Open' && $status->name !== 'OnProgress';
             }
+            // For any other status, exclude Open and OnProgress
+            return !in_array($status->name, ['Open', 'OnProgress']);
         });
 
         $this->newStatusId = $this->report->fallout_status_id;
