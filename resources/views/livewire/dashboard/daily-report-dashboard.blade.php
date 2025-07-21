@@ -14,9 +14,9 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead style="background-color: #005AB2;">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-black uppercase tracking-wider">Pekerjaan</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-black dark:text-white uppercase tracking-wider">Pekerjaan</th>
                         @foreach($users as $user)
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-black uppercase tracking-wider">{{ $user->name }}</th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-black dark:text-white uppercase tracking-wider">{{ $user->name }}</th>
                         @endforeach
                         <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-black dark:text-white uppercase tracking-wider">Total</th>
                     </tr>
@@ -52,11 +52,11 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead style="background-color: #005AB2;">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-black uppercase tracking-wider">
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-black dark:text-white uppercase tracking-wider">
                             <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
                         </th>
                         @foreach(range(1, $userCount) as $i)
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-black uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-black dark:text-white uppercase tracking-wider">
                                 <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mx-auto"></div>
                             </th>
                         @endforeach

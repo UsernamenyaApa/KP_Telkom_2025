@@ -131,7 +131,7 @@
     @if($showStatusModal)
     <div class="fixed inset-0 z-10 overflow-y-auto">
         <!-- Backdrop -->
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75" wire:click="closeStatusModal"></div>
+        <div class="fixed inset-0" wire:click="closeStatusModal"></div>
 
         <div class="flex items-center justify-center min-h-screen">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 relative z-20 w-full max-w-md">
