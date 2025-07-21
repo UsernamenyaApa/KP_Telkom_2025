@@ -29,13 +29,15 @@ class FalloutReportSeeder extends Seeder
             return;
         }
 
-        $dates = [
-            Carbon::create(2025, 6, 30),
-            Carbon::create(2025, 7, 1), // Corrected date order for consistency
-        ];
+        $startDate = Carbon::create(2025, 7, 1);
+        $endDate = Carbon::create(2025, 7, 31);
+        $totalReports = 700;
+        $days = $startDate->diffInDays($endDate);
+        $reportsPerDay = floor($totalReports / $days);
 
-        foreach ($dates as $date) {
-            for ($i = 0; $i < 15; $i++) { // Increased loop for more data
+        for ($day = 0; $day <= $days; $day++) {
+            $date = $startDate->copy()->addDays($day);
+            for ($i = 0; $i < $reportsPerDay; $i++) {
                 $status_id = $falloutStatuses[array_rand($falloutStatuses)];
                 
                 // Randomly assign a user for both reporter and assignee
