@@ -5,32 +5,8 @@
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800 dark:text-white font-sans tracking-wide">Fallout Report</h1>
             <div class="flex items-center space-x-4" x-data="{ openFilter: false }">
-                <div class="relative w-64" x-data="{
-                    fullPlaceholder: 'Search Incident Ticket or Order ID...',
-                    currentPlaceholder: '',
-                    intervalId: null,
-                    speed: 150, // milliseconds per character shift
-
-                    init() {
-                        this.currentPlaceholder = this.fullPlaceholder;
-                    },
-
-                    startMarquee() {
-                        this.stopMarquee(); // Clear any existing interval
-                        let marqueeText = this.fullPlaceholder + '   ' + this.fullPlaceholder; // Duplicate for seamless loop
-                        let offset = 0;
-                        this.intervalId = setInterval(() => {
-                            offset = (offset + 1) % marqueeText.length;
-                            this.currentPlaceholder = marqueeText.substring(offset) + marqueeText.substring(0, offset);
-                        }, this.speed);
-                    },
-
-                    stopMarquee() {
-                        clearInterval(this.intervalId);
-                        this.currentPlaceholder = this.fullPlaceholder; // Reset to original
-                    }
-                }">
-                    <input type="text" wire:model.live.debounce.300ms="search" x-bind:placeholder="currentPlaceholder" @focus="startMarquee()" @blur="stopMarquee()" class="w-full pl-4 pr-10 py-2 rounded-md border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                <div class="relative w-64">
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search Incident Ticket or Order ID..." class="w-full pl-4 pr-10 py-2 rounded-md border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
