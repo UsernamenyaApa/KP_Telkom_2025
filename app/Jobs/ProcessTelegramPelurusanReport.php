@@ -55,18 +55,27 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
     private function prepareReportDataForStorage(array $reportData, array $userInfo): array
     {
         $portOdp = data_get($reportData, 'port_odp');
-        
+
         $data = [
             'tipe_order_id' => $this->tipeOrderId,
-            'order_id' => data_get($reportData, 'order_id'),
             'nomer_layanan' => data_get($reportData, 'nomer_layanan'),
-            'sn_ont' => data_get($reportData, 'sn_ont'),
             'datek_odp' => data_get($reportData, 'datek_odp'),
-            'port_odp' => is_numeric($portOdp) ? (int) $portOdp : null,
-            'incident_fallout_description' => data_get($reportData, 'incident_fallout_description'),
-            'keterangan' => data_get($reportData, 'keterangan'),
+            'port_odp' => is_numeric($portOdp) ? (int)$portOdp : null,
             'image' => data_get($reportData, 'image'),
         ];
+
+        // Customize data based on order type
+        if ($this->tipeOrderId == 8) { // 8 is the ID for "Ex Gangguan"
+            $data['order_id'] = data_get($reportData, 'nomor_incident');
+            $data['sn_ont'] = '-'; // Not applicable
+            $data['incident_fallout_description'] = null;
+            $data['keterangan'] = null;
+        } else {
+            $data['order_id'] = data_get($reportData, 'order_id');
+            $data['sn_ont'] = data_get($reportData, 'sn_ont');
+            $data['incident_fallout_description'] = data_get($reportData, 'incident_fallout_description');
+            $data['keterangan'] = data_get($reportData, 'keterangan');
+        }
 
         // If it's an Office Staff, link to their user account.
         if ($dbUserId = data_get($userInfo, 'db_user_id')) {
@@ -101,19 +110,12 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         // Use the real name if available (Office Staff), otherwise use the Telegram username.
         $reporterName = data_get($userInfo, 'name', data_get($userInfo, 'username', 'N/A'));
         $createdBy = data_get($userInfo, 'username') ? "@{$userInfo['username']}" : $reporterName;
-        
+
         $esc = fn(?string $text) => str_replace(
             ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
             ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
             $text ?? '-'
         );
-
-        // Sanitize input for the code block to prevent parsing errors.
-        // Within `pre` blocks, all `\` and `` ` `` characters must be escaped.
-        $description = $report->incident_fallout_description ?? '-';
-        $keterangan = $report->keterangan ?? '-';
-        $sanitizedDescription = str_replace(['\\', '`'], ['\\', '\\`'], $description);
-        $sanitizedKeterangan = str_replace(['\\', '`'], ['\\', '\\`'], $keterangan);
 
         $lines = [
             "✏️ *Laporan Pelurusan Baru*",
@@ -121,25 +123,41 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
             "*ID Laporan:* `" . $esc($report->id) . "`",
             "*Kode Pelurusan:* `" . $esc($report->pelurusan_code) . "`",
             "*Tipe Order:* `" . $esc($report->orderType->name) . "`",
-            "*OrderID:* `" . $esc($report->order_id) . "`",
-            "*Nomor Layanan:* `" . $esc($report->nomer_layanan) . "`",
-            "*SN ONT:* `" . $esc($report->sn_ont) . "`",
-            "*Datek ODP:* `" . $esc($report->datek_odp) . "`",
-            "*Port ODP:* `" . $esc($report->port_odp) . "`",
-            "",
-            "*Keterangan Insiden:*",
-            "```",
-            $sanitizedDescription,
-            "```",
-            "*Keterangan Tambahan:*",
-            "```",
-            $sanitizedKeterangan,
-            "```",
-            "----------------------------------------",
-            "*Dibuat Oleh:* " . $esc($createdBy),
-            "*Waktu Dibuat:* " . $esc($report->created_at->format('Y-m-d H:i:s')),
         ];
-        
+
+        if ($report->tipe_order_id == 8) { // Ex Gangguan
+            $lines[] = "*Nomor Incident:* `" . $esc($report->order_id) . "`";
+            $lines[] = "*Nomor Layanan:* `" . $esc($report->nomer_layanan) . "`";
+            $lines[] = "*Datek ODP:* `" . $esc($report->datek_odp) . "`";
+            $lines[] = "*Port ODP:* `" . $esc($report->port_odp) . "`";
+        } else {
+            // Sanitize input for the code block to prevent parsing errors.
+            // Within `pre` blocks, all `\` and `` ` `` characters must be escaped.
+            $description = $report->incident_fallout_description ?? '-';
+            $keterangan = $report->keterangan ?? '-';
+            $sanitizedDescription = str_replace(['\\', '`'], ['\\', '\`'], $description);
+            $sanitizedKeterangan = str_replace(['\\', '`'], ['\\', '\`'], $keterangan);
+
+            $lines[] = "*OrderID:* `" . $esc($report->order_id) . "`";
+            $lines[] = "*Nomor Layanan:* `" . $esc($report->nomer_layanan) . "`";
+            $lines[] = "*SN ONT:* `" . $esc($report->sn_ont) . "`";
+            $lines[] = "*Datek ODP:* `" . $esc($report->datek_odp) . "`";
+            $lines[] = "*Port ODP:* `" . $esc($report->port_odp) . "`";
+            $lines[] = "";
+            $lines[] = "*Keterangan Insiden:*";
+            $lines[] = "```";
+            $lines[] = $sanitizedDescription;
+            $lines[] = "```";
+            $lines[] = "*Keterangan Tambahan:*";
+            $lines[] = "```";
+            $lines[] = $sanitizedKeterangan;
+            $lines[] = "```";
+        }
+
+        $lines[] = "----------------------------------------";
+        $lines[] = "*Dibuat Oleh:* " . $esc($createdBy);
+        $lines[] = "*Waktu Dibuat:* " . $esc($report->created_at->format('Y-m-d H:i:s'));
+
         $reportText = implode("\n", $lines);
         $destinations = array_filter([env('TELEGRAM_CHANNEL_ID'), env('TELEGRAM_GROUP_ID')]);
 

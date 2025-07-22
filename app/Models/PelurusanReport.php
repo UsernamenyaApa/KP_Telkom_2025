@@ -13,7 +13,7 @@ class PelurusanReport extends Model
     protected $table = 'pelurusan_reports';
 
     protected $guarded = [
-        'image',
+
     ];
 
     protected $casts = [

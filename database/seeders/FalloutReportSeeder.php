@@ -50,19 +50,20 @@ class FalloutReportSeeder extends Seeder
 
                 FalloutReport::create([
                     'tipe_order_id' => $orderTypes[array_rand($orderTypes)],
-                    'order_id' => 'ORD' . $date->format('Ymd') . str_pad($j + 1, 4, '0', STR_PAD_LEFT),
+                    'order_id' => 'ORD' . $date->format('Ymd') . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
                     'nomer_layanan' => 'NL' . rand(100000000, 999999999),
                     'sn_ont' => 'SN' . rand(1000000000, 9999999999),
                     'datek_odp' => 'ODP-MLG-FA/' . chr(rand(65, 90)) . rand(1, 20),
                     'port_odp' => rand(1, 16),
                     'fallout_status_id' => $status_id,
-                    'keterangan' => 'Keterangan contoh ' . ($j + 1) . ' for ' . $date->format('Y-m-d'),
-                    'resolution_notes' => 'Catatan resolusi contoh ' . ($j + 1) . ' for ' . $date->format('Y-m-d'),
+                    'keterangan' => 'Keterangan contoh ' . ($i + 1) . ' for ' . $date->format('Y-m-d'),
+                    'resolution_notes' => 'Catatan resolusi contoh ' . ($i + 1) . ' for ' . $date->format('Y-m-d'),
                     'reporter_user_id' => $reporterUserId,
                     'assigned_to_user_id' => $assignedUserId,
                     'created_at' => $createdAt,
                     'updated_at' => $updatedAt,
                     'incident_ticket' => 'INC' . rand(100000, 999999),
+                    'image' => 'fallout-images/example.jpg',
                 ]);
             }
         }

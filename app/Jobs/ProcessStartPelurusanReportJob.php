@@ -51,9 +51,17 @@ class ProcessStartPelurusanReportJob implements ShouldQueue
             return;
         }
 
+        $nextStep = 'order_id';
+        $question = "1/5: Masukkan Order ID:";
+
+        if ($orderType->name === 'Ex Gangguan') {
+            $nextStep = 'nomor_incident';
+            $question = "1/4: Masukkan Nomor Incident:";
+        }
+
         $state = [
             'process' => 'pelurusan',
-            'step' => 'order_id',
+            'step' => $nextStep,
             'report_data' => [
                 'tipe_order_id' => $orderType->id // Store the order type ID
             ],
@@ -69,14 +77,5 @@ class ProcessStartPelurusanReportJob implements ShouldQueue
         Log::info("ProcessStartPelurusanReportJob: State cached for chat_id {$this->chat_id} with tipe_order_id: {$state['report_data']['tipe_order_id']}");
 
         // Dispatch job to ask the first question
-        // This assumes askQuestionForStep is now a separate job or can be called from here
-        // For simplicity, we'll re-implement the logic here or call a helper method that dispatches the question.
-        // In a real scenario, you might have a dedicated job for conversation steps.
-        switch ($state['step']) {
-            case 'order_id':
-                SendTelegramNotificationJob::dispatch($this->chat_id, "1/5: Masukkan Order ID:", null);
-                break;
-            // ... other steps would go here, dispatching SendTelegramNotificationJob
-        }
-    }
+        SendTelegramNotificationJob::dispatch($this->chat_id, $question, null);
 }

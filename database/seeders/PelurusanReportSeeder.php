@@ -69,7 +69,8 @@ class PelurusanReportSeeder extends Seeder
                     'assigned_to_user_id' => $assignedUserId,
                     'created_at' => $createdAt,
                     'updated_at' => $updatedAt,
-                    'pelurusan_code' => 'PLR' . rand(100000, 999999),
+                    'pelurusan_code' => 'PLR' . $date->format('Ymd') . str_pad($j + 1, 4, '0', STR_PAD_LEFT),
+                    'image' => 'pelurusan-images/example.jpg',
                 ]);
             }
         }
@@ -103,7 +104,8 @@ class PelurusanReportSeeder extends Seeder
                 'assigned_to_user_id' => $assignedUserId,
                 'created_at' => $createdAt,
                 'updated_at' => $updatedAt,
-                'pelurusan_code' => 'PLR' . rand(100000, 999999),
+                'pelurusan_code' => 'PLR' . Carbon::parse($createdAt)->format('Ymd') . str_pad($i + 101, 4, '0', STR_PAD_LEFT),
+                'image' => 'pelurusan-images/example.jpg',
             ]);
         }
     }

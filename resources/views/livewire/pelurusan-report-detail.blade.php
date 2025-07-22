@@ -93,15 +93,30 @@
                             </div>
                             <div class="px-4 py-5 sm:p-6 sm:col-span-2">
                                 <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Descriptions</h3>
-                                <dl class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-8">
+                                <dl class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-8">
+                                    <!-- Text Descriptions Column -->
                                     <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Keterangan Insiden Pelurusan</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->incident_fallout_description }}</dd>
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Keterangan Insiden Pelurusan</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->incident_fallout_description }}</dd>
+                                        </div>
+                                        <div class="mt-8">
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Catatan Resolusi</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->resolution_notes }}</dd>
+                                        </div>
                                     </div>
+
+                                    <!-- Image Column -->
+                                    @if ($report->image)
                                     <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Catatan Resolusi</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->resolution_notes }}</dd>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Image</dt>
+                                        <dd class="mt-1">
+                                            <img src="{{ asset('storage/' . $report->image) }}" alt="Pelurusan Image" class="w-full h-72 object-cover rounded-lg shadow-md">
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Path: {{ $report->image }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Full URL: {{ asset('storage/' . $report->image) }}</p>
+                                        </dd>
                                     </div>
+                                    @endif
                                 </dl>
                             </div>
                         </div>

@@ -32,7 +32,7 @@ class ProcessShowFalloutMenuJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $orderTypes = OrderType::all();
+        $orderTypes = OrderType::where('name', '!=', 'Ex Gangguan')->get();
         $keyboard = [];
         $row = [];
 

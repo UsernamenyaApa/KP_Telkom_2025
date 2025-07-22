@@ -21,6 +21,7 @@ class OrderTypeSeeder extends Seeder
             ['id' => 5, 'name' => 'RO'],
             ['id' => 6, 'name' => 'PDA'],
             ['id' => 7, 'name' => 'MIGRASI'],
+            ['id' => 8, 'name' => 'Ex Gangguan'],
         ];
 
         foreach ($orderTypes as $type) {

@@ -406,10 +406,16 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             return;
         }
         $state['process'] = self::PROCESS_PELURUSAN;
-        $state['step'] = 'incident_fallout_description';
+        
+        if ($orderType->name === 'Ex Gangguan') {
+            $state['step'] = 'nomor_incident';
+        } else {
+            $state['step'] = 'incident_fallout_description';
+        }
+
         $state['report_data'] = ['tipe_order_id' => $orderType->id];
         Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
-        SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan'));
+        SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan', $orderType->id));
     }
     
     private function advanceFalloutStep(int $chatId, array &$state): void
@@ -441,9 +447,18 @@ class ProcessTelegramUpdateJob implements ShouldQueue
 
     private function advancePelurusanStep(int $chatId, array &$state): void
     {
-        $steps = ['incident_fallout_description', 'order_id', 'nomer_layanan', 'sn_ont', 'datek_odp', 'port_odp', 'keterangan', 'awaiting_image'];
+        $tipeOrderId = $state['report_data']['tipe_order_id'] ?? null;
+        $orderType = $tipeOrderId ? OrderType::find($tipeOrderId) : null;
+
+        if ($orderType && $orderType->name === 'Ex Gangguan') {
+            $steps = ['nomor_incident', 'nomer_layanan', 'datek_odp', 'port_odp', 'awaiting_image'];
+        } else {
+            $steps = ['incident_fallout_description', 'order_id', 'nomer_layanan', 'sn_ont', 'datek_odp', 'port_odp', 'keterangan', 'awaiting_image'];
+        }
+
         $currentStepIndex = array_search($state['step'], $steps);
         $nextStepIndex = $currentStepIndex + 1;
+
         if ($nextStepIndex < count($steps)) {
             $state['step'] = $steps[$nextStepIndex];
             Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
@@ -457,9 +472,9 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                         ]
                     ]
                 ];
-                SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan'), $keyboard);
+                SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan', $tipeOrderId), $keyboard);
             } else {
-                SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan'));
+                SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan', $tipeOrderId));
             }
         } else {
             $this->generateAndSendPelurusanReport($chatId, $state);
@@ -480,19 +495,30 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         SendTelegramNotificationJob::dispatch($chatId, "✅ Laporan Anda telah diterima dan sedang diproses. Anda akan segera menerima konfirmasi akhir.");
     }
     
-    private function getQuestionForStep(string $step, string $process = 'fallout'): string
+    private function getQuestionForStep(string $step, string $process = 'fallout', ?int $tipeOrderId = null): string
     {
         if ($process === 'pelurusan') {
-            $questions = [
-                'incident_fallout_description' => "1/8: Masukkan Keterangan Insiden Pelurusan:",
-                'order_id' => "2/8: Masukkan Order ID:",
-                'nomer_layanan' => "3/8: Masukkan Nomor Layanan:",
-                'sn_ont' => "4/8: Masukkan SN ONT:",
-                'datek_odp' => "5/8: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):",
-                'port_odp' => "6/8: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):",
-                'keterangan' => "7/8: Masukkan Keterangan Tambahan Laporan:",
-                'awaiting_image' => "Apakah Anda ingin menambahkan gambar?",
-            ];
+            $orderType = $tipeOrderId ? OrderType::find($tipeOrderId) : null;
+            if ($orderType && $orderType->name === 'Ex Gangguan') {
+                $questions = [
+                    'nomor_incident' => "1/4: Masukkan Nomor Incident:",
+                    'nomer_layanan' => "2/4: Masukkan Nomor Layanan:",
+                    'datek_odp' => "3/4: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):",
+                    'port_odp' => "4/4: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):",
+                    'awaiting_image' => "Apakah Anda ingin menambahkan gambar?",
+                ];
+            } else {
+                 $questions = [
+                    'incident_fallout_description' => "1/8: Masukkan Keterangan Insiden Pelurusan:",
+                    'order_id' => "2/8: Masukkan Order ID:",
+                    'nomer_layanan' => "3/8: Masukkan Nomor Layanan:",
+                    'sn_ont' => "4/8: Masukkan SN ONT:",
+                    'datek_odp' => "5/8: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):",
+                    'port_odp' => "6/8: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):",
+                    'keterangan' => "7/8: Masukkan Keterangan Tambahan Laporan:",
+                    'awaiting_image' => "Apakah Anda ingin menambahkan gambar?",
+                ];
+            }
         } else {
             $questions = [
                 'incident_ticket' => "1/8: Masukkan Nomor Tiket Insiden:",
