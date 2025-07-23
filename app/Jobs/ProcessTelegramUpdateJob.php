@@ -36,6 +36,23 @@ class ProcessTelegramUpdateJob implements ShouldQueue
 
     public function handle(): void
     {
+        if ($this->update->has('message')) {
+            $message = $this->update->getMessage();
+            $chat = $message->getChat();
+
+            if ($chat->type === 'group' || $chat->type === 'supergroup') {
+                $telegramGroup = \App\Models\TelegramGroup::updateOrCreate(
+                    ['chat_id' => $chat->id],
+                    ['name' => $chat->title]
+                );
+                Log::info("Group chat ID stored: " . $chat->id . " - " . $chat->title);
+
+                if ($telegramGroup->wasRecentlyCreated) {
+                    \App\Jobs\SendTelegramNotificationJob::dispatch($chat->id, "✅ ID Grup Telegram ini telah berhasil didaftarkan dan disimpan.");
+                }
+            }
+        }
+
         if ($this->update->isType('callback_query')) {
             $this->handleCallbackQuery($this->update);
             return;

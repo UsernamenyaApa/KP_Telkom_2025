@@ -14,24 +14,28 @@ class HdDamanUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $hdDamanRole = Role::where('name', 'hd-daman')->first();
+        $hdDamanRole = Role::firstOrCreate(['name' => 'hd-daman']);
 
-        if ($hdDamanRole) {
-            for ($i = 1; $i <= 8; $i++) {
-                $userName = 'HD Daman User ' . $i;
-                $userEmail = 'hd-daman-user-' . $i . '@example.com';
+        $users = [
+            ['nik' => '24000030', 'name' => 'FEBRINA'],
+            ['nik' => '24010032', 'name' => 'JULIYANI SANTIKA'],
+            ['nik' => '24870005', 'name' => 'IMAM GOZALI ASAAT'],
+            ['nik' => '24880003', 'name' => 'KEMAL BAZIAD'],
+            ['nik' => '24900024', 'name' => 'HADI WISNU FEBRIANA'],
+            ['nik' => '24970071', 'name' => 'PEKIK YUGO KINASIH'],
+            ['nik' => '24980057', 'name' => 'RAMADHANTY AVESYA IMAN'],
+        ];
 
-                $user = User::firstOrCreate(
-                    ['email' => $userEmail],
-                    [
-                        'name' => $userName,
-                        'password' => Hash::make('password'), // Default password for HD Daman users
-                        'email_verified_at' => now(),
-                    ]
-                );
+        foreach ($users as $userData) {
+            $user = User::firstOrCreate(
+                ['nik' => $userData['nik']],
+                [
+                    'name' => $userData['name'],
+                    'password' => Hash::make('password'), // Default password
+                ]
+            );
 
-                $user->assignRole($hdDamanRole);
-            }
+            $user->assignRole($hdDamanRole);
         }
     }
 }

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Livewire\Component;
 
+use Livewire\Attributes\Reactive;
+
 class DailyReportDashboard extends Component
 {
     public $users;
@@ -20,20 +22,13 @@ class DailyReportDashboard extends Component
     public $rowTotals = [];
     public $grandTotal = 0;
 
+    #[Reactive]
     public $selectedDate;
-
-    protected $listeners = ['dateUpdated'];
 
     public function mount(): void
     {
         $this->loadReportData();
         $this->userCount = \App\Models\User::role('hd-daman')->count();
-    }
-
-    public function dateUpdated($date)
-    {
-        $this->selectedDate = $date;
-        $this->loadReportData();
     }
 
     public function loadReportData(): void
@@ -64,7 +59,7 @@ class DailyReportDashboard extends Component
             });
 
         if ($this->selectedDate) {
-            $falloutQuery->whereDate('updated_at', $this->selectedDate);
+            $falloutQuery->whereDate('created_at', $this->selectedDate);
         }
 
         $falloutCounts = $falloutQuery->groupBy('assigned_to_user_id')
@@ -78,7 +73,7 @@ class DailyReportDashboard extends Component
             });
 
         if ($this->selectedDate) {
-            $pelurusanQuery->whereDate('updated_at', $this->selectedDate);
+            $pelurusanQuery->whereDate('created_at', $this->selectedDate);
         }
 
         $pelurusanCounts = $pelurusanQuery->groupBy('assigned_to_user_id')

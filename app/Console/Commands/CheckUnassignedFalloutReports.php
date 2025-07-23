@@ -59,7 +59,10 @@ class CheckUnassignedFalloutReports extends Command
                        . "Dibuat pada: " . $report->created_at->format('d M Y H:i:s') . "\n"
                        . "Mohon segera ditindaklanjuti.";
 
-            \App\Jobs\SendTelegramNotificationJob::dispatch(env('TELEGRAM_GROUP_ID'), $message);
+            $groupChat = \App\Models\TelegramGroup::first();
+        if ($groupChat) {
+            \App\Jobs\SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message);
+        }
 
             $report->notified_unassigned_at = now();
             $report->save();

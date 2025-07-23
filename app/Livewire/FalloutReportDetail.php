@@ -107,9 +107,9 @@ class FalloutReportDetail extends Component
             }
 
             // Send to group chat
-            $groupChatId = env('TELEGRAM_GROUP_ID');
-            if ($groupChatId) {
-                SendTelegramNotificationJob::dispatch($groupChatId, $message, null, 'MarkdownV2');
+            $groupChat = \App\Models\TelegramGroup::first();
+            if ($groupChat) {
+                $groupChatId = $groupChat->chat_id;
             }
 
             $this->closeStatusModal();
@@ -145,9 +145,9 @@ class FalloutReportDetail extends Component
 " .
                            "Mohon segera ditindaklanjuti.";
 
-                $groupChatId = env('TELEGRAM_GROUP_ID');
-                if ($groupChatId) {
-                    SendTelegramNotificationJob::dispatch($groupChatId, $message, null, 'MarkdownV2');
+                $groupChat = \App\Models\TelegramGroup::first();
+                if ($groupChat) {
+                    SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message);
                 }
 
                 // Send to personal chat (reporter)

@@ -67,7 +67,8 @@ class SendHourlyFalloutNotifications extends Command
 
         $notificationMessage .= "Mohon untuk segera ditindaklanjuti.";
 
-        $destination = env('TELEGRAM_GROUP_ID') ?? env('TELEGRAM_CHANNEL_ID');
+        $groupChat = \App\Models\TelegramGroup::first();
+        $destination = $groupChat ? $groupChat->chat_id : env('TELEGRAM_CHANNEL_ID');
 
         if ($destination) {
             try {
@@ -79,7 +80,7 @@ class SendHourlyFalloutNotifications extends Command
                 Log::error('Failed to send hourly fallout notification: ' . $e->getMessage());
             }
         } else {
-            $this->warn('TELEGRAM_GROUP_ID or TELEGRAM_CHANNEL_ID not configured.');
+            $this->warn('Telegram Group or Channel ID not configured.');
             Log::warning('Cannot send hourly notification, no destination configured.');
         }
 

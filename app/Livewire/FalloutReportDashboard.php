@@ -113,9 +113,9 @@ class FalloutReportDashboard extends Component
                     SendTelegramNotificationJob::dispatch($report->reporter->telegram_user_id, $message);
                 }
 
-                $groupChatId = env('TELEGRAM_GROUP_ID');
-                if ($groupChatId) {
-                    SendTelegramNotificationJob::dispatch($groupChatId, $message);
+                $groupChat = \App\Models\TelegramGroup::first();
+                if ($groupChat) {
+                    SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message);
                 }
             }
         }

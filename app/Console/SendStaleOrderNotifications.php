@@ -92,7 +92,8 @@ class SendStaleOrderNotifications extends Command
         ];
 
         $message = implode("\n", $lines);
-        $destinations = array_filter([env('TELEGRAM_CHANNEL_ID'), env('TELEGRAM_GROUP_ID')]);
+        $groupChat = \App\Models\TelegramGroup::first();
+        $destinations = array_filter([env('TELEGRAM_CHANNEL_ID'), $groupChat ? $groupChat->chat_id : null]);
         
         foreach ($destinations as $chatId) {
             SendTelegramNotificationJob::dispatch($chatId, $message, null, 'MarkdownV2');

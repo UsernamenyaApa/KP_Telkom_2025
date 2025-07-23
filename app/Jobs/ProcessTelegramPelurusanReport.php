@@ -159,7 +159,8 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         $lines[] = "*Waktu Dibuat:* " . $esc($report->created_at->format('Y-m-d H:i:s'));
 
         $reportText = implode("\n", $lines);
-        $destinations = array_filter([env('TELEGRAM_CHANNEL_ID'), env('TELEGRAM_GROUP_ID')]);
+        $groupChat = \App\Models\TelegramGroup::first();
+        $destinations = array_filter([env('TELEGRAM_CHANNEL_ID'), $groupChat ? $groupChat->chat_id : null]);
 
         foreach ($destinations as $chatId) {
             SendTelegramNotificationJob::dispatch($chatId, $reportText, null, 'MarkdownV2');

@@ -14,9 +14,9 @@ use Livewire\Volt\Component;
 // The layout is set to a new custom layout 'auth-split-screen'
 // which should be created to accommodate the two-column design.
 new #[Layout('components.layouts.auth.auth-split-screen')] class extends Component {
-    // The validation remains for 'email' as requested, even though the placeholder is 'NIK'.
-    #[Validate('required|string|email')]
-    public string $email = '';
+    // The validation is for 'nik'.
+    #[Validate('required|string')]
+    public string $nik = '';
 
     #[Validate('required|string')]
     public string $password = '';
@@ -30,13 +30,12 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
 
         $this->ensureIsNotRateLimited();
 
-        // The authentication logic still uses 'email'. The user should enter their email
-        // in the NIK field for the login to work.
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
+        // The authentication logic now uses 'nik'.
+        if (! Auth::attempt(['nik' => $this->nik, 'password' => $this->password])) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                'nik' => __('auth.failed'),
             ]);
         }
 
@@ -60,7 +59,7 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => __('auth.throttle', [
+            'nik' => __('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -72,7 +71,7 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
      */
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+        return Str::transliterate(Str::lower($this->nik).'|'.request()->ip());
     }
 }; ?>
 
@@ -87,7 +86,7 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
         <x-auth-session-status class="mb-4" :status="session('status')" />
 
         <form wire:submit="login" class="flex flex-col gap-4">
-            {{-- Email Input --}}
+            {{-- NIK Input --}}
             <div>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -96,17 +95,17 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
                         </svg>
                     </div>
                     <input
-                        wire:model="email"
-                        id="email"
-                        name="email"
-                        type="email"
+                        wire:model="nik"
+                        id="nik"
+                        name="nik"
+                        type="text"
                         required
                         autofocus
-                        placeholder="email@tif.co.id"
+                        placeholder="NIK"
                         class="block w-full pl-10 pr-3 py-3 bg-gray-100 border-transparent rounded-md shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
-                @error('email') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
+                @error('nik') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
             </div>
 
             {{-- Password Input dengan Ikon Mata --}}

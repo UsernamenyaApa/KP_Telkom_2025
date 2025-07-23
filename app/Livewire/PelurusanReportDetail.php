@@ -74,9 +74,9 @@ class PelurusanReportDetail extends Component
                 SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $message);
             }
 
-            $groupChatId = env('TELEGRAM_GROUP_ID');
-            if ($groupChatId) {
-                SendTelegramNotificationJob::dispatch($groupChatId, $message);
+            $groupChat = \App\Models\TelegramGroup::first();
+            if ($groupChat) {
+                SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message);
             }
         }
     }
@@ -144,9 +144,9 @@ class PelurusanReportDetail extends Component
             }
 
             // Send to group chat
-            $groupChatId = env('TELEGRAM_GROUP_ID');
-            if ($groupChatId) {
-                SendTelegramNotificationJob::dispatch($groupChatId, $message);
+            $groupChat = \App\Models\TelegramGroup::first();
+            if ($groupChat) {
+                SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message);
             }
 
             $this->closeStatusModal();
