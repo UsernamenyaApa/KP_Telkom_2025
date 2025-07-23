@@ -123,25 +123,41 @@ class FalloutReportDashboard extends Component
 
     public function render()
     {
-        $reports = FalloutReport::with(['reporter', 'orderType', 'falloutStatus', 'assignedToUser'])
-            ->when($this->date, function ($query) {
-                $query->whereDate('created_at', $this->date);
-            })
-            ->when($this->search, function ($query) {
-                $query->where('incident_ticket', 'like', '%' . $this->search . '%')
-                      ->orWhere('order_id', 'like', '%' . $this->search . '%');
-            })
-            ->when($this->selectedOrderType, function ($query) {
-                $query->where('tipe_order_id', $this->selectedOrderType);
-            })
-            ->when($this->selectedFalloutStatus, function ($query) {
+        $query = FalloutReport::with(['reporter', 'orderType', 'falloutStatus', 'assignedToUser']);
+
+        // Filter by date
+        if ($this->date) {
+            $query->whereDate('created_at', $this->date);
+        }
+
+        // Filter by search term
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('incident_ticket', 'like', '%' . $this->search . '%')
+                  ->orWhere('order_id', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        // Filter by order type
+        if ($this->selectedOrderType) {
+            $query->where('tipe_order_id', $this->selectedOrderType);
+        }
+
+        // Filter by assigned to user
+        if ($this->selectedAssignedTo) {
+            $query->where('assigned_to_user_id', $this->selectedAssignedTo);
+        }
+
+        // Custom logic for fallout status filter
+        if ($this->selectedFalloutStatus) {
+            if ($this->selectedFalloutStatus == 7) { // Close
+                $query->whereNotIn('fallout_status_id', [1, 2, 4]);
+            } else {
                 $query->where('fallout_status_id', $this->selectedFalloutStatus);
-            })
-            ->when($this->selectedAssignedTo, function ($query) {
-                $query->where('assigned_to_user_id', $this->selectedAssignedTo);
-            })
-            ->orderBy('created_at', 'asc')
-            ->paginate(10);
+            }
+        }
+
+        $reports = $query->orderBy('created_at', 'asc')->paginate(10);
 
         return view('livewire.fallout-report-dashboard', [
             'reports' => $reports,

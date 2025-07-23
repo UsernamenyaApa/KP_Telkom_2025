@@ -46,6 +46,7 @@
                                     @foreach($falloutStatuses as $status)
                                         <option value="{{ $status->id }}">{{ $status->name }}</option>
                                     @endforeach
+                                    <option value="7">Close</option>
                                 </select>
                             </div>
 
