@@ -76,6 +76,8 @@
 
             <flux:spacer />
 
+            <livewire:unassigned-order-notification wire:poll.10s />
+
             <flux:dropdown position="top" align="end">
                 <flux:profile
                     :initials="auth()->user()->initials()"
@@ -96,7 +98,7 @@
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
                                     <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    <span class="truncate text-xs">{{ auth()->user()->nik }}</span>
                                 </div>
                             </div>
                         </div>
@@ -149,5 +151,7 @@
         </div>
 
         @fluxScripts
+        @livewireStyles
+        @livewireScripts
     </body>
 </html>

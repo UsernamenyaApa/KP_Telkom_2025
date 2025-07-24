@@ -19,6 +19,8 @@
 
     @livewire('dashboard.dashboard-stats', ['selectedDate' => $selectedDate, 'reportType' => $reportType], key($selectedDate . $reportType . '-stats'))
 
+    
+
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mt-6">
         <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 font-akatab tracking-widest">Daily work report HD Daman</h2>
         @livewire('dashboard.daily-report-dashboard', ['selectedDate' => $selectedDate], key($selectedDate . $reportType . '-daily'))
