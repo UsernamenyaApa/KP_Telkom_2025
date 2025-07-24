@@ -1,9 +1,9 @@
 <?php
 
+use App\Http\Controllers\TelegramController;
 use App\Livewire\FalloutReportDetail;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
-use App\Http\Controllers\TelegramController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -39,9 +39,9 @@ Route::middleware(['auth'])->group(function () {
 
 Route::post('telegram/webhook', [TelegramController::class, 'handle'])->name('telegram.webhook');
 
+use App\Livewire\FalloutStatusManager;
 use App\Livewire\HdDamanManager;
 use App\Livewire\OrderTypeManager;
-use App\Livewire\FalloutStatusManager;
 use Illuminate\Support\Facades\Artisan;
 
 Route::middleware(['auth', 'role:super-admin'])->group(function () {
@@ -53,15 +53,16 @@ Route::middleware(['auth', 'role:super-admin'])->group(function () {
 // Webhook for checking unassigned fallout reports
 Route::get('/bot/check-unassigned', function () {
     Artisan::call('app:check-unassigned-fallout-reports');
+
     return response('Unassigned reports checked.', 200);
 });
 
 // Webhook for checking uncompleted fallout reports
 Route::get('/bot/check-uncompleted', function () {
     Artisan::call('app:check-uncompleted-fallout-reports');
+
     return response('Uncompleted reports checked.', 200);
 });
-
 
 // ▼▼▼ PENYESUAIAN RUTE OTENTIKASI ▼▼▼
 

@@ -2,12 +2,13 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use Carbon\Carbon;
+use Livewire\Component;
 
 class DashboardPage extends Component
 {
     public $selectedDate;
+
     public $reportType = 'fallout';
 
     public function mount()

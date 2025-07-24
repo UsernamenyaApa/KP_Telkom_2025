@@ -2,20 +2,24 @@
 
 namespace App\Livewire;
 
-use App\Models\PelurusanReport;
-use App\Models\FalloutStatus;
-use Livewire\Component;
-use Livewire\Attributes\Url;
-use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendTelegramNotificationJob;
+use App\Models\FalloutStatus;
+use App\Models\PelurusanReport;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class PelurusanReportDetail extends Component
 {
     #[Url]
     public $date;
+
     public PelurusanReport $report;
+
     public $showStatusModal = false;
+
     public $newStatusId;
+
     public $keterangan = '';
 
     public function mount($id, $date = null)
@@ -40,31 +44,31 @@ class PelurusanReportDetail extends Component
 
             $user = Auth::user();
 
-            $message = "✅ *Laporan Pelurusan Diambil!* ✅
+            $message = '✅ *Laporan Pelurusan Diambil!* ✅
 
-" .
-                       "*ID Laporan:* `" . ($this->report->id ?? 'N/A') . "`
-" .
-                       "*Kode Pelurusan:* `" . ($this->report->pelurusan_code ?? 'N/A') . "`
-" .
-                       "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
-" .
-                       "*OrderID:* `" . ($this->report->order_id ?? 'N/A') . "`\n" .
-                       "*Nomor Layanan:* `" . ($this->report->nomer_layanan ?? 'N/A') . "`
-" .
-                       "*SN ONT:* `" . ($this->report->sn_ont ?? 'N/A') . "`
-" .
-                       "*Datek ODP:* `" . ($this->report->datek_odp ?? 'N/A') . "`
-" .
-                       "*Port ODP:* `" . ($this->report->port_odp ?? 'N/A') . "`
+'.
+                       '*ID Laporan:* `'.($this->report->id ?? 'N/A').'`
+'.
+                       '*Kode Pelurusan:* `'.($this->report->pelurusan_code ?? 'N/A').'`
+'.
+                       '*Tipe Order:* `'.($this->report->orderType ? $this->report->orderType->name : 'N/A').'`
+'.
+                       '*OrderID:* `'.($this->report->order_id ?? 'N/A')."`\n".
+                       '*Nomor Layanan:* `'.($this->report->nomer_layanan ?? 'N/A').'`
+'.
+                       '*SN ONT:* `'.($this->report->sn_ont ?? 'N/A').'`
+'.
+                       '*Datek ODP:* `'.($this->report->datek_odp ?? 'N/A').'`
+'.
+                       '*Port ODP:* `'.($this->report->port_odp ?? 'N/A').'`
 
-" .
-                       "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "
-" .
-                       "*Waktu Diambil:* " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "
+'.
+                       '*Diambil Oleh:* @'.($user->telegram_username ?? 'N/A').'
+'.
+                       '*Waktu Diambil:* '.($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A').'
 
-" .
-                       "Mohon pantau status laporan ini.";
+'.
+                       'Mohon pantau status laporan ini.';
 
             if ($user->telegram_user_id) {
                 SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
@@ -107,34 +111,34 @@ class PelurusanReportDetail extends Component
 
             $this->report->save();
 
-            $message = "
+            $message = '
 
-" .
-                       "*Status Baru: {$newStatus->name}*\n\n" .
-                       "Tipe Order: " . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "\n" .
-                       "OrderID: " . $this->report->order_id . "\n" .
-                       "Nomor Layanan: " . $this->report->nomer_layanan . "\n" .
-                       "SN ONT: " . $this->report->sn_ont . "\n" .
-                       "Datek ODP: " . $this->report->datek_odp . "\n" .
-                       "Port ODP: " . $this->report->port_odp . "\n\n" .
-                       "
-" . $this->keterangan . "\n\n" .
-                       "----------------------------------------\n" .
-                       "Created By: @" . ($this->report->reporter ? $this->report->reporter->telegram_username : 'N/A') . "\n" .
-                       "Create Order: " . $this->report->created_at->format('Y-m-d H:i:s') . "\n" .
-                       "Taken at: " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
-                       "Updated By: @" . auth()->user()->telegram_username;
+'.
+                       "*Status Baru: {$newStatus->name}*\n\n".
+                       'Tipe Order: '.($this->report->orderType ? $this->report->orderType->name : 'N/A')."\n".
+                       'OrderID: '.$this->report->order_id."\n".
+                       'Nomor Layanan: '.$this->report->nomer_layanan."\n".
+                       'SN ONT: '.$this->report->sn_ont."\n".
+                       'Datek ODP: '.$this->report->datek_odp."\n".
+                       'Port ODP: '.$this->report->port_odp."\n\n".
+                       '
+'.$this->keterangan."\n\n".
+                       "----------------------------------------\n".
+                       'Created By: @'.($this->report->reporter ? $this->report->reporter->telegram_username : 'N/A')."\n".
+                       'Create Order: '.$this->report->created_at->format('Y-m-d H:i:s')."\n".
+                       'Taken at: '.($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A')."\n".
+                       'Updated By: @'.auth()->user()->telegram_username;
 
             // Add completed_at and duration if available
             if ($this->report->completed_at) {
-                $message .= "\n\n" .
-                            "
-" . $this->report->completed_at->format('Y-m-d H:i:s') . "\n";
+                $message .= "\n\n".
+                            '
+'.$this->report->completed_at->format('Y-m-d H:i:s')."\n";
 
                 if ($this->report->created_at) {
                     $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
-                    $message .= "
-" . $duration . "\n";
+                    $message .= '
+'.$duration."\n";
                 }
             }
 

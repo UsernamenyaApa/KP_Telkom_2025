@@ -2,17 +2,16 @@
 
 namespace App\Livewire;
 
+use App\Jobs\SendTelegramNotificationJob;
 use App\Models\FalloutReport;
 use App\Models\FalloutStatus;
 use App\Models\OrderType;
 use App\Models\User;
-use Livewire\Component;
-use Livewire\WithPagination;
-use Livewire\Attributes\Url;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use App\Jobs\SendTelegramNotificationJob;
-use Telegram\Bot\Laravel\Facades\Telegram;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class FalloutReportDashboard extends Component
 {
@@ -20,16 +19,22 @@ class FalloutReportDashboard extends Component
 
     #[Url]
     public $date;
+
     public $search = '';
+
     #[Url]
     public $selectedOrderType = '';
+
     #[Url]
     public $selectedFalloutStatus = '';
+
     #[Url]
     public $selectedAssignedTo = '';
 
     public $orderTypes;
+
     public $falloutStatuses;
+
     public $assignedToUsers;
 
     public function mount()
@@ -92,18 +97,18 @@ class FalloutReportDashboard extends Component
 
                 $user = Auth::user();
 
-                $message = "✅ *Laporan Fallout Diambil!* ✅\n\n" .
-                           "*ID Laporan:* `" . ($report->id ?? 'N/A') . "`\n" .
-                           "*Kode Fallout:* `" . ($report->fallout_code ?? 'N/A') . "`\n" .
-                           "*Tipe Order:* `" . ($report->orderType ? $report->orderType->name : 'N/A') . "`\n" .
-                           "*OrderID:* `" . ($report->order_id ?? 'N/A') . "`\n" .
-                           "*Nomor Layanan:* `" . ($report->nomer_layanan ?? 'N/A') . "`\n" .
-                           "*SN ONT:* `" . ($report->sn_ont ?? 'N/A') . "`\n" .
-                           "*Datek ODP:* `" . ($report->datek_odp ?? 'N/A') . "`\n" .
-                           "*Port ODP:* `" . ($report->port_odp ?? 'N/A') . "`\n\n" .
-                           "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "\n" .
-                           "*Waktu Diambil:* " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n\n" .
-                           "Mohon pantau status laporan ini.";
+                $message = "✅ *Laporan Fallout Diambil!* ✅\n\n".
+                           '*ID Laporan:* `'.($report->id ?? 'N/A')."`\n".
+                           '*Kode Fallout:* `'.($report->fallout_code ?? 'N/A')."`\n".
+                           '*Tipe Order:* `'.($report->orderType ? $report->orderType->name : 'N/A')."`\n".
+                           '*OrderID:* `'.($report->order_id ?? 'N/A')."`\n".
+                           '*Nomor Layanan:* `'.($report->nomer_layanan ?? 'N/A')."`\n".
+                           '*SN ONT:* `'.($report->sn_ont ?? 'N/A')."`\n".
+                           '*Datek ODP:* `'.($report->datek_odp ?? 'N/A')."`\n".
+                           '*Port ODP:* `'.($report->port_odp ?? 'N/A')."`\n\n".
+                           '*Diambil Oleh:* @'.($user->telegram_username ?? 'N/A')."\n".
+                           '*Waktu Diambil:* '.($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A')."\n\n".
+                           'Mohon pantau status laporan ini.';
 
                 if ($user->telegram_user_id) {
                     SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
@@ -133,8 +138,8 @@ class FalloutReportDashboard extends Component
         // Filter by search term
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('incident_ticket', 'like', '%' . $this->search . '%')
-                  ->orWhere('order_id', 'like', '%' . $this->search . '%');
+                $q->where('incident_ticket', 'like', '%'.$this->search.'%')
+                    ->orWhere('order_id', 'like', '%'.$this->search.'%');
             });
         }
 

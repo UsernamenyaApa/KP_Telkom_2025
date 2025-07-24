@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('daily_counters', function (Blueprint $table) {
-            $table->id();
-            $table->date('report_date')->unique();
-            $table->integer('last_number')->default(0);
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->timestamp('email_verified_at')->nullable()->after('password');
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('daily_counters');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('email_verified_at');
+        });
     }
 };

@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use Telegram\Bot\Api;
-use GuzzleHttp\Client;
 use Telegram\Bot\HttpClients\GuzzleHttpClient;
 
 class SetTelegramWebhookCommand extends Command
@@ -37,9 +37,9 @@ class SetTelegramWebhookCommand extends Command
             $response = $telegram->setWebhook(['url' => $webhookUrl]);
             $this->info("Webhook set to: {$webhookUrl}");
             if ($response) {
-                $this->info("Webhook set successfully.");
+                $this->info('Webhook set successfully.');
             } else {
-                $this->error("Failed to set webhook.");
+                $this->error('Failed to set webhook.');
             }
         } catch (\Exception $e) {
             $this->error($e->getMessage());

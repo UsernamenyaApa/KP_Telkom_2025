@@ -2,13 +2,15 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\OrderType;
+use Livewire\Component;
 
 class OrderTypeManager extends Component
 {
     public $name;
+
     public $orderTypeId;
+
     public $isEditing = false;
 
     protected $rules = [
@@ -43,7 +45,7 @@ class OrderTypeManager extends Component
     public function update()
     {
         $this->validate([
-            'name' => 'required|string|max:255|unique:order_types,name,' . $this->orderTypeId,
+            'name' => 'required|string|max:255|unique:order_types,name,'.$this->orderTypeId,
         ]);
 
         $orderType = OrderType::findOrFail($this->orderTypeId);

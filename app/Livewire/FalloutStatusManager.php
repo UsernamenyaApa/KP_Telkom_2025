@@ -2,13 +2,15 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\FalloutStatus;
+use Livewire\Component;
 
 class FalloutStatusManager extends Component
 {
     public $name;
+
     public $falloutStatusId;
+
     public $isEditing = false;
 
     protected $rules = [
@@ -43,7 +45,7 @@ class FalloutStatusManager extends Component
     public function update()
     {
         $this->validate([
-            'name' => 'required|string|max:255|unique:fallout_statuses,name,' . $this->falloutStatusId,
+            'name' => 'required|string|max:255|unique:fallout_statuses,name,'.$this->falloutStatusId,
         ]);
 
         $falloutStatus = FalloutStatus::findOrFail($this->falloutStatusId);

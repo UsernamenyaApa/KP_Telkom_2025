@@ -2,24 +2,26 @@
 
 namespace App\Livewire;
 
+use App\Jobs\SendTelegramNotificationJob;
 use App\Models\FalloutReport;
 use App\Models\FalloutStatus;
-use Livewire\Component;
-
-use Livewire\Attributes\Url;
 use Illuminate\Support\Facades\Auth;
-use App\Jobs\SendTelegramNotificationJob;
+use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class FalloutReportDetail extends Component
 {
-    
-
     #[Url]
     public $date;
+
     public FalloutReport $report;
+
     public $showStatusModal = false;
+
     public $newStatusId;
+
     public $keterangan = '';
+
     public $availableStatuses = [];
 
     public function mount($id, $date = null)
@@ -39,8 +41,9 @@ class FalloutReportDetail extends Component
             if ($currentStatusName === 'Open') {
                 return true; // All statuses available from Open
             }
+
             // For any other status, exclude Open and OnProgress
-            return !in_array($status->name, ['Open', 'OnProgress']);
+            return ! in_array($status->name, ['Open', 'OnProgress']);
         });
 
         $this->newStatusId = $this->report->fallout_status_id;
@@ -60,8 +63,6 @@ class FalloutReportDetail extends Component
             $this->report->fallout_status_id = $this->newStatusId;
             $this->report->resolution_notes = $this->keterangan;
 
-            
-
             $newStatus = FalloutStatus::find($this->newStatusId);
             if ($newStatus && in_array($newStatus->name, ['FA', 'eskalasi', 'input ulang', 'PI'])) {
                 $this->report->completed_at = now();
@@ -69,35 +70,35 @@ class FalloutReportDetail extends Component
 
             $this->report->save();
 
-            $esc = fn(?string $text) => str_replace(
+            $esc = fn (?string $text) => str_replace(
                 ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
                 ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
                 $text ?? '-'
             );
 
-            $message = "🔔 *Update Status Laporan Fallout* 🔔\n\n" .
-                       "*Status Baru:* " . $esc($newStatus->name) . "\n\n" .
-                       "*Tipe Order:* " . $esc($this->report->orderType ? $this->report->orderType->name : 'N/A') . "\n" .
-                       "*OrderID:* `" . $esc($this->report->order_id) . "`\n" .
-                       "*Nomor Layanan:* `" . $esc($this->report->nomer_layanan) . "`\n" .
-                       "*SN ONT:* `" . $esc($this->report->sn_ont) . "`\n" .
-                       "*Datek ODP:* `" . $esc($this->report->datek_odp) . "`\n" .
-                       "*Port ODP:* `" . $esc($this->report->port_odp) . "`\n\n" .
-                       "📝 *Catatan Resolusi:*\n" . $esc($this->keterangan) . "\n\n" .
-                       "----------------------------------------\n" .
-                       "*Created By:* @" . $esc($this->report->reporter ? $this->report->reporter->telegram_username : 'N/A') . "\n" .
-                       "*Create Order:* " . $esc($this->report->created_at->format('Y-m-d H:i:s')) . "\n" .
-                       "*Taken at:* " . $esc($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
-                       "*Updated By:* @" . $esc(auth()->user()->telegram_username);
+            $message = "🔔 *Update Status Laporan Fallout* 🔔\n\n".
+                       '*Status Baru:* '.$esc($newStatus->name)."\n\n".
+                       '*Tipe Order:* '.$esc($this->report->orderType ? $this->report->orderType->name : 'N/A')."\n".
+                       '*OrderID:* `'.$esc($this->report->order_id)."`\n".
+                       '*Nomor Layanan:* `'.$esc($this->report->nomer_layanan)."`\n".
+                       '*SN ONT:* `'.$esc($this->report->sn_ont)."`\n".
+                       '*Datek ODP:* `'.$esc($this->report->datek_odp)."`\n".
+                       '*Port ODP:* `'.$esc($this->report->port_odp)."`\n\n".
+                       "📝 *Catatan Resolusi:*\n".$esc($this->keterangan)."\n\n".
+                       "----------------------------------------\n".
+                       '*Created By:* @'.$esc($this->report->reporter ? $this->report->reporter->telegram_username : 'N/A')."\n".
+                       '*Create Order:* '.$esc($this->report->created_at->format('Y-m-d H:i:s'))."\n".
+                       '*Taken at:* '.$esc($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A')."\n".
+                       '*Updated By:* @'.$esc(auth()->user()->telegram_username);
 
             // Add completed_at and duration if available
             if ($this->report->completed_at) {
-                $message .= "\n\n" .
-                            "✅ *Selesai pada:* " . $esc($this->report->completed_at->format('Y-m-d H:i:s')) . "\n";
+                $message .= "\n\n".
+                            '✅ *Selesai pada:* '.$esc($this->report->completed_at->format('Y-m-d H:i:s'))."\n";
 
                 if ($this->report->created_at) {
                     $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
-                    $message .= "⏳ *Durasi:* " . $esc($duration) . "\n";
+                    $message .= '⏳ *Durasi:* '.$esc($duration)."\n";
                 }
             }
 
@@ -127,23 +128,23 @@ class FalloutReportDetail extends Component
                 $this->report->save();
 
                 // Send Telegram notification
-                $message = "
+                $message = '
 
-" .
-                           "*ID Laporan:* `" . $this->report->id . "`
-" .
-                           "*Kode Fallout:* `" . $this->report->fallout_code . "`
-" .
-                           "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
-" .
-                           "*OrderID:* `" . $this->report->order_id . "`
-" .
-                           "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
-" .
-                           "*Waktu Diambil:* " . $this->report->taken_at->format('Y-m-d H:i:s') . "
+'.
+                           '*ID Laporan:* `'.$this->report->id.'`
+'.
+                           '*Kode Fallout:* `'.$this->report->fallout_code.'`
+'.
+                           '*Tipe Order:* `'.($this->report->orderType ? $this->report->orderType->name : 'N/A').'`
+'.
+                           '*OrderID:* `'.$this->report->order_id.'`
+'.
+                           '*Diambil Oleh:* @'.auth()->user()->telegram_username.'
+'.
+                           '*Waktu Diambil:* '.$this->report->taken_at->format('Y-m-d H:i:s').'
 
-" .
-                           "Mohon segera ditindaklanjuti.";
+'.
+                           'Mohon segera ditindaklanjuti.';
 
                 $groupChat = \App\Models\TelegramGroup::first();
                 if ($groupChat) {
@@ -152,7 +153,7 @@ class FalloutReportDetail extends Component
 
                 // Send to personal chat (reporter)
                 if ($this->report->reporter && $this->report->reporter->telegram_user_id) {
-                    $personalMessage = "🔔 Laporan Anda dengan ID #{$this->report->id} telah diambil oleh @" . auth()->user()->telegram_username . " pada " . $this->report->taken_at->format('Y-m-d H:i:s') . ".";
+                    $personalMessage = "🔔 Laporan Anda dengan ID #{$this->report->id} telah diambil oleh @".auth()->user()->telegram_username.' pada '.$this->report->taken_at->format('Y-m-d H:i:s').'.';
                     SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $personalMessage);
                 }
 
