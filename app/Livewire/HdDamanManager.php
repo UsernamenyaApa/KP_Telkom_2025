@@ -36,9 +36,8 @@ class HdDamanManager extends Component
     {
         $this->users = User::where(function ($query) {
             $query->where('name', 'like', '%'.$this->searchTerm.'%')
-                  ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
+                  ->orWhere('nik', 'like', '%'.$this->searchTerm.'%');
         })
-        ->where('email', 'like', '%@tif.co.id') // Filter for @tif.co.id emails
         ->with('roles') // Eager load roles
         ->get();
     }
@@ -52,25 +51,11 @@ class HdDamanManager extends Component
     {
         $this->validate();
 
-        // 1. Auto-generate email
-        $email = Str::of($this->name)
-            ->lower()
-            ->split('/\s+/') // split by one or more spaces
-            ->take(2)
-            ->join('') . '@tif.co.id';
-
-        // Periksa apakah email yang dihasilkan sudah ada
-        if (User::where('email', $email)->exists()) {
-            $this->addError('name', "Generated email ({$email}) already exists. Please use a different name.");
-            return;
-        }
-
         // 2. Password adalah NIK
         $password = $this->nik;
 
         $user = User::create([
             'name' => $this->name,
-            'email' => $email,
             'nik' => $this->nik,
             'password' => Hash::make($password),
         ]);
@@ -80,7 +65,7 @@ class HdDamanManager extends Component
         $this->reset('name', 'nik');
         $this->loadUsers();
 
-        session()->flash('message', "Pengguna {$user->name} berhasil dibuat dengan email: {$email}. Passwordnya adalah NIK pengguna.");
+        session()->flash('message', "Pengguna {$user->name} berhasil dibuat. Passwordnya adalah NIK pengguna.");
     }
 
     public function assignHdDamanRole(User $user)

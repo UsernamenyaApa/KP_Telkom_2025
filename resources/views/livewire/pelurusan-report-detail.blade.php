@@ -111,7 +111,7 @@
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Image</dt>
                                         <dd class="mt-1">
-                                            <img src="{{ asset('storage/' . $report->image) }}" alt="Pelurusan Image" class="w-full h-72 object-cover rounded-lg shadow-md">
+                                            <img src="{{ asset('storage/' . $report->image) }}" alt="Pelurusan Image" class="w-full max-h-96 object-contain rounded-lg shadow-md">
                                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Path: {{ $report->image }}</p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Full URL: {{ asset('storage/' . $report->image) }}</p>
                                         </dd>

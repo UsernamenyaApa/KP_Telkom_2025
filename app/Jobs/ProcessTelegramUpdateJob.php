@@ -41,14 +41,16 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             $chat = $message->getChat();
 
             if ($chat->type === 'group' || $chat->type === 'supergroup') {
-                $telegramGroup = \App\Models\TelegramGroup::updateOrCreate(
-                    ['chat_id' => $chat->id],
-                    ['name' => $chat->title]
-                );
-                Log::info("Group chat ID stored: " . $chat->id . " - " . $chat->title);
+                if (trim(strtolower($message->text)) === 'tiftang') {
+                    $telegramGroup = \App\Models\TelegramGroup::updateOrCreate(
+                        ['chat_id' => $chat->id],
+                        ['name' => $chat->title]
+                    );
+                    Log::info("Group chat ID stored: " . $chat->id . " - " . $chat->title);
 
-                if ($telegramGroup->wasRecentlyCreated) {
-                    \App\Jobs\SendTelegramNotificationJob::dispatch($chat->id, "✅ ID Grup Telegram ini telah berhasil didaftarkan dan disimpan.");
+                    if ($telegramGroup->wasRecentlyCreated) {
+                        \App\Jobs\SendTelegramNotificationJob::dispatch($chat->id, "✅ ID Grup Telegram ini telah berhasil didaftarkan dan disimpan.");
+                    }
                 }
             }
         }
@@ -120,7 +122,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     
     private function showFalloutMenu(Api $telegram, int $chatId, ?int $messageId = null): void
     {
-        $orderTypes = Cache::remember('order_types_all', now()->addMinutes(60), fn() => OrderType::all());
+        $orderTypes = Cache::remember('fallout_order_types', now()->addMinutes(60), fn() => OrderType::where('name', '!=', 'Ex Gangguan')->get());
         
         if ($orderTypes->isEmpty()) {
             SendTelegramNotificationJob::dispatch($chatId, "⚠️ Maaf, belum ada tipe order yang tersedia di sistem.");
@@ -502,14 +504,14 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     {
         ProcessTelegramReport::dispatch($chatId, $state, $state['report_data']['tipe_order_id']);
         Cache::forget($chatId);
-        SendTelegramNotificationJob::dispatch($chatId, "✅ Laporan Anda telah diterima dan sedang diproses. Anda akan segera menerima konfirmasi akhir.");
+        SendTelegramNotificationJob::dispatch($chatId, "✅ Laporan Anda telah diterima dan sedang diproses.");
     }
 
     private function generateAndSendPelurusanReport(int $chatId, array $state): void
     {
         ProcessTelegramPelurusanReport::dispatch($chatId, $state, $state['report_data']['tipe_order_id']);
         Cache::forget($chatId);
-        SendTelegramNotificationJob::dispatch($chatId, "✅ Laporan Anda telah diterima dan sedang diproses. Anda akan segera menerima konfirmasi akhir.");
+        SendTelegramNotificationJob::dispatch($chatId, "✅ Laporan Anda telah diterima dan sedang diproses.");
     }
     
     private function getQuestionForStep(string $step, string $process = 'fallout', ?int $tipeOrderId = null): string

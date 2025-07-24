@@ -49,7 +49,8 @@ class PelurusanReportDetail extends Component
 " .
                        "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
 " .
-                       "*OrderID:* `" . ($this->report->order_id ?? 'N/A') . "`\n" .
+                       "*OrderID:* `" . ($this->report->order_id ?? 'N/A') . "`
+" .
                        "*Nomor Layanan:* `" . ($this->report->nomer_layanan ?? 'N/A') . "`
 " .
                        "*SN ONT:* `" . ($this->report->sn_ont ?? 'N/A') . "`
@@ -61,17 +62,21 @@ class PelurusanReportDetail extends Component
 " .
                        "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "
 " .
-                       "*Waktu Diambil:* " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "
-
-" .
-                       "Mohon pantau status laporan ini.";
+                       "*Waktu Diambil:* " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
 
             if ($user->telegram_user_id) {
-                SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
+                $takerMessage = "✅ Anda telah berhasil mengambil laporan pelurusan dengan ID #{$this->report->id} (`{$this->report->pelurusan_code}`). Mohon segera ditindaklanjuti.";
+                SendTelegramNotificationJob::dispatch($user->telegram_user_id, $takerMessage);
             }
 
-            if ($this->report->reporter && $this->report->reporter->telegram_user_id) {
-                SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $message);
+            if ($this->report->reporter_user_id) {
+                $reporterChatId = $this->report->reporter->telegram_user_id;
+            } else {
+                $reporterChatId = $this->report->reporter_telegram_id;
+            }
+
+            if ($reporterChatId) {
+                SendTelegramNotificationJob::dispatch($reporterChatId, $message);
             }
 
             $groupChat = \App\Models\TelegramGroup::first();
@@ -120,9 +125,9 @@ class PelurusanReportDetail extends Component
                        "
 " . $this->keterangan . "\n\n" .
                        "----------------------------------------\n" .
-                       "Created By: @" . ($this->report->reporter ? $this->report->reporter->telegram_username : 'N/A') . "\n" .
+                       "Created By: @" . ($this->report->reporter_user_id ? $this->report->reporter->telegram_username : $this->report->reporter_telegram_username) . "\n" .
                        "Create Order: " . $this->report->created_at->format('Y-m-d H:i:s') . "\n" .
-                       "Taken at: " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
+                       "Taken at: " . ($this->report->taken_at ? $this->report->taken_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
                        "Updated By: @" . auth()->user()->telegram_username;
 
             // Add completed_at and duration if available
@@ -139,14 +144,25 @@ class PelurusanReportDetail extends Component
             }
 
             // Send to personal chat (reporter)
-            if ($this->report->reporter && $this->report->reporter->telegram_user_id) {
-                SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $message);
+            if ($this->report->reporter_user_id) {
+                $reporterChatId = $this->report->reporter->telegram_user_id;
+            } else {
+                $reporterChatId = $this->report->reporter_telegram_id;
+            }
+
+            if ($reporterChatId) {
+                SendTelegramNotificationJob::dispatch($reporterChatId, $message);
             }
 
             // Send to group chat
             $groupChat = \App\Models\TelegramGroup::first();
             if ($groupChat) {
                 SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message);
+            }
+
+            // Send to the user who changed the status
+            if (auth()->user()->telegram_user_id) {
+                SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $message, null, 'MarkdownV2');
             }
 
             $this->closeStatusModal();

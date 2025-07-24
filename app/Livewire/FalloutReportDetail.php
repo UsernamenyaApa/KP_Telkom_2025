@@ -85,9 +85,9 @@ class FalloutReportDetail extends Component
                        "*Port ODP:* `" . $esc($this->report->port_odp) . "`\n\n" .
                        "📝 *Catatan Resolusi:*\n" . $esc($this->keterangan) . "\n\n" .
                        "----------------------------------------\n" .
-                       "*Created By:* @" . $esc($this->report->reporter ? $this->report->reporter->telegram_username : 'N/A') . "\n" .
+                       "*Created By:* @" . $esc($this->report->reporter_user_id ? $this->report->reporter->telegram_username : $this->report->reporter_telegram_username) . "\n" .
                        "*Create Order:* " . $esc($this->report->created_at->format('Y-m-d H:i:s')) . "\n" .
-                       "*Taken at:* " . $esc($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
+                       "*Taken at:* " . $esc($this->report->taken_at ? $this->report->taken_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
                        "*Updated By:* @" . $esc(auth()->user()->telegram_username);
 
             // Add completed_at and duration if available
@@ -102,14 +102,26 @@ class FalloutReportDetail extends Component
             }
 
             // Send to personal chat (reporter)
-            if ($this->report->reporter && $this->report->reporter->telegram_user_id) {
-                SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $message, null, 'MarkdownV2');
+            if ($this->report->reporter_user_id) {
+                $reporterChatId = $this->report->reporter->telegram_user_id;
+            } else {
+                $reporterChatId = $this->report->reporter_telegram_id;
+            }
+
+            if ($reporterChatId) {
+                SendTelegramNotificationJob::dispatch($reporterChatId, $message, null, 'MarkdownV2');
             }
 
             // Send to group chat
             $groupChat = \App\Models\TelegramGroup::first();
             if ($groupChat) {
-                $groupChatId = $groupChat->chat_id;
+                SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message, null, 'MarkdownV2');
+            }
+
+            // Send to the user who changed the status
+            if (auth()->user()->telegram_user_id) {
+                $changerMessage = "✅ Anda telah berhasil mengubah status laporan ID #{$this->report->id} (`{$this->report->fallout_code}`) menjadi *{$newStatus->name}*.";
+                SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $changerMessage, null, 'MarkdownV2');
             }
 
             $this->closeStatusModal();
@@ -127,7 +139,7 @@ class FalloutReportDetail extends Component
                 $this->report->save();
 
                 // Send Telegram notification
-                $message = "
+                $message = "✅ *Laporan Fallout Diambil!* ✅
 
 " .
                            "*ID Laporan:* `" . $this->report->id . "`
@@ -138,12 +150,18 @@ class FalloutReportDetail extends Component
 " .
                            "*OrderID:* `" . $this->report->order_id . "`
 " .
-                           "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
+                           "*Nomor Layanan:* `" . $this->report->nomer_layanan . "`
 " .
-                           "*Waktu Diambil:* " . $this->report->taken_at->format('Y-m-d H:i:s') . "
+                           "*SN ONT:* `" . $this->report->sn_ont . "`
+" .
+                           "*Datek ODP:* `" . $this->report->datek_odp . "`
+" .
+                           "*Port ODP:* `" . $this->report->port_odp . "`
 
 " .
-                           "Mohon segera ditindaklanjuti.";
+                           "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
+" .
+                           "*Waktu Diambil:* " . $this->report->taken_at->format('Y-m-d H:i:s');
 
                 $groupChat = \App\Models\TelegramGroup::first();
                 if ($groupChat) {
@@ -151,9 +169,21 @@ class FalloutReportDetail extends Component
                 }
 
                 // Send to personal chat (reporter)
-                if ($this->report->reporter && $this->report->reporter->telegram_user_id) {
+                if ($this->report->reporter_user_id) {
+                    $reporterChatId = $this->report->reporter->telegram_user_id;
+                } else {
+                    $reporterChatId = $this->report->reporter_telegram_id;
+                }
+
+                if ($reporterChatId) {
                     $personalMessage = "🔔 Laporan Anda dengan ID #{$this->report->id} telah diambil oleh @" . auth()->user()->telegram_username . " pada " . $this->report->taken_at->format('Y-m-d H:i:s') . ".";
-                    SendTelegramNotificationJob::dispatch($this->report->reporter->telegram_user_id, $personalMessage);
+                    SendTelegramNotificationJob::dispatch($reporterChatId, $personalMessage);
+                }
+
+                // Send to the user who took the order
+                if (auth()->user()->telegram_user_id) {
+                    $takerMessage = "✅ Anda telah berhasil mengambil laporan dengan ID #{$this->report->id} (`{$this->report->fallout_code}`). Mohon segera ditindaklanjuti.";
+                    SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $takerMessage);
                 }
 
                 // Refresh the component to reflect changes

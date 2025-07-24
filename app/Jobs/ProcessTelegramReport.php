@@ -44,7 +44,7 @@ class ProcessTelegramReport implements ShouldQueue
             $dbData = $this->prepareReportDataForStorage($reportData, $userInfo);
             $falloutReport = $this->saveReportToDatabase($dbData);
             
-            $this->notifyAdmins($falloutReport, $userInfo);
+            $this->notifyRelevantParties($falloutReport, $userInfo);
 
         } catch (\Exception $e) {
             Log::error("Gagal memproses laporan fallout untuk chat {$this->chatId}", [
@@ -100,7 +100,7 @@ class ProcessTelegramReport implements ShouldQueue
         });
     }
 
-    private function notifyAdmins(FalloutReport $report, array $userInfo): void
+    private function notifyRelevantParties(FalloutReport $report, array $userInfo): void
     {
         // Use the real name if available (Office Staff), otherwise use the Telegram username.
         $reporterName = data_get($userInfo, 'name', data_get($userInfo, 'username', 'N/A'));
@@ -144,7 +144,8 @@ class ProcessTelegramReport implements ShouldQueue
         
         $reportText = implode("\n", $lines);
         $groupChat = \App\Models\TelegramGroup::first();
-        $destinations = array_filter([env('TELEGRAM_CHANNEL_ID'), $groupChat ? $groupChat->chat_id : null]);
+        $reporterChatId = data_get($userInfo, 'id'); // Get reporter's chat ID from userInfo
+        $destinations = array_filter([env('TELEGRAM_CHANNEL_ID'), $groupChat ? $groupChat->chat_id : null, $reporterChatId]);
 
         foreach ($destinations as $chatId) {
             SendTelegramNotificationJob::dispatch($chatId, $reportText, null, 'MarkdownV2');

@@ -115,7 +115,7 @@
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Image</dt>
                                         <dd class="mt-1">
-                                            <img src="{{ asset('storage/' . $report->image) }}" alt="Fallout Image" class="w-full h-72 object-cover rounded-lg shadow-md">
+                                            <img src="{{ asset('storage/' . $report->image) }}" alt="Fallout Image" class="w-full max-h-96 object-contain rounded-lg shadow-md">
                                         </dd>
                                     </div>
                                     @endif

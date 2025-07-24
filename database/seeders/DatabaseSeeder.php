@@ -29,8 +29,8 @@ class DatabaseSeeder extends Seeder
             HdDamanRoleSeeder::class,
             HdDamanUserSeeder::class,
             SuperAdminSeeder::class,
-            FalloutReportSeeder::class,
-            PelurusanReportSeeder::class,
+            // FalloutReportSeeder::class,
+            // PelurusanReportSeeder::class,
         ]);
     }
 }

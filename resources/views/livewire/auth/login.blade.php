@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -30,12 +31,21 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
 
         $this->ensureIsNotRateLimited();
 
-        // The authentication logic now uses 'nik'.
+        // Check if NIK exists first
+        $user = User::where('nik', $this->nik)->first();
+
+        if (! $user) {
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'nik' => __('NIK tidak ditemukan.'),
+            ]);
+        }
+
+        // Attempt to authenticate with NIK and password
         if (! Auth::attempt(['nik' => $this->nik, 'password' => $this->password])) {
             RateLimiter::hit($this->throttleKey());
-
             throw ValidationException::withMessages([
-                'nik' => __('auth.failed'),
+                'password' => __('Kata sandi salah.'),
             ]);
         }
 
