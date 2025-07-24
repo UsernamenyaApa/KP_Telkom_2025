@@ -17,7 +17,7 @@ test('reset password link can be requested', function () {
     $user = User::factory()->create();
 
     Volt::test('auth.forgot-password')
-        ->set('email', $user->email)
+        ->set('nik', $user->nik)
         ->call('sendPasswordResetLink');
 
     Notification::assertSentTo($user, ResetPassword::class);
@@ -29,7 +29,7 @@ test('reset password screen can be rendered', function () {
     $user = User::factory()->create();
 
     Volt::test('auth.forgot-password')
-        ->set('email', $user->email)
+        ->set('nik', $user->nik)
         ->call('sendPasswordResetLink');
 
     Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
@@ -47,12 +47,12 @@ test('password can be reset with valid token', function () {
     $user = User::factory()->create();
 
     Volt::test('auth.forgot-password')
-        ->set('email', $user->email)
+        ->set('nik', $user->nik)
         ->call('sendPasswordResetLink');
 
     Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
         $response = Volt::test('auth.reset-password', ['token' => $notification->token])
-            ->set('email', $user->email)
+            ->set('nik', $user->nik)
             ->set('password', 'password')
             ->set('password_confirmation', 'password')
             ->call('resetPassword');

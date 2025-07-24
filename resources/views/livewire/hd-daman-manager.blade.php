@@ -58,7 +58,7 @@
                         @forelse ($users as $user)
                             <tr>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-0">{{ $user->name }}</td>
-                                <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</td>
+                                <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500 dark:text-gray-400">{{ $user->nik }}</td>
                                 <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500 dark:text-gray-400">
                                     @foreach ($user->getRoleNames() as $role)
                                         <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">{{ $role }}</span>

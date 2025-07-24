@@ -81,7 +81,7 @@ class HdDamanManager extends Component
         $this->reset('name', 'nik');
         $this->loadUsers();
 
-        session()->flash('message', "Pengguna {$user->name} berhasil dibuat dengan email: {$email}. Passwordnya adalah NIK pengguna.");
+        session()->flash('message', "Pengguna {$user->name} berhasil dibuat. Passwordnya adalah NIK pengguna.");
     }
 
     public function assignHdDamanRole(User $user)
