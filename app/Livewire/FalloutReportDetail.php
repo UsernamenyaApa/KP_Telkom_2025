@@ -2,24 +2,26 @@
 
 namespace App\Livewire;
 
+use App\Jobs\SendTelegramNotificationJob;
 use App\Models\FalloutReport;
 use App\Models\FalloutStatus;
-use Livewire\Component;
-
-use Livewire\Attributes\Url;
 use Illuminate\Support\Facades\Auth;
-use App\Jobs\SendTelegramNotificationJob;
+use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class FalloutReportDetail extends Component
 {
-    
-
     #[Url]
     public $date;
+
     public FalloutReport $report;
+
     public $showStatusModal = false;
+
     public $newStatusId;
+
     public $keterangan = '';
+
     public $availableStatuses = [];
 
     public function mount($id, $date = null)
@@ -39,8 +41,9 @@ class FalloutReportDetail extends Component
             if ($currentStatusName === 'Open') {
                 return true; // All statuses available from Open
             }
+
             // For any other status, exclude Open and OnProgress
-            return !in_array($status->name, ['Open', 'OnProgress']);
+            return ! in_array($status->name, ['Open', 'OnProgress']);
         });
 
         $this->newStatusId = $this->report->fallout_status_id;
@@ -60,8 +63,6 @@ class FalloutReportDetail extends Component
             $this->report->fallout_status_id = $this->newStatusId;
             $this->report->resolution_notes = $this->keterangan;
 
-            
-
             $newStatus = FalloutStatus::find($this->newStatusId);
             if ($newStatus && in_array($newStatus->name, ['FA', 'eskalasi', 'input ulang', 'PI'])) {
                 $this->report->completed_at = now();
@@ -69,7 +70,7 @@ class FalloutReportDetail extends Component
 
             $this->report->save();
 
-            $esc = fn(?string $text) => str_replace(
+            $esc = fn (?string $text) => str_replace(
                 ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
                 ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
                 $text ?? '-'
@@ -92,12 +93,12 @@ class FalloutReportDetail extends Component
 
             // Add completed_at and duration if available
             if ($this->report->completed_at) {
-                $message .= "\n\n" .
-                            "✅ *Selesai pada:* " . $esc($this->report->completed_at->format('Y-m-d H:i:s')) . "\n";
+                $message .= "\n\n".
+                            '✅ *Selesai pada:* '.$esc($this->report->completed_at->format('Y-m-d H:i:s'))."\n";
 
                 if ($this->report->created_at) {
                     $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
-                    $message .= "⏳ *Durasi:* " . $esc($duration) . "\n";
+                    $message .= '⏳ *Durasi:* '.$esc($duration)."\n";
                 }
             }
 

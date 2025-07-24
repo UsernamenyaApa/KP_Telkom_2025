@@ -2,20 +2,24 @@
 
 namespace App\Livewire;
 
-use App\Models\PelurusanReport;
-use App\Models\FalloutStatus;
-use Livewire\Component;
-use Livewire\Attributes\Url;
-use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendTelegramNotificationJob;
+use App\Models\FalloutStatus;
+use App\Models\PelurusanReport;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class PelurusanReportDetail extends Component
 {
     #[Url]
     public $date;
+
     public PelurusanReport $report;
+
     public $showStatusModal = false;
+
     public $newStatusId;
+
     public $keterangan = '';
 
     public function mount($id, $date = null)
@@ -40,7 +44,7 @@ class PelurusanReportDetail extends Component
 
             $user = Auth::user();
 
-            $message = "✅ *Laporan Pelurusan Diambil!* ✅
+            $message = '✅ *Laporan Pelurusan Diambil!* ✅
 
 " .
                        "*ID Laporan:* `" . ($this->report->id ?? 'N/A') . "`
@@ -112,7 +116,7 @@ class PelurusanReportDetail extends Component
 
             $this->report->save();
 
-            $message = "
+            $message = '
 
 " .
                        "*Status Baru: {$newStatus->name}*\n\n" .
@@ -132,14 +136,14 @@ class PelurusanReportDetail extends Component
 
             // Add completed_at and duration if available
             if ($this->report->completed_at) {
-                $message .= "\n\n" .
-                            "
-" . $this->report->completed_at->format('Y-m-d H:i:s') . "\n";
+                $message .= "\n\n".
+                            '
+'.$this->report->completed_at->format('Y-m-d H:i:s')."\n";
 
                 if ($this->report->created_at) {
                     $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
-                    $message .= "
-" . $duration . "\n";
+                    $message .= '
+'.$duration."\n";
                 }
             }
 

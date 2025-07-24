@@ -2,15 +2,14 @@
 
 namespace App\Livewire;
 
-use App\Models\PelurusanReport;
+use App\Jobs\SendTelegramNotificationJob;
 use App\Models\FalloutStatus;
-use Livewire\Component;
-use Livewire\WithPagination;
-use Livewire\Attributes\Url;
+use App\Models\PelurusanReport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use App\Jobs\SendTelegramNotificationJob;
-use Telegram\Bot\Laravel\Facades\Telegram;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class PelurusanReportDashboard extends Component
 {
@@ -18,16 +17,22 @@ class PelurusanReportDashboard extends Component
 
     #[Url]
     public $date;
+
     public $search = '';
+
     #[Url]
     public $selectedOrderType = '';
+
     #[Url]
     public $selectedFalloutStatus = '';
+
     #[Url]
     public $selectedAssignedTo = '';
 
     public $orderTypes;
+
     public $falloutStatuses;
+
     public $assignedToUsers;
 
     public function mount()
@@ -90,18 +95,18 @@ class PelurusanReportDashboard extends Component
 
                 $user = Auth::user();
 
-                $message = "✅ *Laporan Pelurusan Diambil!* ✅\n\n" .
-                           "*ID Laporan:* `" . ($report->id ?? 'N/A') . "`\n" .
-                           "*Kode Pelurusan:* `" . ($report->pelurusan_code ?? 'N/A') . "`\n" .
-                           "*Tipe Order:* `" . ($report->orderType ? $report->orderType->name : 'N/A') . "`\n" .
-                           "*OrderID:* `" . ($report->order_id ?? 'N/A') . "`\n" .
-                           "*Nomor Layanan:* `" . ($report->nomer_layanan ?? 'N/A') . "`\n" .
-                           "*SN ONT:* `" . ($report->sn_ont ?? 'N/A') . "`\n" .
-                           "*Datek ODP:* `" . ($report->datek_odp ?? 'N/A') . "`\n" .
-                           "*Port ODP:* `" . ($report->port_odp ?? 'N/A') . "`\n\n" .
-                           "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "\n" .
-                           "*Waktu Diambil:* " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n\n" .
-                           "Mohon pantau status laporan ini.";
+                $message = "✅ *Laporan Pelurusan Diambil!* ✅\n\n".
+                           '*ID Laporan:* `'.($report->id ?? 'N/A')."`\n".
+                           '*Kode Pelurusan:* `'.($report->pelurusan_code ?? 'N/A')."`\n".
+                           '*Tipe Order:* `'.($report->orderType ? $report->orderType->name : 'N/A')."`\n".
+                           '*OrderID:* `'.($report->order_id ?? 'N/A')."`\n".
+                           '*Nomor Layanan:* `'.($report->nomer_layanan ?? 'N/A')."`\n".
+                           '*SN ONT:* `'.($report->sn_ont ?? 'N/A')."`\n".
+                           '*Datek ODP:* `'.($report->datek_odp ?? 'N/A')."`\n".
+                           '*Port ODP:* `'.($report->port_odp ?? 'N/A')."`\n\n".
+                           '*Diambil Oleh:* @'.($user->telegram_username ?? 'N/A')."\n".
+                           '*Waktu Diambil:* '.($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A')."\n\n".
+                           'Mohon pantau status laporan ini.';
 
                 if ($user->telegram_user_id) {
                     SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
@@ -126,7 +131,7 @@ class PelurusanReportDashboard extends Component
                 $query->whereDate('created_at', $this->date);
             })
             ->when($this->search, function ($query) {
-                $query->where('order_id', 'like', '%' . $this->search . '%');
+                $query->where('order_id', 'like', '%'.$this->search.'%');
             })
             ->when($this->selectedOrderType, function ($query) {
                 $query->where('tipe_order_id', $this->selectedOrderType);

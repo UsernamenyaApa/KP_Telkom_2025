@@ -140,7 +140,7 @@
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                                 @forelse ($reports as $report)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-center text-sm font-medium text-gray-900 dark:text-white font-istok-web">{{ $report->id_harian }}</td>
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-center text-sm font-medium text-gray-900 dark:text-white font-istok-web">{{ $loop->index + $reports->firstItem() }}</td>
                                         <td class="py-4 px-3 text-sm font-medium text-gray-900 dark:text-white font-istok-web break-words">{{ $report->incident_ticket }}</td>
                                         <td class="px-3 py-4 text-sm text-gray-500 dark:text-white font-istok-web">{{ $report->orderType?->name }}</td>
                                         <td class="px-3 py-4 text-sm text-gray-500 dark:text-white font-istok-web break-words">{{ $report->order_id }}</td>
@@ -148,7 +148,7 @@
                                             @php
                                                 $statusColorClass = '';
                                                 switch ($report->falloutStatus?->name) {
-                                                    case 'Eskalasi':
+                                                    case 'eskalasi':
                                                         $statusColorClass = 'bg-red-500/50';
                                                         break;
                                                     case 'FA':
@@ -160,8 +160,11 @@
                                                     case 'Open':
                                                         $statusColorClass = 'bg-blue-500/50';
                                                         break;
-                                                    case 'Re-Input':
-                                                        $statusColorClass = 'bg-orange-500/50';
+                                                    case 'input ulang':
+                                                        $statusColorClass = 'bg-[#E79C56]/50';
+                                                        break;
+                                                    case 'PI':
+                                                        $statusColorClass = 'bg-purple-500/50';
                                                         break;
                                                     case 'Completed':
                                                         $statusColorClass = 'bg-green-700/50';

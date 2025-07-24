@@ -32,7 +32,7 @@ new #[Layout('components.layouts.minimal')] class extends Component
                     Pembuatan akun dapat dilakukan melalui bot Telegram
                 </p>
             <a href="https://t.me/kp_telkom_2025_bot" target="_blank"
-                class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 transition-colors">
+                class="px-3 py-1.5 text-sm font-semibold text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 transition-colors">
                 @KPMAGANGBOT
             </a>
         </div>

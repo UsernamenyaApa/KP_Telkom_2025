@@ -5,21 +5,25 @@ namespace App\Livewire\Dashboard;
 use App\Models\FalloutReport;
 use App\Models\PelurusanReport;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Livewire\Component;
-
 use Livewire\Attributes\Reactive;
+use Livewire\Component;
 
 class DailyReportDashboard extends Component
 {
     public $users;
+
     public $userCount = 0;
+
     public $reportRows = [];
+
     public $reportData = [];
+
     public $userTotals = [];
+
     public $rowTotals = [];
+
     public $grandTotal = 0;
 
     #[Reactive]
@@ -102,6 +106,7 @@ class DailyReportDashboard extends Component
     public function render(): View
     {
         $this->loadReportData();
+
         return view('livewire.dashboard.daily-report-dashboard');
     }
 }

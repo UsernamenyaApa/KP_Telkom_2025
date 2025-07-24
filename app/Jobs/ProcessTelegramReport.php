@@ -13,7 +13,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 /**
  * Memproses dan menyimpan data laporan fallout dari state percakapan Telegram.
@@ -26,8 +25,7 @@ class ProcessTelegramReport implements ShouldQueue
         protected int $chatId,
         protected array $state,
         protected int $tipeOrderId
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {
@@ -35,12 +33,12 @@ class ProcessTelegramReport implements ShouldQueue
 
         try {
             $userInfo = data_get($this->state, 'user_info');
-            if (!$userInfo) {
-                throw new \Exception("Informasi pengguna tidak ditemukan dalam state.");
+            if (! $userInfo) {
+                throw new \Exception('Informasi pengguna tidak ditemukan dalam state.');
             }
 
             $reportData = data_get($this->state, 'report_data', []);
-            
+
             $dbData = $this->prepareReportDataForStorage($reportData, $userInfo);
             $falloutReport = $this->saveReportToDatabase($dbData);
             
@@ -51,14 +49,14 @@ class ProcessTelegramReport implements ShouldQueue
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->notifyUserOnFailure("Terjadi kesalahan teknis saat menyimpan laporan.");
+            $this->notifyUserOnFailure('Terjadi kesalahan teknis saat menyimpan laporan.');
         }
     }
-    
+
     private function prepareReportDataForStorage(array $reportData, array $userInfo): array
     {
         $portOdp = data_get($reportData, 'port_odp');
-        
+
         $data = [
             'tipe_order_id' => $this->tipeOrderId,
             'order_id' => data_get($reportData, 'order_id'),
@@ -89,11 +87,11 @@ class ProcessTelegramReport implements ShouldQueue
         return DB::transaction(function () use ($dbData) {
             $today = Carbon::today();
             $idHarian = (FalloutReport::whereDate('created_at', $today)->max('id_harian') ?? 0) + 1;
-            
+
             $openStatus = FalloutStatus::where('name', 'Open')->firstOrFail();
 
             $dbData['id_harian'] = $idHarian;
-            $dbData['fallout_code'] = 'FA' . $today->format('Ymd') . str_pad($idHarian, 3, '0', STR_PAD_LEFT);
+            $dbData['fallout_code'] = 'FA'.$today->format('Ymd').str_pad($idHarian, 3, '0', STR_PAD_LEFT);
             $dbData['fallout_status_id'] = $openStatus->id;
 
             return FalloutReport::create($dbData);
@@ -105,8 +103,8 @@ class ProcessTelegramReport implements ShouldQueue
         // Use the real name if available (Office Staff), otherwise use the Telegram username.
         $reporterName = data_get($userInfo, 'name', data_get($userInfo, 'username', 'N/A'));
         $createdBy = data_get($userInfo, 'username') ? "@{$userInfo['username']}" : $reporterName;
-        
-        $esc = fn(?string $text) => str_replace(
+
+        $esc = fn (?string $text) => str_replace(
             ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
             ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
             $text ?? '-'
@@ -114,34 +112,37 @@ class ProcessTelegramReport implements ShouldQueue
 
         // Sanitize input for the code block to prevent parsing errors.
         // Within `pre` blocks, all `` and `` ` `` characters must be escaped.
-        $description = $report->incident_fallout_description ?? '-';        $keterangan = $report->keterangan ?? '-';        $sanitizedDescription = str_replace(['\\', '`'], ['/', '\\`'], $description);        $sanitizedKeterangan = str_replace(['\\', '`'], ['/', '\\`'], $keterangan);
+        $description = $report->incident_fallout_description ?? '-';
+        $keterangan = $report->keterangan ?? '-';
+        $sanitizedDescription = str_replace(['\\', '`'], ['/', '\\`'], $description);
+        $sanitizedKeterangan = str_replace(['\\', '`'], ['/', '\\`'], $keterangan);
 
         $lines = [
-            "📊 *Laporan Fallout Baru*",
-            "",
-            "*ID Laporan:* `" . $esc($report->id) . "`",
-            "*Kode Fallout:* `" . $esc($report->fallout_code) . "`",
-            "*Tipe Order:* `" . $esc($report->orderType->name) . "`",
-            "*OrderID:* `" . $esc($report->order_id) . "`",
-            "*Nomor Layanan:* `" . $esc($report->nomer_layanan) . "`",
-            "*SN ONT:* `" . $esc($report->sn_ont) . "`",
-            "*Datek ODP:* `" . $esc($report->datek_odp) . "`",
-            "*Port ODP:* `" . $esc($report->port_odp) . "`",
-            "*Tiket Insiden:* `" . $esc($report->incident_ticket) . "`",
-            "",
-            "*Keterangan Insiden:*",
-            "```",
+            '📊 *Laporan Fallout Baru*',
+            '',
+            '*ID Laporan:* `'.$esc($report->id).'`',
+            '*Kode Fallout:* `'.$esc($report->fallout_code).'`',
+            '*Tipe Order:* `'.$esc($report->orderType->name).'`',
+            '*OrderID:* `'.$esc($report->order_id).'`',
+            '*Nomor Layanan:* `'.$esc($report->nomer_layanan).'`',
+            '*SN ONT:* `'.$esc($report->sn_ont).'`',
+            '*Datek ODP:* `'.$esc($report->datek_odp).'`',
+            '*Port ODP:* `'.$esc($report->port_odp).'`',
+            '*Tiket Insiden:* `'.$esc($report->incident_ticket).'`',
+            '',
+            '*Keterangan Insiden:*',
+            '```',
             $sanitizedDescription,
-            "```",
-            "*Keterangan Tambahan:*",
-            "```",
+            '```',
+            '*Keterangan Tambahan:*',
+            '```',
             $sanitizedKeterangan,
-            "```",
-            "----------------------------------------",
-            "*Dibuat Oleh:* " . $esc($createdBy),
-            "*Waktu Dibuat:* " . $esc($report->created_at->format('Y-m-d H:i:s')),
+            '```',
+            '----------------------------------------',
+            '*Dibuat Oleh:* '.$esc($createdBy),
+            '*Waktu Dibuat:* '.$esc($report->created_at->format('Y-m-d H:i:s')),
         ];
-        
+
         $reportText = implode("\n", $lines);
         $groupChat = \App\Models\TelegramGroup::first();
         $reporterChatId = data_get($userInfo, 'id'); // Get reporter's chat ID from userInfo
@@ -151,15 +152,9 @@ class ProcessTelegramReport implements ShouldQueue
             SendTelegramNotificationJob::dispatch($chatId, $reportText, null, 'MarkdownV2');
         }
     }
-    
-    
 
-    
-    
     private function notifyUserOnFailure(string $message): void
     {
         SendTelegramNotificationJob::dispatch($this->chatId, "❌ Gagal memproses laporan: {$message}");
     }
-
-    
 }

@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\PelurusanReport;
 use App\Models\FalloutStatus;
+use App\Models\PelurusanReport;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -13,7 +13,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class ProcessTelegramPelurusanReport implements ShouldQueue
 {
@@ -23,8 +22,7 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         protected int $chatId,
         protected array $state,
         protected int $tipeOrderId
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {
@@ -32,12 +30,12 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
 
         try {
             $userInfo = data_get($this->state, 'user_info');
-            if (!$userInfo) {
-                throw new \Exception("Informasi pengguna tidak ditemukan dalam state.");
+            if (! $userInfo) {
+                throw new \Exception('Informasi pengguna tidak ditemukan dalam state.');
             }
 
             $reportData = data_get($this->state, 'report_data', []);
-            
+
             $dbData = $this->prepareReportDataForStorage($reportData, $userInfo);
             $pelurusanReport = $this->saveReportToDatabase($dbData);
             
@@ -48,10 +46,10 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $this->notifyUserOnFailure("Terjadi kesalahan teknis saat menyimpan laporan.");
+            $this->notifyUserOnFailure('Terjadi kesalahan teknis saat menyimpan laporan.');
         }
     }
-    
+
     private function prepareReportDataForStorage(array $reportData, array $userInfo): array
     {
         $portOdp = data_get($reportData, 'port_odp');
@@ -60,7 +58,7 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
             'tipe_order_id' => $this->tipeOrderId,
             'nomer_layanan' => data_get($reportData, 'nomer_layanan'),
             'datek_odp' => data_get($reportData, 'datek_odp'),
-            'port_odp' => is_numeric($portOdp) ? (int)$portOdp : null,
+            'port_odp' => is_numeric($portOdp) ? (int) $portOdp : null,
             'image' => data_get($reportData, 'image'),
         ];
 
@@ -94,11 +92,11 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         return DB::transaction(function () use ($dbData) {
             $today = Carbon::today();
             $idHarian = (PelurusanReport::whereDate('created_at', $today)->max('id_harian') ?? 0) + 1;
-            
+
             $openStatus = FalloutStatus::where('name', 'Open')->firstOrFail();
 
             $dbData['id_harian'] = $idHarian;
-            $dbData['pelurusan_code'] = 'PL' . $today->format('Ymd') . str_pad($idHarian, 3, '0', STR_PAD_LEFT);
+            $dbData['pelurusan_code'] = 'PL'.$today->format('Ymd').str_pad($idHarian, 3, '0', STR_PAD_LEFT);
             $dbData['fallout_status_id'] = $openStatus->id;
 
             return PelurusanReport::create($dbData);
@@ -111,25 +109,25 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         $reporterName = data_get($userInfo, 'name', data_get($userInfo, 'username', 'N/A'));
         $createdBy = data_get($userInfo, 'username') ? "@{$userInfo['username']}" : $reporterName;
 
-        $esc = fn(?string $text) => str_replace(
+        $esc = fn (?string $text) => str_replace(
             ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
             ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
             $text ?? '-'
         );
 
         $lines = [
-            "✏️ *Laporan Pelurusan Baru*",
-            "",
-            "*ID Laporan:* `" . $esc($report->id) . "`",
-            "*Kode Pelurusan:* `" . $esc($report->pelurusan_code) . "`",
-            "*Tipe Order:* `" . $esc($report->orderType->name) . "`",
+            '✏️ *Laporan Pelurusan Baru*',
+            '',
+            '*ID Laporan:* `'.$esc($report->id).'`',
+            '*Kode Pelurusan:* `'.$esc($report->pelurusan_code).'`',
+            '*Tipe Order:* `'.$esc($report->orderType->name).'`',
         ];
 
         if ($report->tipe_order_id == 8) { // Ex Gangguan
-            $lines[] = "*Nomor Incident:* `" . $esc($report->order_id) . "`";
-            $lines[] = "*Nomor Layanan:* `" . $esc($report->nomer_layanan) . "`";
-            $lines[] = "*Datek ODP:* `" . $esc($report->datek_odp) . "`";
-            $lines[] = "*Port ODP:* `" . $esc($report->port_odp) . "`";
+            $lines[] = '*Nomor Incident:* `'.$esc($report->order_id).'`';
+            $lines[] = '*Nomor Layanan:* `'.$esc($report->nomer_layanan).'`';
+            $lines[] = '*Datek ODP:* `'.$esc($report->datek_odp).'`';
+            $lines[] = '*Port ODP:* `'.$esc($report->port_odp).'`';
         } else {
             // Sanitize input for the code block to prevent parsing errors.
             // Within `pre` blocks, all `\` and `` ` `` characters must be escaped.
@@ -138,25 +136,25 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
             $sanitizedDescription = str_replace(['\\', '`'], ['\\', '\`'], $description);
             $sanitizedKeterangan = str_replace(['\\', '`'], ['\\', '\`'], $keterangan);
 
-            $lines[] = "*OrderID:* `" . $esc($report->order_id) . "`";
-            $lines[] = "*Nomor Layanan:* `" . $esc($report->nomer_layanan) . "`";
-            $lines[] = "*SN ONT:* `" . $esc($report->sn_ont) . "`";
-            $lines[] = "*Datek ODP:* `" . $esc($report->datek_odp) . "`";
-            $lines[] = "*Port ODP:* `" . $esc($report->port_odp) . "`";
-            $lines[] = "";
-            $lines[] = "*Keterangan Insiden:*";
-            $lines[] = "```";
+            $lines[] = '*OrderID:* `'.$esc($report->order_id).'`';
+            $lines[] = '*Nomor Layanan:* `'.$esc($report->nomer_layanan).'`';
+            $lines[] = '*SN ONT:* `'.$esc($report->sn_ont).'`';
+            $lines[] = '*Datek ODP:* `'.$esc($report->datek_odp).'`';
+            $lines[] = '*Port ODP:* `'.$esc($report->port_odp).'`';
+            $lines[] = '';
+            $lines[] = '*Keterangan Insiden:*';
+            $lines[] = '```';
             $lines[] = $sanitizedDescription;
-            $lines[] = "```";
-            $lines[] = "*Keterangan Tambahan:*";
-            $lines[] = "```";
+            $lines[] = '```';
+            $lines[] = '*Keterangan Tambahan:*';
+            $lines[] = '```';
             $lines[] = $sanitizedKeterangan;
-            $lines[] = "```";
+            $lines[] = '```';
         }
 
-        $lines[] = "----------------------------------------";
-        $lines[] = "*Dibuat Oleh:* " . $esc($createdBy);
-        $lines[] = "*Waktu Dibuat:* " . $esc($report->created_at->format('Y-m-d H:i:s'));
+        $lines[] = '----------------------------------------';
+        $lines[] = '*Dibuat Oleh:* '.$esc($createdBy);
+        $lines[] = '*Waktu Dibuat:* '.$esc($report->created_at->format('Y-m-d H:i:s'));
 
         $reportText = implode("\n", $lines);
         $groupChat = \App\Models\TelegramGroup::first();
@@ -167,15 +165,9 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
             SendTelegramNotificationJob::dispatch($chatId, $reportText, null, 'MarkdownV2');
         }
     }
-    
-    
 
-    
-    
     private function notifyUserOnFailure(string $message): void
     {
         SendTelegramNotificationJob::dispatch($this->chatId, "❌ Gagal memproses laporan: {$message}");
     }
-
-    
 }

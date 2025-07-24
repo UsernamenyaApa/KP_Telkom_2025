@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\FalloutReport;
 use App\Jobs\SendTelegramNotificationJob;
+use App\Models\FalloutReport;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -43,6 +43,7 @@ class SendHourlyFalloutNotifications extends Command
         if ($unassignedReports->isEmpty() && $inProgressReports->isEmpty()) {
             $this->info('No reports to notify.');
             Log::info('No pending fallout reports to notify.');
+
             return 0;
         }
 
@@ -65,7 +66,7 @@ class SendHourlyFalloutNotifications extends Command
             $notificationMessage .= "\n";
         }
 
-        $notificationMessage .= "Mohon untuk segera ditindaklanjuti.";
+        $notificationMessage .= 'Mohon untuk segera ditindaklanjuti.';
 
         $groupChat = \App\Models\TelegramGroup::first();
         $destination = $groupChat ? $groupChat->chat_id : env('TELEGRAM_CHANNEL_ID');
@@ -76,8 +77,8 @@ class SendHourlyFalloutNotifications extends Command
                 $this->info('Notification sent successfully.');
                 Log::info('Hourly fallout notification sent successfully.');
             } catch (\Exception $e) {
-                $this->error('Failed to send notification: ' . $e->getMessage());
-                Log::error('Failed to send hourly fallout notification: ' . $e->getMessage());
+                $this->error('Failed to send notification: '.$e->getMessage());
+                Log::error('Failed to send hourly fallout notification: '.$e->getMessage());
             }
         } else {
             $this->warn('Telegram Group or Channel ID not configured.');

@@ -2,19 +2,20 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 class HdDamanManager extends Component
 {
     public $users;
+
     public $searchTerm = '';
 
     // Properti untuk pengguna baru
     public $name;
+
     public $nik;
 
     protected $rules = [
@@ -51,6 +52,19 @@ class HdDamanManager extends Component
     {
         $this->validate();
 
+        // 1. Auto-generate email
+        $email = Str::of($this->name)
+            ->lower()
+            ->split('/\s+/') // split by one or more spaces
+            ->take(2)
+            ->join('').'@tif.co.id';
+
+        // Periksa apakah email yang dihasilkan sudah ada
+        if (User::where('email', $email)->exists()) {
+            $this->addError('name', "Generated email ({$email}) already exists. Please use a different name.");
+
+            return;
+        }
         // 2. Password adalah NIK
         $password = $this->nik;
 
