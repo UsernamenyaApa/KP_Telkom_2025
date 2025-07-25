@@ -96,7 +96,7 @@ class PelurusanReportDashboard extends Component
                 $user = Auth::user();
 
                 $message = "✅ *Laporan Pelurusan Diambil!* ✅\n\n".
-                           '*ID Laporan:* `'.($report->id ?? 'N/A')."`\n".
+                           '*ID Laporan:* `'.($report->id_harian ?? 'N/A')."`\n".
                            '*Kode Pelurusan:* `'.($report->pelurusan_code ?? 'N/A')."`\n".
                            '*Tipe Order:* `'.($report->orderType ? $report->orderType->name : 'N/A')."`\n".
                            '*OrderID:* `'.($report->order_id ?? 'N/A')."`\n".

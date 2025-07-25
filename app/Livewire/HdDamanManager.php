@@ -52,16 +52,9 @@ class HdDamanManager extends Component
     {
         $this->validate();
 
-        // 1. Auto-generate email
-        $email = Str::of($this->name)
-            ->lower()
-            ->split('/\s+/') // split by one or more spaces
-            ->take(2)
-            ->join('').'@tif.co.id';
-
-        // Periksa apakah email yang dihasilkan sudah ada
-        if (User::where('email', $email)->exists()) {
-            $this->addError('name', "Generated email ({$email}) already exists. Please use a different name.");
+        // Periksa apakah NIK yang dimasukkan sudah ada
+        if (User::where('nik', $this->nik)->exists()) {
+            $this->addError('nik', "NIK {$this->nik} sudah terdaftar. Silakan gunakan NIK yang lain.");
 
             return;
         }

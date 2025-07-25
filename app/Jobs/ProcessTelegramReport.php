@@ -120,7 +120,7 @@ class ProcessTelegramReport implements ShouldQueue
         $lines = [
             '📊 *Laporan Fallout Baru*',
             '',
-            '*ID Laporan:* `'.$esc($report->id).'`',
+            '*ID Laporan:* `'.$esc($report->id_harian).'`',
             '*Kode Fallout:* `'.$esc($report->fallout_code).'`',
             '*Tipe Order:* `'.$esc($report->orderType->name).'`',
             '*OrderID:* `'.$esc($report->order_id).'`',

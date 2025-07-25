@@ -98,7 +98,7 @@ class FalloutReportDashboard extends Component
                 $user = Auth::user();
 
                 $message = "✅ *Laporan Fallout Diambil!* ✅\n\n".
-                           '*ID Laporan:* `'.($report->id ?? 'N/A')."`\n".
+                           '*ID Laporan:* `'.($report->id_harian ?? 'N/A')."`\n".
                            '*Kode Fallout:* `'.($report->fallout_code ?? 'N/A')."`\n".
                            '*Tipe Order:* `'.($report->orderType ? $report->orderType->name : 'N/A')."`\n".
                            '*OrderID:* `'.($report->order_id ?? 'N/A')."`\n".
