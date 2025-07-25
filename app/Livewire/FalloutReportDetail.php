@@ -121,8 +121,7 @@ class FalloutReportDetail extends Component
 
             // Send to the user who changed the status
             if (auth()->user()->telegram_user_id) {
-                $changerMessage = "✅ Anda telah berhasil mengubah status laporan ID #{$this->report->id} (`{$this->report->fallout_code}`) menjadi *{$newStatus->name}*.";
-                SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $changerMessage, null, 'MarkdownV2');
+                SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $message, null, 'MarkdownV2');
             }
 
             $this->closeStatusModal();
@@ -177,14 +176,61 @@ class FalloutReportDetail extends Component
                 }
 
                 if ($reporterChatId) {
-                    $personalMessage = "🔔 Laporan Anda dengan ID #{$this->report->id} telah diambil oleh @" . auth()->user()->telegram_username . " pada " . $this->report->taken_at->format('Y-m-d H:i:s') . ".";
-                    SendTelegramNotificationJob::dispatch($reporterChatId, $personalMessage);
+                    $personalMessage = "✅ Laporan Fallout Diambil! ✅
+
+" .
+                                       "*ID Laporan:* `" . $this->report->id_harian . "`
+" .
+                                       "*Kode Fallout:* `" . $this->report->fallout_code . "`
+" .
+                                       "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
+" .
+                                       "*OrderID:* `" . $this->report->order_id . "`
+" .
+                                       "*Nomor Layanan:* `" . $this->report->nomer_layanan . "`
+" .
+                                       "*SN ONT:* `" . $this->report->sn_ont . "`
+" .
+                                       "*Datek ODP:* `" . $this->report->datek_odp . "`
+" .
+                                       "*Port ODP:* `" . $this->report->port_odp . "`
+
+" .
+                                       "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
+" .
+                                       "*Waktu Diambil:* " . $this->report->taken_at->format('Y-m-d H:i:s');
+                    SendTelegramNotificationJob::dispatch($reporterChatId, $personalMessage, null, 'MarkdownV2');
                 }
 
                 // Send to the user who took the order
                 if (auth()->user()->telegram_user_id) {
-                    $takerMessage = "✅ Anda telah berhasil mengambil laporan dengan ID #{$this->report->id} (`{$this->report->fallout_code}`). Mohon segera ditindaklanjuti.";
-                    SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $takerMessage);
+                    $takerMessage = "✅ Anda telah berhasil mengambil laporan.✅
+
+" .
+                                    "Berikut detail laporan:
+
+" .
+                                    "*ID Laporan:* `" . $this->report->id_harian . "`
+" .
+                                    "*Kode Fallout:* `" . $this->report->fallout_code . "`
+" .
+                                    "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
+" .
+                                    "*OrderID:* `" . $this->report->order_id . "`
+" .
+                                    "*Nomor Layanan:* `" . $this->report->nomer_layanan . "`
+" .
+                                    "*SN ONT:* `" . $this->report->sn_ont . "`
+" .
+                                    "*Datek ODP:* `" . $this->report->datek_odp . "`
+" .
+                                    "*Port ODP:* `" . $this->report->port_odp . "`
+
+" .
+                                    "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
+" .
+                                    "*Waktu Diambil:* " . $this->report->taken_at->format('Y-m-d H:i:s');
+                    SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $takerMessage, null, 'MarkdownV2');
                 }
 
                 // Refresh the component to reflect changes

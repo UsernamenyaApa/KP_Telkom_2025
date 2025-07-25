@@ -24,7 +24,7 @@
                     document.documentElement.classList.remove('dark');
                 }
             });
-        }">
+        ">
         <flux:sidebar
             class="fixed inset-y-0 left-0 z-50 w-64 border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900"
             x-show="sidebarOpen"

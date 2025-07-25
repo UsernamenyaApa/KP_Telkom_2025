@@ -114,13 +114,13 @@ class ProcessTelegramReport implements ShouldQueue
         // Within `pre` blocks, all `` and `` ` `` characters must be escaped.
         $description = $report->incident_fallout_description ?? '-';
         $keterangan = $report->keterangan ?? '-';
-        $sanitizedDescription = str_replace(['\\', '`'], ['/', '\\`'], $description);
-        $sanitizedKeterangan = str_replace(['\\', '`'], ['/', '\\`'], $keterangan);
+        $sanitizedDescription = str_replace(['', '`'], ['', '`'], $description);
+        $sanitizedKeterangan = str_replace(['', '`'], ['', '`'], $keterangan);
 
         $lines = [
-            '📊 *Laporan Fallout Baru*',
+            '📊 *Laporan Fallout Baru* 📊',
             '',
-            '*ID Laporan:* `'.$esc($report->id).'`',
+            '*ID Laporan:* `'.$esc($report->id_harian).'`',
             '*Kode Fallout:* `'.$esc($report->fallout_code).'`',
             '*Tipe Order:* `'.$esc($report->orderType->name).'`',
             '*OrderID:* `'.$esc($report->order_id).'`',
@@ -147,6 +147,9 @@ class ProcessTelegramReport implements ShouldQueue
         $groupChat = \App\Models\TelegramGroup::first();
         $reporterChatId = data_get($userInfo, 'id'); // Get reporter's chat ID from userInfo
         $destinations = array_filter([env('TELEGRAM_CHANNEL_ID'), $groupChat ? $groupChat->chat_id : null, $reporterChatId]);
+
+        Log::info('Group Chat:', ['groupChat' => $groupChat]);
+        Log::info('Destinations:', ['destinations' => $destinations]);
 
         foreach ($destinations as $chatId) {
             SendTelegramNotificationJob::dispatch($chatId, $reportText, null, 'MarkdownV2');
