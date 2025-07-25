@@ -44,21 +44,46 @@ class PelurusanReportDetail extends Component
 
             $user = Auth::user();
 
-            $message = "✅ *Laporan Pelurusan Diambil!* ✅\n\n" .
-                "*ID Laporan:* `" . ($this->report->id ?? 'N/A') . "`\n" .
-                "*Kode Pelurusan:* `" . ($this->report->pelurusan_code ?? 'N/A') . "`\n" .
-                "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`\n" .
-                "*OrderID:* `" . ($this->report->order_id ?? 'N/A') . "`\n" .
-                "*Nomor Layanan:* `" . ($this->report->nomer_layanan ?? 'N/A') . "`\n" .
-                "*SN ONT:* `" . ($this->report->sn_ont ?? 'N/A') . "`\n" .
-                "*Datek ODP:* `" . ($this->report->datek_odp ?? 'N/A') . "`\n" .
-                "*Port ODP:* `" . ($this->report->port_odp ?? 'N/A') . "`\n\n" .
-                "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "\n" .
-                "*Waktu Diambil:* " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
+            $message = "✅ Laporan Pelurusan Diambil! ✅\n\n" .
+                "ID Laporan: " . ($this->report->id_harian ?? 'N/A') . "\n" .
+                "Kode Pelurusan: " . ($this->report->pelurusan_code ?? 'N/A') . "\n" .
+                "Tipe Order: " . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "\n" .
+                "OrderID: " . ($this->report->order_id ?? 'N/A') . "\n" .
+                "Nomor Layanan: " . ($this->report->nomer_layanan ?? 'N/A') . "\n" .
+                "SN ONT: " . ($this->report->sn_ont ?? 'N/A') . "\n" .
+                "Datek ODP: " . ($this->report->datek_odp ?? 'N/A') . "\n" .
+                "Port ODP: " . ($this->report->port_odp ?? 'N/A') . "\n\n" .
+                "Diambil Oleh: @" . ($user->telegram_username ?? 'N/A') . "\n" .
+                "Waktu Diambil: " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
 
             if ($user->telegram_user_id) {
-                $takerMessage = "✅ Anda telah berhasil mengambil laporan pelurusan dengan ID #{$this->report->id} (`{$this->report->pelurusan_code}`). Mohon segera ditindaklanjuti.";
-                SendTelegramNotificationJob::dispatch($user->telegram_user_id, $takerMessage);
+                $takerMessage = "✅ Anda telah berhasil mengambil laporan pelurusan dengan ID #{$this->report->id_harian} (`{$this->report->pelurusan_code}`). Mohon segera ditindaklanjuti.
+
+" .
+                                "Berikut detail laporan:
+
+" .
+                                "*ID Laporan:* `" . ($this->report->id_harian ?? 'N/A') . "`
+" .
+                                "*Kode Pelurusan:* `" . ($this->report->pelurusan_code ?? 'N/A') . "`
+" .
+                                "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
+" .
+                                "*OrderID:* `" . ($this->report->order_id ?? 'N/A') . "`
+" .
+                                "*Nomor Layanan:* `" . ($this->report->nomer_layanan ?? 'N/A') . "`
+" .
+                                "*SN ONT:* `" . ($this->report->sn_ont ?? 'N/A') . "`
+" .
+                                "*Datek ODP:* `" . ($this->report->datek_odp ?? 'N/A') . "`
+" .
+                                "*Port ODP:* `" . ($this->report->port_odp ?? 'N/A') . "`
+
+" .
+                                "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "
+" .
+                                "*Waktu Diambil:* " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
+                SendTelegramNotificationJob::dispatch($user->telegram_user_id, $takerMessage, null, 'MarkdownV2');
             }
 
             if ($this->report->reporter_user_id) {
@@ -68,7 +93,30 @@ class PelurusanReportDetail extends Component
             }
 
             if ($reporterChatId) {
-                SendTelegramNotificationJob::dispatch($reporterChatId, $message);
+                $reporterMessage = "✅ Laporan Pelurusan Diambil! ✅
+
+" .
+                                   "*ID Laporan:* `" . ($this->report->id_harian ?? 'N/A') . "`
+" .
+                                   "*Kode Pelurusan:* `" . ($this->report->pelurusan_code ?? 'N/A') . "`
+" .
+                                   "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
+" .
+                                   "*OrderID:* `" . ($this->report->order_id ?? 'N/A') . "`
+" .
+                                   "*Nomor Layanan:* `" . ($this->report->nomer_layanan ?? 'N/A') . "`
+" .
+                                   "*SN ONT:* `" . ($this->report->sn_ont ?? 'N/A') . "`
+" .
+                                   "*Datek ODP:* `" . ($this->report->datek_odp ?? 'N/A') . "`
+" .
+                                   "*Port ODP:* `" . ($this->report->port_odp ?? 'N/A') . "`
+
+" .
+                                   "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "
+" .
+                                   "*Waktu Diambil:* " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
+                SendTelegramNotificationJob::dispatch($reporterChatId, $reporterMessage, null, 'MarkdownV2');
             }
 
             $groupChat = \App\Models\TelegramGroup::first();
