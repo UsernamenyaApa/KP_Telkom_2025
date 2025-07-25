@@ -114,8 +114,18 @@ class FalloutReportDashboard extends Component
                 }
 
                 if ($report->reporter && $report->reporter->telegram_user_id) {
-                    $reporterMessage = "Laporan Anda dengan ID #{$report->id_harian} telah diambil oleh @" . ($user->telegram_username ?? 'N/A') . " pada " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . ".";
-                    SendTelegramNotificationJob::dispatch($report->reporter->telegram_user_id, $reporterMessage);
+                    $reporterMessage = "✅ Laporan Fallout Diambil! ✅\n\n" .
+                                       "*ID Laporan:* " . ($report->id_harian ?? 'N/A') . "\n" .
+                                       "*Kode Fallout:* " . ($report->fallout_code ?? 'N/A') . "\n" .
+                                       "*Tipe Order:* " . ($report->orderType ? $report->orderType->name : 'N/A') . "\n" .
+                                       "*OrderID:* " . ($report->order_id ?? 'N/A') . "\n" .
+                                       "*Nomor Layanan:* " . ($report->nomer_layanan ?? 'N/A') . "\n" .
+                                       "*SN ONT:* " . ($report->sn_ont ?? 'N/A') . "\n" .
+                                       "*Datek ODP:* " . ($report->datek_odp ?? 'N/A') . "\n" .
+                                       "*Port ODP:* " . ($report->port_odp ?? 'N/A') . "\n\n" .
+                                       "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "\n" .
+                                       "*Waktu Diambil:* " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
+                    SendTelegramNotificationJob::dispatch($report->reporter->telegram_user_id, $reporterMessage, null, 'MarkdownV2');
                 }
 
                 $groupChat = \App\Models\TelegramGroup::first();
