@@ -189,6 +189,7 @@ class FalloutReportDetail extends Component
 
                 // Refresh the component to reflect changes
                 $this->report = $this->report->fresh(['orderType', 'falloutStatus', 'reporter', 'assignedToUser']);
+                $this->dispatch('reportAssigned');
             }
         }
     }

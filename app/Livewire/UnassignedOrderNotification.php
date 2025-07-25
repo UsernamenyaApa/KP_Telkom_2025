@@ -13,6 +13,8 @@ class UnassignedOrderNotification extends Component
     public $unassignedFalloutReports = [];
     public $unassignedPelurusanReports = [];
 
+    protected $listeners = ['reportAssigned' => 'loadUnassignedReports'];
+
     public function mount()
     {
         $this->loadUnassignedReports();
@@ -24,11 +26,13 @@ class UnassignedOrderNotification extends Component
     {
         $this->unassignedFalloutReports = FalloutReport::whereNull('assigned_to_user_id')
             ->where('fallout_status_id', 1) // Assuming 1 is 'Open' status
+            ->latest()
             ->get();
         $this->unassignedFalloutReportsCount = $this->unassignedFalloutReports->count();
 
         $this->unassignedPelurusanReports = PelurusanReport::whereNull('assigned_to_user_id')
-            ->where('fallout_status_id', 1) // Assuming 1 is 'Open' status
+            ->where('fallout_status_id', 1) // Corrected to use fallout_status_id
+            ->latest()
             ->get();
         $this->unassignedPelurusanReportsCount = $this->unassignedPelurusanReports->count();
     }
