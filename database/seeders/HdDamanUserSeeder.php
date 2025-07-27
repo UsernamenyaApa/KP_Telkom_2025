@@ -31,7 +31,7 @@ class HdDamanUserSeeder extends Seeder
                 ['nik' => $userData['nik']],
                 [
                     'name' => $userData['name'],
-                    'password' => Hash::make('password'), // Default password
+                    'password' => Hash::make($userData['nik']), // Default password
                 ]
             );
 

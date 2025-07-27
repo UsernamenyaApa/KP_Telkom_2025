@@ -213,7 +213,7 @@ class PelurusanReportDetail extends Component
             return 'N/A';
         }
 
-        $chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+        $chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '=', '|', '{', '}', '!'];
         return str_replace($chars, array_map(fn ($char) => '\\' . $char, $chars), $text);
     }
 }

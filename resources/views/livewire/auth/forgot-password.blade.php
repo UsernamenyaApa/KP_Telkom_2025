@@ -1,9 +1,6 @@
 
 
-{{-- Perhatikan, div pembungkus dengan gradien telah dihapus. --}}
-{{-- Kita mulai dengan div yang bertugas memusatkan kartu. --}}
-<div class="flex items-center justify-center w-full h-full p-4">
-
+<x-layouts.guest>
     {{-- Ini adalah kartu kontennya --}}
     <div class="w-full max-w-xl p-6 space-y-6 bg-white/70 backdrop-blur-lg rounded-lg shadow-lg border border-gray-200/80">
 
@@ -23,4 +20,4 @@
             </a>
         </div>
     </div>
-</div>
+</x-layouts.guest>
