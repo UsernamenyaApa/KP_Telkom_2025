@@ -133,6 +133,8 @@ class PelurusanReportDetail extends Component
 
             DB::commit();
 
+            $this->report->refresh();
+
             $message = sprintf(
                 "*Status Baru:* %s\n\n" .
                 "*ID Laporan:* `%s`\n" .
@@ -150,14 +152,14 @@ class PelurusanReportDetail extends Component
                 "*Diambil Pada:* %s\n" .
                 "*Diperbarui Oleh:* @%s",
                 $this->escapeMarkdown($newStatus->name),
-                $this->escapeMarkdown($this->report->id ?? 'N/A'),
-                $this->escapeMarkdown($this->report->pelurusan_code ?? 'N/A'),
+                $this->report->id ?? 'N/A',
+                $this->report->pelurusan_code ?? 'N/A',
                 $this->escapeMarkdown($this->report->orderType->name ?? 'N/A'),
-                $this->escapeMarkdown($this->report->order_id ?? 'N/A'),
-                $this->escapeMarkdown($this->report->nomer_layanan ?? 'N/A'),
-                $this->escapeMarkdown($this->report->sn_ont ?? 'N/A'),
-                $this->escapeMarkdown($this->report->datek_odp ?? 'N/A'),
-                $this->escapeMarkdown($this->report->port_odp ?? 'N/A'),
+                $this->report->order_id ?? 'N/A',
+                $this->report->nomer_layanan ?? 'N/A',
+                $this->report->sn_ont ?? 'N/A',
+                $this->report->datek_odp ?? 'N/A',
+                $this->report->port_odp ?? 'N/A',
                 $this->escapeMarkdown($this->keterangan ?? 'N/A'),
                 $this->escapeMarkdown($this->report->reporter_user_id ? $this->report->reporter->telegram_username : $this->report->reporter_telegram_username ?? 'N/A'),
                 $this->report->created_at->format('Y-m-d H:i:s'),
@@ -165,8 +167,8 @@ class PelurusanReportDetail extends Component
                 $this->escapeMarkdown(Auth::user()->telegram_username ?? 'N/A')
             );
 
-            if ($this->report->completed_at && $this->report->created_at) {
-                $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
+            if ($this->report->completed_at && $this->report->taken_at) {
+                $duration = $this->report->taken_at->diffForHumans($this->report->completed_at, true, true, 2);
                 $message .= sprintf(
                     "\n\n*Selesai Pada:* %s\n*Durasi:* %s",
                     $this->report->completed_at->format('Y-m-d H:i:s'),

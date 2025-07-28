@@ -111,6 +111,7 @@ new #[Layout('components.layouts.auth.auth-split-screen')] class extends Compone
                         type="text"
                         required
                         autofocus
+                        autocomplete="username"
                         placeholder="NIK"
                         class="block w-full pl-10 pr-3 py-3 bg-gray-100 border-transparent rounded-md shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] focus:ring-blue-500 focus:border-blue-500"
                     />

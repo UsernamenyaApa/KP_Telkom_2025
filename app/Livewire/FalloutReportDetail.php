@@ -71,19 +71,19 @@ class FalloutReportDetail extends Component
             $this->report->save();
 
             $esc = fn (?string $text) => str_replace(
-                ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
-                ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
+                ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '=', '|', '{', '}', '!'],
+                ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\=', '\|', '\{', '\}', '\!'],
                 $text ?? '-'
             );
 
             $message = "🔔 *Update Status Laporan Fallout* 🔔\n\n" .
                        "*Status Baru:* " . $esc($newStatus->name) . "\n\n" .
                        "*Tipe Order:* " . $esc($this->report->orderType ? $this->report->orderType->name : 'N/A') . "\n" .
-                       "*OrderID:* `" . $esc($this->report->order_id) . "`\n" .
-                       "*Nomor Layanan:* `" . $esc($this->report->nomer_layanan) . "`\n" .
-                       "*SN ONT:* `" . $esc($this->report->sn_ont) . "`\n" .
-                       "*Datek ODP:* `" . $esc($this->report->datek_odp) . "`\n" .
-                       "*Port ODP:* `" . $esc($this->report->port_odp) . "`\n\n" .
+                       "*OrderID:* `" . ($this->report->order_id) . "`\n" .
+                       "*Nomor Layanan:* `" . ($this->report->nomer_layanan) . "`\n" .
+                       "*SN ONT:* `" . ($this->report->sn_ont) . "`\n" .
+                       "*Datek ODP:* `" . ($this->report->datek_odp) . "`\n" .
+                       "*Port ODP:* `" . ($this->report->port_odp) . "`\n\n" .
                        "📝 *Catatan Resolusi:*\n" . $esc($this->keterangan) . "\n\n" .
                        "----------------------------------------\n" .
                        "*Created By:* @" . $esc($this->report->reporter_user_id ? $this->report->reporter->telegram_username : $this->report->reporter_telegram_username) . "\n" .
@@ -96,8 +96,8 @@ class FalloutReportDetail extends Component
                 $message .= "\n\n".
                             '✅ *Selesai pada:* '.$esc($this->report->completed_at->format('Y-m-d H:i:s'))."\n";
 
-                if ($this->report->created_at) {
-                    $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
+                if ($this->report->taken_at) {
+                    $duration = $this->report->taken_at->diffForHumans($this->report->completed_at, true, true, 2);
                     $message .= '⏳ *Durasi:* '.$esc($duration)."\n";
                 }
             }
