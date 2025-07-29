@@ -21,14 +21,17 @@ class SendTelegramNotificationJob implements ShouldQueue
 
     protected $replyMarkup;
 
+    protected $parseMode;
+
     /**
      * Create a new job instance.
      */
-    public function __construct(string $chatId, string $message, ?array $replyMarkup = null)
+    public function __construct(string $chatId, string $message, ?array $replyMarkup = null, string $parseMode = 'Markdown')
     {
         $this->chatId = $chatId;
-        $this->message = $message;
+        $this->message = str_replace('\\', '', $message);
         $this->replyMarkup = $replyMarkup;
+        $this->parseMode = $parseMode;
     }
 
     /**
@@ -40,7 +43,7 @@ class SendTelegramNotificationJob implements ShouldQueue
             $params = [
                 'chat_id' => $this->chatId,
                 'text' => $this->message,
-                'parse_mode' => 'Markdown',
+                'parse_mode' => $this->parseMode,
             ];
 
             if ($this->replyMarkup) {

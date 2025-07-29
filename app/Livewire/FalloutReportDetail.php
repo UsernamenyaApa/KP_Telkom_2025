@@ -43,7 +43,7 @@ class FalloutReportDetail extends Component
             }
 
             // For any other status, exclude Open and OnProgress
-            return ! in_array($status->name, ['Open', 'OnProgress']);
+            return !in_array($status->name, ['Open', 'OnProgress']);
         });
 
         $this->newStatusId = $this->report->fallout_status_id;
@@ -70,35 +70,30 @@ class FalloutReportDetail extends Component
 
             $this->report->save();
 
-            $esc = fn (?string $text) => str_replace(
-                ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
-                ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
-                $text ?? '-'
-            );
-
             $message = "🔔 *Update Status Laporan Fallout* 🔔\n\n" .
-                       "*Status Baru:* " . $esc($newStatus->name) . "\n\n" .
-                       "*Tipe Order:* " . $esc($this->report->orderType ? $this->report->orderType->name : 'N/A') . "\n" .
-                       "*OrderID:* `" . $esc($this->report->order_id) . "`\n" .
-                       "*Nomor Layanan:* `" . $esc($this->report->nomer_layanan) . "`\n" .
-                       "*SN ONT:* `" . $esc($this->report->sn_ont) . "`\n" .
-                       "*Datek ODP:* `" . $esc($this->report->datek_odp) . "`\n" .
-                       "*Port ODP:* `" . $esc($this->report->port_odp) . "`\n\n" .
-                       "📝 *Catatan Resolusi:*\n" . $esc($this->keterangan) . "\n\n" .
-                       "----------------------------------------\n" .
-                       "*Created By:* @" . $esc($this->report->reporter_user_id ? $this->report->reporter->telegram_username : $this->report->reporter_telegram_username) . "\n" .
-                       "*Create Order:* " . $esc($this->report->created_at->format('Y-m-d H:i:s')) . "\n" .
-                       "*Taken at:* " . $esc($this->report->taken_at ? $this->report->taken_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
-                       "*Updated By:* @" . $esc(auth()->user()->telegram_username);
+                "*Status Baru:* " . $this->escapeMarkdown($newStatus->name) . "\n\n" .
+                "*Tipe Order:* " . $this->escapeMarkdown($this->report->orderType ? $this->report->orderType->name : 'N/A') . "\n" .
+                "*OrderID:* `" . $this->escapeMarkdown($this->report->order_id) . "`\n" .
+                "*Nomor Layanan:* `" . $this->escapeMarkdown($this->report->nomer_layanan) . "`\n" .
+                "*SN ONT:* `" . $this->escapeMarkdown($this->report->sn_ont) . "`\n" .
+                "*Datek ODP:* `" . $this->escapeMarkdown($this->report->datek_odp) . "`\n" .
+                "*Port ODP:* `" . $this->escapeMarkdown($this->report->port_odp) . "`\n\n" .
+                "📝 *Catatan Resolusi:*\n" . $this->escapeMarkdown($this->keterangan) . "\n\n" .
+                "----------------------------------------\n" .
+                "*Created By:* @" . $this->escapeMarkdown($this->report->reporter_user_id ? $this->report->reporter->telegram_username : $this->report->reporter_telegram_username) . "\n" .
+                "*Create Order:* " . $this->escapeMarkdown($this->report->created_at->format('Y-m-d H:i:s')) . "\n" .
+                "*Taken at:* " . $this->escapeMarkdown($this->report->taken_at ? $this->report->taken_at->format('Y-m-d H:i:s') : 'N/A') . "\n" .
+                "*Updated By:* @" . $this->escapeMarkdown(auth()->user()->telegram_username);
 
             // Add completed_at and duration if available
             if ($this->report->completed_at) {
-                $message .= "\n\n".
-                            '✅ *Selesai pada:* '.$esc($this->report->completed_at->format('Y-m-d H:i:s'))."\n";
+                $message .= "\n\n" .
+                    '✅ *Selesai pada:* ' . $this->escapeMarkdown($this->report->completed_at->format('Y-m-d H:i:s')) . "\n";
 
                 if ($this->report->created_at) {
                     $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
-                    $message .= '⏳ *Durasi:* '.$esc($duration)."\n";
+                    $message .= '⏳ *Durasi:* ' . $this->escapeMarkdown($duration) . "
+";
                 }
             }
 
@@ -110,22 +105,22 @@ class FalloutReportDetail extends Component
             }
 
             if ($reporterChatId) {
-                SendTelegramNotificationJob::dispatch($reporterChatId, $message, null, 'MarkdownV2');
+                SendTelegramNotificationJob::dispatch($reporterChatId, $message, null);
             }
 
             // Send to group chat
             $groupChat = \App\Models\TelegramGroup::first();
             if ($groupChat) {
-                SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message, null, 'MarkdownV2');
+                SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message, null);
             }
 
             // Send to the user who changed the status
             if (auth()->user()->telegram_user_id) {
-                SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $message, null, 'MarkdownV2');
+                SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $message, null);
             }
-
-            $this->closeStatusModal();
         }
+
+        $this->closeStatusModal();
     }
 
     public function takeOrder()
@@ -142,30 +137,30 @@ class FalloutReportDetail extends Component
                 $message = "✅ *Laporan Fallout Diambil!* ✅
 
 " .
-                           "*ID Laporan:* `" . $this->report->id . "`
+                    "*ID Laporan:* `" . $this->escapeMarkdown($this->report->id) . "`
 " .
-                           "*Kode Fallout:* `" . $this->report->fallout_code . "`
+                    "*Kode Fallout:* `" . $this->escapeMarkdown($this->report->fallout_code) . "`
 " .
-                           "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
+                    "*Tipe Order:* `" . $this->escapeMarkdown($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
 " .
-                           "*OrderID:* `" . $this->report->order_id . "`
+                    "*OrderID:* `" . $this->escapeMarkdown($this->report->order_id) . "`
 " .
-                           "*Nomor Layanan:* `" . $this->report->nomer_layanan . "`
+                    "*Nomor Layanan:* `" . $this->escapeMarkdown($this->report->nomer_layanan) . "`
 " .
-                           "*SN ONT:* `" . $this->report->sn_ont . "`
+                    "*SN ONT:* `" . $this->escapeMarkdown($this->report->sn_ont) . "`
 " .
-                           "*Datek ODP:* `" . $this->report->datek_odp . "`
+                    "*Datek ODP:* `" . $this->escapeMarkdown($this->report->datek_odp) . "`
 " .
-                           "*Port ODP:* `" . $this->report->port_odp . "`
+                    "*Port ODP:* `" . $this->escapeMarkdown($this->report->port_odp) . "`
 
 " .
-                           "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
+                    "*Diambil Oleh:* @" . $this->escapeMarkdown(auth()->user()->telegram_username) . "
 " .
-                           "*Waktu Diambil:* " . $this->report->taken_at->format('Y-m-d H:i:s');
+                    "*Waktu Diambil:* " . $this->escapeMarkdown($this->report->taken_at->format('Y-m-d H:i:s'));
 
                 $groupChat = \App\Models\TelegramGroup::first();
                 if ($groupChat) {
-                    SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message);
+                    SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message, null);
                 }
 
                 // Send to personal chat (reporter)
@@ -179,27 +174,27 @@ class FalloutReportDetail extends Component
                     $personalMessage = "✅ Laporan Fallout Diambil! ✅
 
 " .
-                                       "*ID Laporan:* `" . $this->report->id_harian . "`
+                        "*ID Laporan:* `" . $this->escapeMarkdown($this->report->id_harian) . "`
 " .
-                                       "*Kode Fallout:* `" . $this->report->fallout_code . "`
+                        "*Kode Fallout:* `" . $this->escapeMarkdown($this->report->fallout_code) . "`
 " .
-                                       "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
+                        "*Tipe Order:* `" . $this->escapeMarkdown($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
 " .
-                                       "*OrderID:* `" . $this->report->order_id . "`
+                        "*OrderID:* `" . $this->escapeMarkdown($this->report->order_id) . "`
 " .
-                                       "*Nomor Layanan:* `" . $this->report->nomer_layanan . "`
+                        "*Nomor Layanan:* `" . $this->escapeMarkdown($this->report->nomer_layanan) . "`
 " .
-                                       "*SN ONT:* `" . $this->report->sn_ont . "`
+                        "*SN ONT:* `" . $this->escapeMarkdown($this->report->sn_ont) . "`
 " .
-                                       "*Datek ODP:* `" . $this->report->datek_odp . "`
+                        "*Datek ODP:* `" . $this->escapeMarkdown($this->report->datek_odp) . "`
 " .
-                                       "*Port ODP:* `" . $this->report->port_odp . "`
+                        "*Port ODP:* `" . $this->escapeMarkdown($this->report->port_odp) . "`
 
 " .
-                                       "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
+                        "*Diambil Oleh:* @" . $this->escapeMarkdown(auth()->user()->telegram_username) . "
 " .
-                                       "*Waktu Diambil:* " . $this->report->taken_at->format('Y-m-d H:i:s');
-                    SendTelegramNotificationJob::dispatch($reporterChatId, $personalMessage, null, 'MarkdownV2');
+                        "*Waktu Diambil:* " . $this->escapeMarkdown($this->report->taken_at->format('Y-m-d H:i:s'));
+                    SendTelegramNotificationJob::dispatch($reporterChatId, $personalMessage, null);
                 }
 
                 // Send to the user who took the order
@@ -207,30 +202,30 @@ class FalloutReportDetail extends Component
                     $takerMessage = "✅ Anda telah berhasil mengambil laporan.✅
 
 " .
-                                    "Berikut detail laporan:
+                        "Berikut detail laporan:
 
 " .
-                                    "*ID Laporan:* `" . $this->report->id_harian . "`
+                        "*ID Laporan:* `" . $this->escapeMarkdown($this->report->id_harian) . "`
 " .
-                                    "*Kode Fallout:* `" . $this->report->fallout_code . "`
+                        "*Kode Fallout:* `" . $this->escapeMarkdown($this->report->fallout_code) . "`
 " .
-                                    "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
+                        "*Tipe Order:* `" . $this->escapeMarkdown($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
 " .
-                                    "*OrderID:* `" . $this->report->order_id . "`
+                        "*OrderID:* `" . $this->escapeMarkdown($this->report->order_id) . "`
 " .
-                                    "*Nomor Layanan:* `" . $this->report->nomer_layanan . "`
+                        "*Nomor Layanan:* `" . $this->escapeMarkdown($this->report->nomer_layanan) . "`
 " .
-                                    "*SN ONT:* `" . $this->report->sn_ont . "`
+                        "*SN ONT:* `" . $this->escapeMarkdown($this->report->sn_ont) . "`
 " .
-                                    "*Datek ODP:* `" . $this->report->datek_odp . "`
+                        "*Datek ODP:* `" . $this->escapeMarkdown($this->report->datek_odp) . "`
 " .
-                                    "*Port ODP:* `" . $this->report->port_odp . "`
+                        "*Port ODP:* `" . $this->escapeMarkdown($this->report->port_odp) . "`
 
 " .
-                                    "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
+                        "*Diambil Oleh:* @" . $this->escapeMarkdown(auth()->user()->telegram_username) . "
 " .
-                                    "*Waktu Diambil:* " . $this->report->taken_at->format('Y-m-d H:i:s');
-                    SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $takerMessage, null, 'MarkdownV2');
+                        "*Waktu Diambil:* " . $this->escapeMarkdown($this->report->taken_at->format('Y-m-d H:i:s'));
+                    SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $takerMessage, null);
                 }
 
                 // Refresh the component to reflect changes
@@ -243,5 +238,15 @@ class FalloutReportDetail extends Component
     public function render()
     {
         return view('livewire.fallout-report-detail');
+    }
+
+    private function escapeMarkdown($text)
+    {
+        if (is_null($text)) {
+            return 'N/A';
+        }
+
+        $chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+        return str_replace($chars, array_map(fn ($char) => '\\' . $char, $chars), $text);
     }
 }
