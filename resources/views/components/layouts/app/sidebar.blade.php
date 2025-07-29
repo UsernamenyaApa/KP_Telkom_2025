@@ -76,7 +76,7 @@
 
             <flux:spacer />
 
-            <livewire:unassigned-order-notification wire:poll.10s />
+            <livewire:notification-bell />
 
             <flux:dropdown position="top" align="end">
                 <flux:profile
