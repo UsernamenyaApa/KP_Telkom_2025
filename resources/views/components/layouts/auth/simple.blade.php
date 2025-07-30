@@ -7,7 +7,7 @@
         <div class="relative grid min-h-svh w-full grid-cols-1 md:grid-cols-2">
             <div class="relative hidden flex-col justify-between bg-neutral-900 p-10 text-white md:flex">
                 <a href="{{ route('dashboard') }}" class="z-10 flex items-center gap-2 font-medium" wire:navigate>
-                    <x-app-logo-icon class="size-9 fill-current" />
+                    <x-app-logo-icon class="w-24 h-auto fill-current" />
                     <span class="text-lg">{{ config('app.name', 'Laravel') }}</span>
                 </a>
 

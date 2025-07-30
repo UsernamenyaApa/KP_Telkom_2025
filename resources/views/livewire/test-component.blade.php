@@ -1,3 +1,3 @@
 <div>
-    <h1>Livewire Test Component is Working!</h1>
+    <h1>Website for HD Daman Rekap Harian and Assign Order</h1>
 </div>

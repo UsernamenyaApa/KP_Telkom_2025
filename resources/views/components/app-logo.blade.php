@@ -1,1 +1,1 @@
-
+<img src="{{ asset('images/infranexia logo.png') }}" alt="Infranexia Logo" {{ $attributes }}>
