@@ -35,19 +35,15 @@ export default {
             accent: 'var(--color-neutral-800)',
             'accent-content': 'var(--color-neutral-800)',
             'accent-foreground': 'var(--color-white)',
-            // New custom colors for themes
-            'theme-white-red-primary': '#FFFFFF', // White background
-            'theme-white-red-accent': '#FF0000', // Red accent
-            'theme-white-dark-blue-primary': '#FFFFFF', // White background
-            'theme-white-dark-blue-accent': '#00008B', // Dark Blue accent
-            'theme-white-light-blue-primary': '#FFFFFF', // White background
-            'theme-white-light-blue-accent': '#ADD8E6', // Light Blue accent
-            'theme-dark-red-primary': '#1A202C', // Dark background
-            'theme-dark-red-accent': '#FF0000', // Red accent
-            'theme-dark-dark-blue-primary': '#1A202C', // Dark background
-            'theme-dark-dark-blue-accent': '#00008B', // Dark Blue accent
-            'theme-dark-light-blue-primary': '#1A202C', // Dark background
-            'theme-dark-light-blue-accent': '#ADD8E6', // Light Blue accent
+            // Generic theme colors that will be mapped to CSS variables
+            'theme-primary': 'var(--theme-primary)',
+            'theme-secondary': 'var(--theme-secondary)',
+            'theme-text': 'var(--theme-text)',
+            'theme-text-light': 'var(--theme-text-light)',
+            'theme-text-dark': 'var(--theme-text-dark)',
+            'theme-accent': 'var(--theme-accent)',
+            'theme-accent-light': 'var(--theme-accent-light)',
+            'theme-accent-dark': 'var(--theme-accent-dark)',
         }
     },
   },

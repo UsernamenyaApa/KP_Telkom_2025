@@ -1,3 +1,4 @@
+/* Force recompile */
 @import url('https://fonts.googleapis.com/css2?family=Akatab&family=Instrument+Sans:wght@400;700&family=Istok+Web:wght@400;700&display=swap');
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
@@ -9,12 +10,110 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+    --theme-primary: #FFFFFF;
+    --theme-secondary: #F3F4F6;
+    --theme-text: #1F2937;
+    --theme-text-light: #6B7280;
+    --theme-text-dark: #000000;
+    --theme-accent: #3B82F6;
+    --theme-accent-light: #BFDBFE;
+    --theme-accent-dark: #1D4ED8;
+}
 
+[data-theme="light-red"] {
+    --theme-primary: #FFFFFF;
+    --theme-secondary: #FEE2E2;
+    --theme-text: #1F2937;
+    --theme-text-light: #6B7280;
+    --theme-text-dark: #000000;
+    --theme-accent: #EF4444;
+    --theme-accent-light: #FCA5A5;
+    --theme-accent-dark: #DC2626;
+}
+
+[data-theme="light-blue"] {
+    --theme-primary: #FFFFFF;
+    --theme-secondary: #DBEAFE;
+    --theme-text: #1F2937;
+    --theme-text-light: #6B7280;
+    --theme-text-dark: #000000;
+    --theme-accent: #3B82F6;
+    --theme-accent-light: #BFDBFE;
+    --theme-accent-dark: #1D4ED8;
+}
+
+[data-theme="light-dark-blue"] {
+    --theme-primary: #FFFFFF;
+    --theme-secondary: #DBEAFE;
+    --theme-text: #1F2937;
+    --theme-text-light: #6B7280;
+    --theme-text-dark: #000000;
+    --theme-accent: #1D4ED8;
+    --theme-accent-light: #93C5FD;
+    --theme-accent-dark: #1E40AF;
+}
+
+.dark {
+    --theme-primary: #1F2937;
+    --theme-secondary: #374151;
+    --theme-text: #F9FAFB;
+    --theme-text-light: #D1D5DB;
+    --theme-text-dark: #FFFFFF;
+    --theme-accent: #60A5FA;
+    --theme-accent-light: #1E40AF;
+    --theme-accent-dark: #2563EB;
+}
+
+.dark[data-theme="dark-red"] {
+    --theme-primary: #1F2937;
+    --theme-secondary: #374151;
+    --theme-text: #F9FAFB;
+    --theme-text-light: #D1D5DB;
+    --theme-text-dark: #FFFFFF;
+    --theme-accent: #EF4444;
+    --theme-accent-light: #DC2626;
+    --theme-accent-dark: #B91C1C;
+}
+
+.dark[data-theme="dark-blue"] {
+    --theme-primary: #1F2937;
+    --theme-secondary: #374151;
+    --theme-text: #F9FAFB;
+    --theme-text-light: #D1D5DB;
+    --theme-text-dark: #FFFFFF;
+    --theme-accent: #3B82F6;
+    --theme-accent-light: #2563EB;
+    --theme-accent-dark: #1D4ED8;
+}
+
+.dark[data-theme="dark-dark-blue"] {
+    --theme-primary: #1F2937;
+    --theme-secondary: #374151;
+    --theme-text: #F9FAFB;
+    --theme-text-light: #D1D5DB;
+    --theme-text-dark: #FFFFFF;
+    --theme-accent: #1D4ED8;
+    --theme-accent-light: #1E40AF;
+    --theme-accent-dark: #1A202C;
+}
 
 @layer base {
-    body {
-        @apply text-zinc-800 dark:text-zinc-200;
+    html {
+        font-size: 10px;
+        box-sizing: border-box;
     }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: inherit;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        @apply text-zinc-800 dark:text-zinc-200;
     }
 
     *,
@@ -70,4 +169,10 @@ button[type="submit"]:hover {
     transform: translateY(-2px); /* Move up slightly */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a more prominent shadow */
     transition: all 0.2s ease-in-out; /* Smooth transition */
+}
+
+header {
+    background-color: #ffffff !important; /* Use a solid color */
+    background-image: none !important; /* Ensure no background image */
+    z-index: 9999 !important; /* Bring to front */
 }
