@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return view('dashboard');
 });
 
 Route::view('dashboard', 'dashboard')
