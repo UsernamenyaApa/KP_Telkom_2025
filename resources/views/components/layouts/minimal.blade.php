@@ -9,18 +9,8 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        {{-- Pastikan baris ini tetap dalam komentar jika Anda hanya menggunakan Tailwind CDN --}}
-        {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
-
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                darkMode: 'class',
-                theme: {
-                    extend: {}
-                }
-            }
-        </script>
+        {{-- Aset dikompilasi menggunakan Vite --}}
+        @vite(['resources/css/app.css', 'resources/js/app.js'], null, ['preload' => false])
     </head>
     {{-- Body ini adalah 'kanvas' untuk gradien --}}
     <body class="h-full bg-gradient-to-b from-sky-700 to-slate-300 backdrop-blur-[2px]">

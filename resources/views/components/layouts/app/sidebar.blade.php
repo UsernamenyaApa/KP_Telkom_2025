@@ -50,99 +50,117 @@
         x-transition:leave-end="-translate-x-full"
         @click.outside="sidebarOpen = false"
     >
-        <flux:sidebar.toggle icon="x-mark" @click="sidebarOpen = false" class="text-gray-900 dark:text-white hover:text-zinc-700 dark:hover:text-zinc-300" />
+        <!-- Header Sidebar dengan Logo dan Close Button -->
+        <div class="flex items-center justify-between px-4 py-4 border-b border-zinc-200 dark:border-zinc-700">
+            <div class="flex items-center space-x-3">
+                <div>
+                    <x-app-logo class="h-7 w-7 text-gray-900 dark:text-white drop-shadow-lg translate-y-0.5" />
+                </div>
+                <a href="{{ route('dashboard') }}" class="flex items-center text-lg font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200" wire:navigate>
+                    Infranexia
+                </a>
+            </div>
+            <button 
+                @click="sidebarOpen = false" 
+                class="flex items-center justify-center w-8 h-8 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded-lg transition-colors duration-200"
+                aria-label="Close sidebar"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
 
-        <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse mb-6 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700" wire:navigate>
-            <x-app-logo class="text-gray-900 dark:text-white drop-shadow-lg" />
-        </a>
-
-        <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Platform')" class="grid [&_h3]:text-zinc-500 [&_h3]:font-semibold [&_h3]:text-sm [&_h3]:uppercase [&_h3]:tracking-wider">
-                <flux:navlist.item 
-                    icon="home" 
-                    :href="route('dashboard')" 
-                    :current="request()->routeIs('dashboard')" 
-                    wire:navigate
-                    class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:bg-opacity-70 [&.flux-current]:shadow-inner"
-                >
-                    {{ __('Dashboard') }}
-                </flux:navlist.item>
-                <flux:navlist.item 
-                    icon="exclamation-circle" 
-                    :href="route('fallout-reports.index')" 
-                    :current="request()->routeIs('fallout-reports.index')" 
-                    wire:navigate
-                    class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:bg-opacity-70 [&.flux-current]:shadow-inner"
-                >
-                    {{ __('Fallout Reports') }}
-                </flux:navlist.item>
-                <flux:navlist.item 
-                    icon="check-circle" 
-                    :href="route('pelurusan.index')" 
-                    :current="request()->routeIs('pelurusan.index')" 
-                    wire:navigate
-                    class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:bg-opacity-70 [&.flux-current]:shadow-inner"
-                >
-                    {{ __('Pelurusan') }}
-                </flux:navlist.item>
-            </flux:navlist.group>
-
-            @if (auth()->user()->hasRole('super-admin'))
-                <flux:navlist.group :heading="__('Admin')" class="grid [&_h3]:text-zinc-500 [&_h3]:font-semibold [&_h3]:text-sm [&_h3]:uppercase [&_h3]:tracking-wider [&_h3]:mt-6">
+        <!-- Navigation Menu -->
+        <div class="px-4 pb-4 mt-4">
+            <flux:navlist variant="outline">
+                <flux:navlist.group :heading="__('Platform')" class="grid [&_h3]:text-zinc-500 [&_h3]:font-semibold [&_h3]:text-sm [&_h3]:uppercase [&_h3]:tracking-wider">
                     <flux:navlist.item 
-                        icon="server" 
-                        :href="route('hd-damans.index')" 
-                        :current="request()->routeIs('hd-damans.index')" 
+                        icon="home" 
+                        :href="route('dashboard')" 
+                        :current="request()->routeIs('dashboard')" 
                         wire:navigate
-                        class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:bg-opacity-70 [&.flux-current]:shadow-inner"
+                        class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:shadow-inner"
                     >
-                        HD Damans
-                    </flux:navlist.item>
-                    <flux:navlist.item 
-                        icon="list-bullet" 
-                        :href="route('order-types.index')" 
-                        :current="request()->routeIs('order-types.index')" 
-                        wire:navigate
-                        class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:bg-opacity-70 [&.flux-current]:shadow-inner"
-                    >
-                        Order Types
+                        {{ __('Dashboard') }}
                     </flux:navlist.item>
                     <flux:navlist.item 
                         icon="exclamation-circle" 
-                        :href="route('fallout-statuses.index')" 
-                        :current="request()->routeIs('fallout-statuses.index')" 
+                        :href="route('fallout-reports.index')" 
+                        :current="request()->routeIs('fallout-reports.index')" 
                         wire:navigate
-                        class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:bg-opacity-70 [&.flux-current]:shadow-inner"
+                        class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:shadow-inner"
                     >
-                        Fallout Statuses
+                        {{ __('Fallout Reports') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item 
+                        icon="check-circle" 
+                        :href="route('pelurusan.index')" 
+                        :current="request()->routeIs('pelurusan.index')" 
+                        wire:navigate
+                        class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:shadow-inner"
+                    >
+                        {{ __('Pelurusan') }}
                     </flux:navlist.item>
                 </flux:navlist.group>
-            @endif
-        </flux:navlist>
 
-        <flux:spacer />
+                @if (auth()->user()->hasRole('super-admin'))
+                    <flux:navlist.group :heading="__('Admin')" class="grid [&_h3]:text-zinc-500 [&_h3]:font-semibold [&_h3]:text-sm [&_h3]:uppercase [&_h3]:tracking-wider [&_h3]:mt-6">
+                        <flux:navlist.item 
+                            icon="server" 
+                            :href="route('hd-damans.index')" 
+                            :current="request()->routeIs('hd-damans.index')" 
+                            wire:navigate
+                            class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:shadow-inner"
+                        >
+                            HD Damans
+                        </flux:navlist.item>
+                        <flux:navlist.item 
+                            icon="list-bullet" 
+                            :href="route('order-types.index')" 
+                            :current="request()->routeIs('order-types.index')" 
+                            wire:navigate
+                            class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:shadow-inner"
+                        >
+                            Order Types
+                        </flux:navlist.item>
+                        <flux:navlist.item 
+                            icon="exclamation-circle" 
+                            :href="route('fallout-statuses.index')" 
+                            :current="request()->routeIs('fallout-statuses.index')" 
+                            wire:navigate
+                            class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg [&.flux-current]:bg-gray-100 dark:[&.flux-current]:bg-zinc-700 [&.flux-current]:shadow-inner"
+                        >
+                            Fallout Statuses
+                        </flux:navlist.item>
+                    </flux:navlist.group>
+                @endif
+            </flux:navlist>
 
-        <flux:navlist variant="outline">
-            <flux:navlist.item 
-                icon="folder-git-2" 
-                href="https://github.com/laravel/livewire-starter-kit" 
-                target="_blank"
-                class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg"
-            >
-                {{ __('Repository') }}
-            </flux:navlist.item>
-            <flux:navlist.item 
-                icon="book-open-text" 
-                href="https://laravel.com/docs/starter-kits#livewire" 
-                target="_blank"
-                class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg"
-            >
-                {{ __('Documentation') }}
-            </flux:navlist.item>
-        </flux:navlist>
+            <flux:spacer />
+
+            <flux:navlist variant="outline">
+                <flux:navlist.item 
+                    icon="folder-git-2" 
+                    href="https://github.com/laravel/livewire-starter-kit" 
+                    target="_blank"
+                    class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg"
+                >
+                    {{ __('Repository') }}
+                </flux:navlist.item>
+                <flux:navlist.item 
+                    icon="book-open-text" 
+                    href="https://laravel.com/docs/starter-kits#livewire" 
+                    target="_blank"
+                    class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg"
+                >
+                    {{ __('Documentation') }}
+                </flux:navlist.item>
+            </flux:navlist>
+        </div>
     </flux:sidebar>
 
-    <flux:header class="fixed top-0 w-full z-40 shadow-lg border-b border-gray-200 dark:border-zinc-700" style="background: var(--theme-primary) !important; background-color: var(--theme-primary) !important; background-image: none !important;">
+    <flux:header class="fixed top-0 w-full z-40 shadow-lg border-b border-gray-200 dark:border-zinc-700 bg-theme-primary dark:bg-theme-primary">
         <flux:sidebar.toggle icon="bars-2" inset="left" @click="sidebarOpen = true" class="text-theme-text hover:text-zinc-700 dark:hover:text-zinc-300" />
 
         <flux:spacer />
@@ -154,10 +172,6 @@
                 <button class="flex items-center space-x-2">
                     <img class="h-8 w-8 rounded-full object-cover" src="{{ auth()->user()->profilePhotoUrl() }}" alt="{{ auth()->user()->name }}" />
                     <span class="text-sm font-medium text-theme-text">{{ auth()->user()->name }}</span>
-                    <svg class="h-5 w-5 text-theme-text-light dark:text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                    </svg>
                 </button>
 
                 <flux:menu class="bg-theme-primary dark:bg-theme-primary border-gray-200 dark:border-zinc-600">
@@ -191,7 +205,7 @@
 
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
-                        <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-zinc-700 dark:hover:bg-opacity-50">
+                        <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-zinc-700">
                             {{ __('Log Out') }}
                         </flux:menu.item>
                     </form>

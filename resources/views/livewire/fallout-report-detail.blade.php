@@ -44,18 +44,7 @@
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Nomer Layanan</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->nomer_layanan }}</dd>
                                     </div>
-                                    <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">SN ONT</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->sn_ont }}</dd>
-                                    </div>
-                                    <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Datek ODP</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->datek_odp }}</dd>
-                                    </div>
-                                    <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Port ODP</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->port_odp }}</dd>
-                                    </div>
+                                    
                                 </dl>
                             </div>
                             <div class="px-4 py-5 sm:p-6">

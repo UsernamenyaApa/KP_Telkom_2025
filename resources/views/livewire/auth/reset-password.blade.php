@@ -11,6 +11,18 @@ new #[Layout('components.layouts.minimal')] class extends Component
 {
     public string $password = '';
     public string $password_confirmation = '';
+    public ?string $nik = '';
+
+    public function mount(): void
+    {
+        $userId = session('otp_verified_user_id');
+        if ($userId) {
+            $user = User::find($userId);
+            if ($user) {
+                $this->nik = $user->nik;
+            }
+        }
+    }
 
     public function resetPassword(): void
     {
@@ -63,6 +75,9 @@ new #[Layout('components.layouts.minimal')] class extends Component
 
         <form wire:submit="resetPassword" class="space-y-6">
             @csrf
+
+                        <label for="nik" class="sr-only">NIK</label>
+            <input id="nik" type="text" wire:model="nik" autocomplete="username" class="sr-only">
             
             {{-- Input Password Baru dengan Ikon Gambar --}}
             <div x-data="{ showPassword: false }">
@@ -74,6 +89,7 @@ new #[Layout('components.layouts.minimal')] class extends Component
                         name="password" 
                         :type="showPassword ? 'text' : 'password'"
                         placeholder="New password" required
+                        autocomplete="new-password"
                         class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     
                     {{-- Tombol untuk Toggle Ikon --}}
@@ -102,6 +118,7 @@ new #[Layout('components.layouts.minimal')] class extends Component
                         name="password_confirmation" 
                         :type="showConfirmPassword ? 'text' : 'password'"
                         placeholder="Confirm password" required
+                        autocomplete="new-password"
                         class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
 
                     {{-- Tombol untuk Toggle Ikon --}}

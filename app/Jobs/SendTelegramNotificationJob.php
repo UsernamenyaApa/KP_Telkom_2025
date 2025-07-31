@@ -8,32 +8,39 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
 class SendTelegramNotificationJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected string $chatId;
-    protected string $message;
-    protected ?array $replyMarkup;
-    protected string $parseMode;
+    protected $chatId;
 
-    public function __construct(string $chatId, string $message, ?array $replyMarkup = null, string $parseMode = 'Markdown')
+    protected $message;
+
+    protected $replyMarkup;
+
+    /**
+     * Create a new job instance.
+     */
+    public function __construct(string $chatId, string $message, ?array $replyMarkup = null)
     {
         $this->chatId = $chatId;
         $this->message = $message;
         $this->replyMarkup = $replyMarkup;
-        $this->parseMode = $parseMode;
     }
 
+    /**
+     * Execute the job.
+     */
     public function handle(): void
     {
         try {
             $params = [
                 'chat_id' => $this->chatId,
                 'text' => $this->message,
-                'parse_mode' => $this->parseMode,
+                'parse_mode' => 'Markdown',
             ];
 
             if ($this->replyMarkup) {
@@ -41,9 +48,9 @@ class SendTelegramNotificationJob implements ShouldQueue
             }
 
             Telegram::sendMessage($params);
-
-        } catch (\Exception $e) {
-            Log::error("Failed to send Telegram notification to {$this->chatId}: " . $e->getMessage());
+            Log::info("Telegram notification sent to {$this->chatId}");
+        } catch (TelegramSDKException $e) {
+            Log::error("Failed to send Telegram notification to {$this->chatId}: ".$e->getMessage());
         }
     }
 }

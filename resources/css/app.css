@@ -130,7 +130,7 @@
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
 input:focus[data-flux-control],
@@ -139,40 +139,31 @@ select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
 
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
-
-/* Hover effect for input fields */
 input[type="text"]:hover,
 input[type="email"]:hover,
 input[type="password"]:hover,
 input[type="number"]:hover,
 textarea:hover {
-    border-color: #a0aec0; /* A lighter gray border on hover */
+    border-color: #a0aec0;
 }
 
-/* Hover effect for buttons */
 button:hover {
-    opacity: 0.9; /* Slightly reduce opacity on hover */
+    opacity: 0.9;
 }
 
-/* Pop-out effect for input fields on hover */
 input[type="password"]:hover {
-    transform: translateY(-2px); /* Move up slightly */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
-    transition: all 0.2s ease-in-out; /* Smooth transition */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
 }
 
-/* Pop-out effect for buttons on hover */
 button[type="submit"]:hover {
-    transform: translateY(-2px); /* Move up slightly */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a more prominent shadow */
-    transition: all 0.2s ease-in-out; /* Smooth transition */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease-in-out;
 }
 
 header {
-    background-color: #ffffff !important; /* Use a solid color */
-    background-image: none !important; /* Ensure no background image */
-    z-index: 9999 !important; /* Bring to front */
+    background-color: var(--theme-primary) !important;
+    z-index: 9999 !important;
 }
