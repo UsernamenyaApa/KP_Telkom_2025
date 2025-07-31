@@ -542,15 +542,16 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                 return;
             }
 
-            $photo = last($photoCollection);
+            // Ambil foto dengan resolusi tertinggi (elemen terakhir dari koleksi)
+            $photo = $photoCollection->last();
 
-            if (!$photo || !isset($photo['file_id'])) {
+            if (!$photo || !$photo->file_id) {
                 Log::error('Gagal mendapatkan data foto yang valid dari update.', ['update' => $update->toArray()]);
                 SendTelegramNotificationJob::dispatch((string)$chatId, '❌ Gagal memproses file gambar. Format tidak didukung atau file kosong.');
                 return;
             }
 
-            $file = $telegram->getFile(['file_id' => $photo['file_id']]);
+            $file = $telegram->getFile(['file_id' => $photo->file_id]);
             $fileContents = file_get_contents('https://api.telegram.org/file/bot' . config('telegram.bots.mybot.token') . "/{$file->filePath}");
 
             $directory = ($state['process'] === self::PROCESS_FALLOUT) ? 'fallout-images/' : 'pelurusan-images/';
@@ -566,7 +567,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                 $this->generateAndSendPelurusanReport($chatId, $state);
             }
         } catch (\Exception $e) {
-            Log::error("Gagal memproses foto: " . $e->getMessage());
+            Log::error("Gagal memproses foto: " . $e->getMessage() . ' on line ' . $e->getLine());
             SendTelegramNotificationJob::dispatch((string)$chatId, '❌ Terjadi kesalahan teknis saat memproses gambar Anda.');
         }
     }

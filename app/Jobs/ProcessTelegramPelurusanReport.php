@@ -71,22 +71,15 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
     
     private function sendCreationNotification(PelurusanReport $report, array $userInfo): void
     {
-        $escapeMarkdown = function (?string $text): string {
-            if ($text === null || $text === '') return '-';
-            $chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
-            $escapedChars = array_map(fn($c) => '\\' . $c, $chars);
-            return str_replace($chars, $escapedChars, $text);
-        };
-        
         $createdBy = $userInfo['username'] ? "@{$userInfo['username']}" : ($userInfo['name'] ?? $userInfo['first_name']);
 
         $lines = [
             '✅ *Laporan Pelurusan Data Baru Diterima*',
-            '*Tipe Order:* ' . $escapeMarkdown($report->orderType->name),
-            '*Nomor Layanan:* ' . $escapeMarkdown($report->nomer_layanan),
-            '*Datek ODP:* ' . $escapeMarkdown($report->datek_odp) . ' Port ' . $escapeMarkdown((string)$report->port_odp),
-            '*Dilaporkan Oleh:* ' . $escapeMarkdown($createdBy),
-            '*Waktu:* ' . $escapeMarkdown($report->created_at->format('Y-m-d H:i:s')),
+            '*Tipe Order:* ' . $this->escape($report->orderType->name),
+            '*Nomor Layanan:* ' . $this->escape($report->nomer_layanan),
+            '*Datek ODP:* ' . $this->escape($report->datek_odp) . ' Port ' . $this->escape((string)$report->port_odp),
+            '*Dilaporkan Oleh:* ' . $this->escape($createdBy),
+            '*Waktu:* ' . $this->escape($report->created_at->format('Y-m-d H:i:s')),
         ];
 
         $reportText = implode("\n", array_filter($lines));
@@ -99,5 +92,16 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
                 SendTelegramNotificationJob::dispatch((string)$dest, $reportText, null, 'MarkdownV2');
             }
         }
+    }
+
+    private function escape(?string $text): string
+    {
+        if (is_null($text) || $text === '') return '-';
+        $chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+        return str_replace(
+            $chars,
+            array_map(fn ($char) => '\\' . $char, $chars),
+            $text
+        );
     }
 }

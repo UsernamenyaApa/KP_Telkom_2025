@@ -115,13 +115,13 @@ class ProcessTelegramReport implements ShouldQueue
             '*Tiket Insiden:* `' . $this->escape($report->incident_ticket) . '`',
             '*Keterangan Insiden:*',
             '```',
-            $this->escape($report->incident_fallout_description),
+            $report->incident_fallout_description, // Tidak di-escape
             '```',
             '*Keterangan Tambahan:*',
             '```',
-            $this->escape($report->keterangan),
+            $report->keterangan, // Tidak di-escape
             '```',
-            '---',
+            '---', // Separator yang di-escape
             '*Dibuat Oleh:* ' . $this->escape($createdBy),
             '*Waktu Dibuat:* `' . $this->escape($report->created_at->format('Y-m-d H:i:s')) . '`',
         ];
