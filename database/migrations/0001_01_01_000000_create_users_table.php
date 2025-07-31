@@ -14,9 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('nik')->unique()->nullable();
-            $table->string('email')->unique()->nullable();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('nik')->unique();
             $table->string('password');
             $table->bigInteger('telegram_user_id')->nullable()->unique(); // Added telegram_user_id
             $table->string('telegram_username')->nullable()->unique(); // Added telegram_username
@@ -25,7 +23,7 @@ return new class extends Migration
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
+            $table->string('nik')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });

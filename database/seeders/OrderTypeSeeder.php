@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\OrderType;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class OrderTypeSeeder extends Seeder
@@ -21,6 +20,7 @@ class OrderTypeSeeder extends Seeder
             ['id' => 5, 'name' => 'RO'],
             ['id' => 6, 'name' => 'PDA'],
             ['id' => 7, 'name' => 'MIGRASI'],
+            ['id' => 8, 'name' => 'Ex Gangguan'],
         ];
 
         foreach ($orderTypes as $type) {

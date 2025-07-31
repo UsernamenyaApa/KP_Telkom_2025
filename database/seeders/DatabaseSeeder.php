@@ -16,11 +16,10 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::firstOrCreate(
-            ['email' => 'test@example.com'],
+            ['nik' => '12345678'], // Dummy NIK for Test User
             [
                 'name' => 'Test User',
                 'password' => bcrypt('password'),
-                'email_verified_at' => now(),
             ]
         );
 
@@ -28,8 +27,10 @@ class DatabaseSeeder extends Seeder
             OrderTypeSeeder::class,
             FalloutStatusSeeder::class,
             HdDamanRoleSeeder::class,
+            HdDamanUserSeeder::class,
             SuperAdminSeeder::class,
-            FalloutReportSeeder::class,
+            // FalloutReportSeeder::class,
+            // PelurusanReportSeeder::class,
         ]);
     }
 }

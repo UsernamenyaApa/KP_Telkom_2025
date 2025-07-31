@@ -7,36 +7,35 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Telegram\Bot\Laravel\Facades\Telegram;
-use Telegram\Bot\Exceptions\TelegramSDKException;
 use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Exceptions\TelegramSDKException;
+use Telegram\Bot\Laravel\Facades\Telegram;
 
 class SendTelegramNotificationJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $chatId;
+
     protected $message;
+
     protected $replyMarkup;
+
+    protected $parseMode;
 
     /**
      * Create a new job instance.
-     *
-     * @param string $chatId
-     * @param string $message
-     * @param array|null $replyMarkup
      */
-    public function __construct(string $chatId, string $message, ?array $replyMarkup = null)
+    public function __construct(string $chatId, string $message, ?array $replyMarkup = null, string $parseMode = 'MarkdownV2')
     {
         $this->chatId = $chatId;
         $this->message = $message;
         $this->replyMarkup = $replyMarkup;
+        $this->parseMode = $parseMode;
     }
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -44,7 +43,7 @@ class SendTelegramNotificationJob implements ShouldQueue
             $params = [
                 'chat_id' => $this->chatId,
                 'text' => $this->message,
-                'parse_mode' => 'Markdown',
+                'parse_mode' => $this->parseMode,
             ];
 
             if ($this->replyMarkup) {
@@ -54,7 +53,7 @@ class SendTelegramNotificationJob implements ShouldQueue
             Telegram::sendMessage($params);
             Log::info("Telegram notification sent to {$this->chatId}");
         } catch (TelegramSDKException $e) {
-            Log::error("Failed to send Telegram notification to {$this->chatId}: " . $e->getMessage());
+            Log::error("Failed to send Telegram notification to {$this->chatId}: ".$e->getMessage());
         }
     }
 }

@@ -24,7 +24,7 @@
                     document.documentElement.classList.remove('dark');
                 }
             });
-        }">
+        ">
         <flux:sidebar
             class="fixed inset-y-0 left-0 z-50 w-64 border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900"
             x-show="sidebarOpen"
@@ -76,6 +76,8 @@
 
             <flux:spacer />
 
+            <livewire:unassigned-order-notification wire:poll.10s />
+
             <flux:dropdown position="top" align="end">
                 <flux:profile
                     :initials="auth()->user()->initials()"
@@ -96,7 +98,7 @@
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
                                     <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    <span class="truncate text-xs">{{ auth()->user()->nik }}</span>
                                 </div>
                             </div>
                         </div>
@@ -149,5 +151,7 @@
         </div>
 
         @fluxScripts
+        @livewireStyles
+        @livewireScripts
     </body>
 </html>

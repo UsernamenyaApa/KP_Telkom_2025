@@ -2,24 +2,80 @@
 
 namespace App\Livewire;
 
-use App\Models\PelurusanReport;
+use App\Jobs\SendTelegramNotificationJob;
 use App\Models\FalloutStatus;
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Models\PelurusanReport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use App\Jobs\SendTelegramNotificationJob;
-use Telegram\Bot\Laravel\Facades\Telegram;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class PelurusanReportDashboard extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $date;
+
+    public $search = '';
+
+    #[Url]
+    public $selectedOrderType = '';
+
+    #[Url]
+    public $selectedFalloutStatus = '';
+
+    #[Url]
+    public $selectedAssignedTo = '';
+
+    public $orderTypes;
+
+    public $falloutStatuses;
+
+    public $assignedToUsers;
 
     public function mount()
     {
-        $this->date = Carbon::today()->format('Y-m-d');
+        if (empty($this->date)) {
+            $this->date = Carbon::today()->format('Y-m-d');
+        }
+        $this->orderTypes = \App\Models\OrderType::all();
+        $this->falloutStatuses = \App\Models\FalloutStatus::all();
+        $this->assignedToUsers = \App\Models\User::role('hd-daman')->get();
+    }
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedDate()
+    {
+        $this->resetPage();
+    }
+
+    public function resetFilters()
+    {
+        $this->selectedOrderType = '';
+        $this->selectedFalloutStatus = '';
+        $this->selectedAssignedTo = '';
+        $this->resetPage();
+    }
+
+    public function updatedSelectedOrderType()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedFalloutStatus()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedAssignedTo()
+    {
+        $this->resetPage();
     }
 
     public function takeOrder($reportId)
@@ -30,7 +86,7 @@ class PelurusanReportDashboard extends Component
             $onProgressStatus = FalloutStatus::where('name', 'OnProgress')->first();
             if ($onProgressStatus) {
                 $report->fallout_status_id = $onProgressStatus->id;
-                $report->assigned_to_user_id = Auth::id(); // Store user ID
+                $report->assigned_to_user_id = Auth::id();
                 if (is_null($report->assigned_at)) {
                     $report->assigned_at = now();
                 }
@@ -39,33 +95,46 @@ class PelurusanReportDashboard extends Component
 
                 $user = Auth::user();
 
-                $message = "✅ *Laporan Pelurusan Diambil!* ✅\n\n" .
-                           "*ID Laporan:* `" . ($report->id ?? 'N/A') . "`\n" .
-                           "*Kode Pelurusan:* `" . ($report->pelurusan_code ?? 'N/A') . "`\n" .
-                           "*Tipe Order:* `" . ($report->orderType ? $report->orderType->name : 'N/A') . "`\n" .
-                           "*OrderID:* `" . ($report->order_id ?? 'N/A') . "`\n" .
-                           "*Nomor Layanan:* `" . ($report->nomer_layanan ?? 'N/A') . "`\n" .
-                           "*SN ONT:* `" . ($report->sn_ont ?? 'N/A') . "`\n" .
-                           "*Datek ODP:* `" . ($report->datek_odp ?? 'N/A') . "`\n" .
-                           "*Port ODP:* `" . ($report->port_odp ?? 'N/A') . "`\n\n" .
-                           "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "\n" .
-                           "*Waktu Diambil:* " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "\n\n" .
-                           "Mohon pantau status laporan ini.";
+                $message = "✅ Laporan Pelurusan Diambil! ✅\n\n" .
+                           "ID Laporan: " . ($report->id_harian ?? 'N/A') . "\n" .
+                           "Kode Pelurusan: " . ($report->pelurusan_code ?? 'N/A') . "\n" .
+                           "Tipe Order: " . ($report->orderType ? $report->orderType->name : 'N/A') . "\n" .
+                           "OrderID: " . ($report->order_id ?? 'N/A') . "\n" .
+                           "Nomor Layanan: " . ($report->nomer_layanan ?? 'N/A') . "\n" .
+                           "SN ONT: " . ($report->sn_ont ?? 'N/A') . "\n" .
+                           "Datek ODP: " . ($report->datek_odp ?? 'N/A') . "\n" .
+                           "Port ODP: " . ($report->port_odp ?? 'N/A') . "\n\n" .
+                           "Diambil Oleh: @" . ($user->telegram_username ?? 'N/A') . "\n" .
+                           "Waktu Diambil: " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
 
-                // Send to personal chat (taker)
                 if ($user->telegram_user_id) {
                     SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
                 }
 
-                // Send to personal chat (reporter)
                 if ($report->reporter && $report->reporter->telegram_user_id) {
-                    SendTelegramNotificationJob::dispatch($report->reporter->telegram_user_id, $message);
+                    $esc = fn (?string $text) => str_replace(
+                        ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '=', '|', '{', '}', '!'],
+                        ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\=', '\|', '\{', '\}', '\!'],
+                        $text ?? '-'
+                    );
+
+                    $reporterMessage = "✅ *Laporan Pelurusan Diambil!* ✅\n\n" .
+                                       "*ID Laporan:* `" . $esc($report->id_harian) . "`\n" .
+                                       "*Kode Pelurusan:* `" . $esc($report->pelurusan_code) . "`\n" .
+                                       "*Tipe Order:* `" . $esc($report->orderType->name) . "`\n" .
+                                       "*OrderID:* `" . $esc($report->order_id) . "`\n" .
+                                       "*Nomor Layanan:* `" . $esc($report->nomer_layanan) . "`\n" .
+                                       "*SN ONT:* `" . $esc($report->sn_ont) . "`\n" .
+                                       "*Datek ODP:* `" . $esc($report->datek_odp) . "`\n" .
+                                       "*Port ODP:* `" . $esc($report->port_odp) . "`\n\n" .
+                                       "*Diambil Oleh:* " . $esc('@' . $user->telegram_username) . "\n" .
+                                       "*Waktu Diambil:* `" . $esc($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "`";
+                    SendTelegramNotificationJob::dispatch($report->reporter->telegram_user_id, $reporterMessage, null, 'MarkdownV2');
                 }
 
-                // Send to group chat
-                $groupChatId = env('TELEGRAM_GROUP_ID');
-                if ($groupChatId) {
-                    SendTelegramNotificationJob::dispatch($groupChatId, $message);
+                $groupChat = \App\Models\TelegramGroup::first();
+                if ($groupChat) {
+                    SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message);
                 }
             }
         }
@@ -74,7 +143,21 @@ class PelurusanReportDashboard extends Component
     public function render()
     {
         $reports = PelurusanReport::with(['reporter', 'orderType', 'falloutStatus', 'assignedToUser'])
-            ->whereDate('created_at', $this->date)
+            ->when($this->date, function ($query) {
+                $query->whereDate('created_at', $this->date);
+            })
+            ->when($this->search, function ($query) {
+                $query->where('order_id', 'like', '%'.$this->search.'%');
+            })
+            ->when($this->selectedOrderType, function ($query) {
+                $query->where('tipe_order_id', $this->selectedOrderType);
+            })
+            ->when($this->selectedFalloutStatus, function ($query) {
+                $query->where('fallout_status_id', $this->selectedFalloutStatus);
+            })
+            ->when($this->selectedAssignedTo, function ($query) {
+                $query->where('assigned_to_user_id', $this->selectedAssignedTo);
+            })
             ->orderBy('created_at', 'asc')
             ->paginate(10);
 

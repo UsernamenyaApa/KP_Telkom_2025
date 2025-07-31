@@ -16,7 +16,7 @@ test('profile information can be updated', function () {
 
     $response = Volt::test('settings.profile')
         ->set('name', 'Test User')
-        ->set('email', 'test@example.com')
+        ->set('nik', '1234567890123456')
         ->call('updateProfileInformation');
 
     $response->assertHasNoErrors();

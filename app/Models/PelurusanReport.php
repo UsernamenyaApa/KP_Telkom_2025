@@ -12,7 +12,9 @@ class PelurusanReport extends Model
 
     protected $table = 'pelurusan_reports';
 
-    protected $guarded = [];
+    protected $guarded = [
+
+    ];
 
     protected $casts = [
         'taken_at' => 'datetime',

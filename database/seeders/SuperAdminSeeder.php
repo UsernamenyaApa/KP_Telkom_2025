@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use App\Models\User;
 
 class SuperAdminSeeder extends Seeder
 {
@@ -15,7 +14,7 @@ class SuperAdminSeeder extends Seeder
     public function run(): void
     {
         $role = Role::firstOrCreate(['name' => 'super-admin']);
-        $user = User::where('email', 'test@example.com')->first();
+        $user = User::where('nik', '12345678')->first();
         $user->assignRole($role);
     }
 }

@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id(); // id_pelurusan
             $table->integer('id_harian')->default(0);
             $table->string('pelurusan_code')->nullable();
+            $table->string('image')->nullable();
+            $table->string('number_incident')->nullable();
             $table->text('incident_fallout_description')->nullable();
             $table->foreignId('tipe_order_id')->constrained('order_types');
             $table->string('order_id');
@@ -30,6 +32,8 @@ return new class extends Migration
             $table->string('keterangan')->nullable();
             $table->text('resolution_notes')->nullable(); // new column for hd_daman notes
             $table->foreignId('reporter_user_id')->nullable()->constrained('users');
+            $table->bigInteger('reporter_telegram_id')->nullable();
+            $table->string('reporter_telegram_username')->nullable();
             $table->timestamps();
             $table->timestamp('taken_at')->nullable();
             $table->timestamp('completed_at')->nullable();

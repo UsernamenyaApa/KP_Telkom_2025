@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
+use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
 use Telegram\Bot\Api;
-use GuzzleHttp\Client;
 use Telegram\Bot\HttpClients\GuzzleHttpClient;
 
 class TelegramServiceProvider extends ServiceProvider
