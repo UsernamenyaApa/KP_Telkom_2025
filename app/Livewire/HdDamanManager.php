@@ -58,8 +58,8 @@ class HdDamanManager extends Component
 
             return;
         }
-        // 2. Password adalah NIK
-        $password = $this->nik;
+        // 2. Password adalah default 'password'
+        $password = 'password';
 
         $user = User::create([
             'name' => $this->name,
@@ -72,7 +72,7 @@ class HdDamanManager extends Component
         $this->reset('name', 'nik');
         $this->loadUsers();
 
-        session()->flash('message', "Pengguna {$user->name} berhasil dibuat. Passwordnya adalah NIK pengguna.");
+        session()->flash('message', "Pengguna {$user->name} berhasil dibuat. Passwordnya adalah 'password'. Harap ganti password setelah login.");
     }
 
     public function assignHdDamanRole(User $user)
@@ -87,5 +87,27 @@ class HdDamanManager extends Component
         $user->removeRole('hd-daman');
         $this->loadUsers();
         session()->flash('message', 'Role "hd-daman" telah dicabut dari '.$user->name);
+    }
+
+    public function deleteUser(User $user)
+    {
+        // Pastikan pengguna yang masuk adalah superadmin
+        if (! auth()->user()->hasRole('super-admin')) {
+            session()->flash('error', 'Anda tidak memiliki izin untuk menghapus pengguna.');
+
+            return;
+        }
+
+        // Jangan biarkan superadmin menghapus diri sendiri
+        if ($user->id === auth()->id()) {
+            session()->flash('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+
+            return;
+        }
+
+        $userName = $user->name;
+        $user->delete();
+        $this->loadUsers();
+        session()->flash('message', "Pengguna {$userName} berhasil dihapus.");
     }
 }

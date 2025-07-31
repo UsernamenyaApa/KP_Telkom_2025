@@ -12,8 +12,30 @@ class PelurusanReport extends Model
 
     protected $table = 'pelurusan_reports';
 
-    protected $guarded = [
-
+    protected $fillable = [
+        'id_harian',
+        'pelurusan_code',
+        'image', // Pastikan nama ini konsisten dengan database dan job
+        'number_incident',
+        'incident_fallout_description',
+        'tipe_order_id',
+        'order_id',
+        'nomer_layanan',
+        'sn_ont',
+        'datek_odp',
+        'port_odp',
+        'fallout_status_id',
+        'assigned_to_user_id',
+        'assigned_at',
+        'notified_unassigned_at',
+        'notified_uncompleted_at',
+        'keterangan',
+        'resolution_notes',
+        'reporter_user_id',
+        'reporter_telegram_id',
+        'reporter_telegram_username',
+        'taken_at',
+        'completed_at',
     ];
 
     protected $casts = [

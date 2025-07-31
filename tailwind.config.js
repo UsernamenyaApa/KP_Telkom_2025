@@ -35,6 +35,15 @@ export default {
             accent: 'var(--color-neutral-800)',
             'accent-content': 'var(--color-neutral-800)',
             'accent-foreground': 'var(--color-white)',
+            // Generic theme colors that will be mapped to CSS variables
+            'theme-primary': 'var(--theme-primary)',
+            'theme-secondary': 'var(--theme-secondary)',
+            'theme-text': 'var(--theme-text)',
+            'theme-text-light': 'var(--theme-text-light)',
+            'theme-text-dark': 'var(--theme-text-dark)',
+            'theme-accent': 'var(--theme-accent)',
+            'theme-accent-light': 'var(--theme-accent-light)',
+            'theme-accent-dark': 'var(--theme-accent-dark)',
         }
     },
   },

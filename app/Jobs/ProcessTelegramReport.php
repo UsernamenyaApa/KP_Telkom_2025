@@ -104,40 +104,43 @@ class ProcessTelegramReport implements ShouldQueue
         $reporterName = data_get($userInfo, 'name', data_get($userInfo, 'username', 'N/A'));
         $createdBy = data_get($userInfo, 'username') ? "@{$userInfo['username']}" : $reporterName;
 
-        // Escaper for general MarkdownV2 text.
-        $escMd = fn (?string $text) => str_replace(
-            ['\\', '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
-            ['\\', '\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
+        $esc = fn (?string $text) => str_replace(
+            ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
+            ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
             $text ?? '-'
         );
 
-        // Escaper for text inside `code` (single backtick) and `pre` (triple backtick) blocks.
-        $escCode = fn (?string $text) => str_replace(['\\', '`'], ['\\', '\`'], $text ?? '-');
+        // Sanitize input for the code block to prevent parsing errors.
+        // Within `pre` blocks, all `` and `` ` `` characters must be escaped.
+        $description = $report->incident_fallout_description ?? '-';
+        $keterangan = $report->keterangan ?? '-';
+        $sanitizedDescription = str_replace(['', '`'], ['', '`'], $description);
+        $sanitizedKeterangan = str_replace(['', '`'], ['', '`'], $keterangan);
 
         $lines = [
             '📊 *Laporan Fallout Baru* 📊',
             '',
-            '*ID Laporan:* `'.$escCode($report->id_harian).'`',
-            '*Kode Fallout:* `'.$escCode($report->fallout_code).'`',
-            '*Tipe Order:* `'.$escCode($report->orderType->name).'`',
-            '*OrderID:* `'.$escCode($report->order_id).'`',
-            '*Nomor Layanan:* `'.$escCode($report->nomer_layanan).'`',
-            '*SN ONT:* `'.$escCode($report->sn_ont).'`',
-            '*Datek ODP:* `'.$escCode($report->datek_odp).'`',
-            '*Port ODP:* `'.$escCode($report->port_odp).'`',
-            '*Tiket Insiden:* `'.$escCode($report->incident_ticket).'`',
+            '*ID Laporan:* `'.$esc($report->id_harian).'`',
+            '*Kode Fallout:* `'.$esc($report->fallout_code).'`',
+            '*Tipe Order:* `'.$esc($report->orderType->name).'`',
+            '*OrderID:* `'.$esc($report->order_id).'`',
+            '*Nomor Layanan:* `'.$esc($report->nomer_layanan).'`',
+            '*SN ONT:* `'.$esc($report->sn_ont).'`',
+            '*Datek ODP:* `'.$esc($report->datek_odp).'`',
+            '*Port ODP:* `'.$esc($report->port_odp).'`',
+            '*Tiket Insiden:* `'.$esc($report->incident_ticket).'`',
             '',
             '*Keterangan Insiden:*',
             '```',
-            $escCode($report->incident_fallout_description),
+            $sanitizedDescription,
             '```',
             '*Keterangan Tambahan:*',
             '```',
-            $escCode($report->keterangan),
+            $sanitizedKeterangan,
             '```',
             '----------------------------------------',
-            '*Dibuat Oleh:* '.$escMd($createdBy),
-            '*Waktu Dibuat:* `'.$escCode($report->created_at->format('Y-m-d H:i:s')).'`',
+            '*Dibuat Oleh:* '.$esc($createdBy),
+            '*Waktu Dibuat:* '.$esc($report->created_at->format('Y-m-d H:i:s')),
         ];
 
         $reportText = implode("\n", $lines);
@@ -155,12 +158,6 @@ class ProcessTelegramReport implements ShouldQueue
 
     private function notifyUserOnFailure(string $message): void
     {
-        $escMd = fn (?string $text) => str_replace(
-            ['\\', '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
-            ['\\', '\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
-            $text ?? ''
-        );
-
-        SendTelegramNotificationJob::dispatch($this->chatId, "❌ Gagal memproses laporan: {$escMd($message)}");
+        SendTelegramNotificationJob::dispatch($this->chatId, "❌ Gagal memproses laporan: {$message}");
     }
 }

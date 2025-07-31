@@ -45,7 +45,7 @@ new class extends Component {
             <flux:input
                 wire:model="current_password"
                 :label="__('Current password')"
-                type="password"
+                type="text"
                 required
                 autocomplete="current-password"
                 placeholder="Current password"
@@ -53,7 +53,7 @@ new class extends Component {
             <flux:input
                 wire:model="password"
                 :label="__('New password')"
-                type="password"
+                type="text"
                 required
                 autocomplete="new-password"
                 placeholder="New password"
@@ -61,7 +61,7 @@ new class extends Component {
             <flux:input
                 wire:model="password_confirmation"
                 :label="__('Confirm Password')"
-                type="password"
+                type="text"
                 required
                 autocomplete="new-password"
                 placeholder="Confirm password"

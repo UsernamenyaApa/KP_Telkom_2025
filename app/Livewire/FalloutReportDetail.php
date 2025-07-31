@@ -5,7 +5,9 @@ namespace App\Livewire;
 use App\Jobs\SendTelegramNotificationJob;
 use App\Models\FalloutReport;
 use App\Models\FalloutStatus;
+use App\Models\TelegramGroup;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -15,22 +17,21 @@ class FalloutReportDetail extends Component
     public $date;
 
     public FalloutReport $report;
-
     public $showStatusModal = false;
-
     public $newStatusId;
-
     public $keterangan = '';
-
     public $availableStatuses = [];
+
+    private const ON_PROGRESS = 'OnProgress';
+    private const COMPLETED_STATUSES = ['FA', 'input ulang', 'PI'];
 
     public function mount($id, $date = null)
     {
         $this->report = FalloutReport::with(['orderType', 'falloutStatus', 'reporter', 'assignedToUser'])->findOrFail($id);
-        if ($date) {
-            $this->date = $date;
-        }
+        $this->date = $date ?? $this->date;
     }
+
+    
 
     public function openStatusModal()
     {
@@ -38,12 +39,8 @@ class FalloutReportDetail extends Component
         $currentStatusName = $this->report->falloutStatus?->name;
 
         $this->availableStatuses = $allStatuses->filter(function ($status) use ($currentStatusName) {
-            if ($currentStatusName === 'Open') {
-                return true; // All statuses available from Open
-            }
-
-            // For any other status, exclude Open and OnProgress
-            return ! in_array($status->name, ['Open', 'OnProgress']);
+            if ($currentStatusName === 'Open') return true;
+            return !in_array($status->name, ['Open', 'OnProgress']);
         });
 
         $this->newStatusId = $this->report->fallout_status_id;
@@ -59,6 +56,7 @@ class FalloutReportDetail extends Component
 
     public function changeStatus()
     {
+
         if ($this->newStatusId && $this->report->assigned_to_user_id == auth()->id()) {
             $this->report->fallout_status_id = $this->newStatusId;
             $this->report->resolution_notes = $this->keterangan;
@@ -238,10 +236,20 @@ class FalloutReportDetail extends Component
                 $this->dispatch('reportAssigned');
             }
         }
+
     }
 
     public function render()
     {
         return view('livewire.fallout-report-detail');
+    }
+
+    private function escapeMarkdown($text): string
+    {
+        if (is_null($text)) {
+            return 'N/A';
+        }
+        $chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+        return str_replace($chars, array_map(fn ($char) => '\\' . $char, $chars), $text);
     }
 }

@@ -110,13 +110,13 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         $createdBy = data_get($userInfo, 'username') ? "@{$userInfo['username']}" : $reporterName;
 
         $esc = fn (?string $text) => str_replace(
-            ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '=', '|', '{', '}', '!'],
-            ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '`', '\>', '\#', '\+', '\=', '\|', '\{', '\}', '\!'],
+            ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
+            ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
             $text ?? '-'
         );
 
         $lines = [
-            '✏️ *Laporan Pelurusan Baru* ✏️',
+            '✏️ *Laporan Pelurusan Baru*',
             '',
             '*ID Laporan:* `'.$esc($report->id_harian).'`',
             '*Kode Pelurusan:* `'.$esc($report->pelurusan_code).'`',

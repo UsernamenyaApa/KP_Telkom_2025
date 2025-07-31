@@ -18,5 +18,6 @@ class FalloutStatusSeeder extends Seeder
         FalloutStatus::firstOrCreate(['id' => 4, 'name' => 'eskalasi']);
         FalloutStatus::firstOrCreate(['id' => 5, 'name' => 'PI']);
         FalloutStatus::firstOrCreate(['id' => 6, 'name' => 'FA']);
+        FalloutStatus::firstOrCreate(['id' => 7, 'name' => 'Submitted']);
     }
 }

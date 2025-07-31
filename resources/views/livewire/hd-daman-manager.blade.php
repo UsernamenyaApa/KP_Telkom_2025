@@ -70,6 +70,9 @@
                                     @else
                                         <button wire:click="assignHdDamanRole({{ $user->id }})" class="text-indigo-600 hover:text-indigo-900">Assign HD-Daman</button>
                                     @endif
+                                    @if (auth()->user()->hasRole('super-admin') && auth()->user()->id !== $user->id)
+                                        <button wire:click="deleteUser({{ $user->id }})" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.') || event.stopImmediatePropagation()" class="ml-4 text-red-600 hover:text-red-900">Delete</button>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
