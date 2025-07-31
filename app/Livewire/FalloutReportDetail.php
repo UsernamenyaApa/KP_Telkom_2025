@@ -76,12 +76,10 @@ class FalloutReportDetail extends Component
 
             $message = "🔔 *Update Status Laporan Fallout* 🔔\n\n" .
                        "*Status Baru:* " . $esc($newStatus->name) . "\n\n" .
+                       "*Kode Fallout:* `" . ($this->report->incident_ticket) . "`\n" .
                        "*Tipe Order:* " . $esc($this->report->orderType ? $this->report->orderType->name : 'N/A') . "\n" .
                        "*OrderID:* `" . ($this->report->order_id) . "`\n" .
-                       "*Nomor Layanan:* `" . ($this->report->nomer_layanan) . "`\n" .
-                       "*SN ONT:* `" . ($this->report->sn_ont) . "`\n" .
-                       "*Datek ODP:* `" . ($this->report->datek_odp) . "`\n" .
-                       "*Port ODP:* `" . ($this->report->port_odp) . "`\n\n" .
+                       "*Nomor Layanan:* `" . ($this->report->nomer_layanan) . "`\n\n" .
                        "📝 *Catatan Resolusi:*\n" . $esc($this->keterangan) . "\n\n" .
                        "----------------------------------------\n" .
                        "*Created By:* @" . $esc($this->report->reporter_user_id ? $this->report->reporter->telegram_username : $this->report->reporter_telegram_username) . "\n" .
@@ -140,21 +138,15 @@ class FalloutReportDetail extends Component
                 $message = "✅ *Laporan Fallout Diambil!* ✅
 
 " .
-                           "*ID Laporan:* `" . $this->report->id . "`
+                           "*Antrian:* `" . $this->report->id_harian . "`
 " .
-                           "*Kode Fallout:* `" . $this->report->fallout_code . "`
+                           "*Kode Fallout:* `" . $this->report->incident_ticket . "`
 " .
                            "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
 " .
                            "*OrderID:* `" . $this->report->order_id . "`
 " .
                            "*Nomor Layanan:* `" . $this->report->nomer_layanan . "`
-" .
-                           "*SN ONT:* `" . $this->report->sn_ont . "`
-" .
-                           "*Datek ODP:* `" . $this->report->datek_odp . "`
-" .
-                           "*Port ODP:* `" . $this->report->port_odp . "`
 
 " .
                            "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
@@ -177,21 +169,15 @@ class FalloutReportDetail extends Component
                     $personalMessage = "✅ Laporan Fallout Diambil! ✅
 
 " .
-                                       "*ID Laporan:* `" . $this->report->id_harian . "`
+                                       "*Antrian:* `" . $this->report->id_harian . "`
 " .
-                                       "*Kode Fallout:* `" . $this->report->fallout_code . "`
+                                       "*Kode Fallout:* `" . $this->report->incident_ticket . "`
 " .
                                        "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
 " .
                                        "*OrderID:* `" . $this->report->order_id . "`
 " .
                                        "*Nomor Layanan:* `" . $this->report->nomer_layanan . "`
-" .
-                                       "*SN ONT:* `" . $this->report->sn_ont . "`
-" .
-                                       "*Datek ODP:* `" . $this->report->datek_odp . "`
-" .
-                                       "*Port ODP:* `" . $this->report->port_odp . "`
 
 " .
                                        "*Diambil Oleh:* @" . auth()->user()->telegram_username . "
@@ -208,21 +194,15 @@ class FalloutReportDetail extends Component
                                     "Berikut detail laporan:
 
 " .
-                                    "*ID Laporan:* `" . $this->report->id_harian . "`
+                                    "*Antrian:* `" . $this->report->id_harian . "`
 " .
-                                    "*Kode Fallout:* `" . $this->report->fallout_code . "`
+                                    "*Kode Fallout:* `" . $this->report->incident_ticket . "`
 " .
                                     "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
 " .
                                     "*OrderID:* `" . $this->report->order_id . "`
 " .
                                     "*Nomor Layanan:* `" . $this->report->nomer_layanan . "`
-" .
-                                    "*SN ONT:* `" . $this->report->sn_ont . "`
-" .
-                                    "*Datek ODP:* `" . $this->report->datek_odp . "`
-" .
-                                    "*Port ODP:* `" . $this->report->port_odp . "`
 
 " .
                                     "*Diambil Oleh:* @" . auth()->user()->telegram_username . "

@@ -55,19 +55,13 @@ class ProcessTelegramReport implements ShouldQueue
 
     private function prepareReportDataForStorage(array $reportData, array $userInfo): array
     {
-        $portOdp = data_get($reportData, 'port_odp');
-
         $data = [
             'tipe_order_id' => $this->tipeOrderId,
             'order_id' => data_get($reportData, 'order_id'),
             'nomer_layanan' => data_get($reportData, 'nomer_layanan'),
-            'sn_ont' => data_get($reportData, 'sn_ont'),
-            'datek_odp' => data_get($reportData, 'datek_odp'),
-            'port_odp' => is_numeric($portOdp) ? (int) $portOdp : null,
             'incident_ticket' => data_get($reportData, 'incident_ticket'),
             'incident_fallout_description' => data_get($reportData, 'incident_fallout_description'),
             'keterangan' => data_get($reportData, 'keterangan'),
-            'image' => data_get($reportData, 'image'),
         ];
 
         // If it's an Office Staff, link to their user account.
@@ -104,43 +98,36 @@ class ProcessTelegramReport implements ShouldQueue
         $reporterName = data_get($userInfo, 'name', data_get($userInfo, 'username', 'N/A'));
         $createdBy = data_get($userInfo, 'username') ? "@{$userInfo['username']}" : $reporterName;
 
+        $description = $report->incident_fallout_description ?? '-';
+        $keterangan = $report->keterangan ?? '-';
+
+        // Sanitize for MarkdownV2
         $esc = fn (?string $text) => str_replace(
             ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
             ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
-            $text ?? '-'
+            $text ?? ''
         );
-
-        // Sanitize input for the code block to prevent parsing errors.
-        // Within `pre` blocks, all `` and `` ` `` characters must be escaped.
-        $description = $report->incident_fallout_description ?? '-';
-        $keterangan = $report->keterangan ?? '-';
-        $sanitizedDescription = str_replace(['\\', '`'], ['\\\\', '\`'], $description);
-        $sanitizedKeterangan = str_replace(['\\', '`'], ['\\\\', '\`'], $keterangan);
 
         $lines = [
             '📊 *Laporan Fallout Baru* 📊',
             '',
-            '*ID Laporan:* `' . $esc($report->id_harian) . '`',
-            '*Kode Fallout:* `' . $esc($report->fallout_code) . '`',
+            '*Antrian:* `' . $report->id_harian . '`',
+            '*Kode Fallout:* `' . $esc($report->incident_ticket) . '`',
             '*Tipe Order:* `' . $esc($report->orderType->name) . '`',
             '*OrderID:* `' . $esc($report->order_id) . '`',
-            '*Nomor Layanan:* `' . $esc($report->nomer_layanan) . '`',
-            '*SN ONT:* `' . $esc($report->sn_ont) . '`',
-            '*Datek ODP:* `' . $esc($report->datek_odp) . '`',
-            '*Port ODP:* `' . $esc($report->port_odp) . '`',
-            '*Tiket Insiden:* `' . $esc($report->incident_ticket) . '`',
+            '*Nomor Layanan:* `' . $report->nomer_layanan . '`',
             '',
             '*Keterangan Insiden:*',
-            '```',
-            $sanitizedDescription,
+            '```text',
+            $description,
             '```',
             '*Keterangan Tambahan:*',
-            '```',
-            $sanitizedKeterangan,
+            '```text',
+            $keterangan,
             '```',
             '----------------------------------------',
             '*Dibuat Oleh:* ' . $esc($createdBy),
-            '*Waktu Dibuat:* ' . $esc($report->created_at->format('Y-m-d H:i:s')),
+            '*Waktu Dibuat:* `' . $report->created_at->format('Y-m-d H:i:s') . '`',
         ];
 
         $reportText = implode("\n", $lines);

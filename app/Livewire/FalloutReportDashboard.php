@@ -98,14 +98,11 @@ class FalloutReportDashboard extends Component
                 $user = Auth::user();
 
                 $message = "✅ Laporan Fallout Diambil! ✅\n\n" .
-                           "ID Laporan: " . ($report->id_harian ?? 'N/A') . "\n" .
-                           "Kode Fallout: " . ($report->fallout_code ?? 'N/A') . "\n" .
+                           "Antrian: " . ($report->id_harian ?? 'N/A') . "\n" .
+                           "Kode Fallout: " . ($report->incident_ticket ?? 'N/A') . "\n" .
                            "Tipe Order: " . ($report->orderType ? $report->orderType->name : 'N/A') . "\n" .
                            "OrderID: " . ($report->order_id ?? 'N/A') . "\n" .
-                           "Nomor Layanan: " . ($report->nomer_layanan ?? 'N/A') . "\n" .
-                           "SN ONT: " . ($report->sn_ont ?? 'N/A') . "\n" .
-                           "Datek ODP: " . ($report->datek_odp ?? 'N/A') . "\n" .
-                           "Port ODP: " . ($report->port_odp ?? 'N/A') . "\n\n" .
+                           "Nomor Layanan: " . ($report->nomer_layanan ?? 'N/A') . "\n\n" .
                            "Diambil Oleh: @" . ($user->telegram_username ?? 'N/A') . "\n" .
                            "Waktu Diambil: " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
 
@@ -115,14 +112,11 @@ class FalloutReportDashboard extends Component
 
                 if ($report->reporter && $report->reporter->telegram_user_id) {
                     $reporterMessage = "✅ Laporan Fallout Diambil! ✅\n\n" .
-                                       "*ID Laporan:* " . ($report->id_harian ?? 'N/A') . "\n" .
-                                       "*Kode Fallout:* " . ($report->fallout_code ?? 'N/A') . "\n" .
+                                       "*Antrian:* " . ($report->id_harian ?? 'N/A') . "\n" .
+                                       "*Kode Fallout:* " . ($report->incident_ticket ?? 'N/A') . "\n" .
                                        "*Tipe Order:* " . ($report->orderType ? $report->orderType->name : 'N/A') . "\n" .
                                        "*OrderID:* " . ($report->order_id ?? 'N/A') . "\n" .
-                                       "*Nomor Layanan:* " . ($report->nomer_layanan ?? 'N/A') . "\n" .
-                                       "*SN ONT:* " . ($report->sn_ont ?? 'N/A') . "\n" .
-                                       "*Datek ODP:* " . ($report->datek_odp ?? 'N/A') . "\n" .
-                                       "*Port ODP:* " . ($report->port_odp ?? 'N/A') . "\n\n" .
+                                       "*Nomor Layanan:* " . ($report->nomer_layanan ?? 'N/A') . "\n\n" .
                                        "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "\n" .
                                        "*Waktu Diambil:* " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
                     SendTelegramNotificationJob::dispatch($report->reporter->telegram_user_id, $reporterMessage, null, 'MarkdownV2');
