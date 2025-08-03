@@ -68,6 +68,10 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
     {
         $portOdp = data_get($reportData, 'port_odp');
 
+        if (! data_get($reportData, 'image')) {
+            throw new \Exception('Gambar wajib disertakan.');
+        }
+
         $data = [
             'tipe_order_id' => $this->tipeOrderId,
             'nomer_layanan' => data_get($reportData, 'nomer_layanan'),
@@ -130,31 +134,31 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         );
 
         $lines = [
-            '✏️ *Laporan Pelurusan Baru*',
-            '',
-            '*ID Laporan:* `' . $esc($report->id_harian) . '`',
-            '*Kode Pelurusan:* `' . $esc($report->pelurusan_code) . '`',
-            '*Tipe Order:* `' . $esc($report->orderType->name) . '`',
+            "✏️ *Laporan Pelurusan Baru*",
+            "",
+            "*ID Laporan:* `{$esc($report->id_harian)}`",
+            "*Kode Pelurusan:* `{$esc($report->pelurusan_code)}`",
+            "*Tipe Order:* `{$esc($report->orderType->name)}`",
         ];
 
         if ($report->tipe_order_id == 8) { // Ex Gangguan
-            $lines[] = '*Nomor Incident:* `' . $esc($report->order_id) . '`';
-            $lines[] = '*Nomor Layanan:* `' . $esc($report->nomer_layanan) . '`';
-            $lines[] = '*Datek ODP:* `' . $esc($report->datek_odp) . '`';
-            $lines[] = '*Port ODP:* `' . $esc($report->port_odp) . '`';
+            $lines[] = "*Nomor Incident:* `{$esc($report->order_id)}`";
+            $lines[] = "*Nomor Layanan:* `{$esc($report->nomer_layanan)}`";
+            $lines[] = "*Datek ODP:* `{$esc($report->datek_odp)}`";
+            $lines[] = "*Port ODP:* `{$esc($report->port_odp)}`";
         } else {
             // Sanitize input for the code block to prevent parsing errors.
-            // Within `pre` blocks, all `\` and `` ` `` characters must be escaped.
+            // Within `pre` blocks, all `\\` and `` ` `` characters must be escaped.
             $description = $report->incident_fallout_description ?? '-';
             $keterangan = $report->keterangan ?? '-';
-            $sanitizedDescription = str_replace(['\', '`'], ['\\', '\`'], $description);
-            $sanitizedKeterangan = str_replace(['\', '`'], ['\\', '\`'], $keterangan);
+            $sanitizedDescription = str_replace(['\\', '`'], ['\\', '`'], $description);
+            $sanitizedKeterangan = str_replace(['\\', '`'], ['\\', '`'], $keterangan);
 
-            $lines[] = '*OrderID:* `' . $esc($report->order_id) . '`';
-            $lines[] = '*Nomor Layanan:* `' . $esc($report->nomer_layanan) . '`';
-            $lines[] = '*SN ONT:* `' . $esc($report->sn_ont) . '`';
-            $lines[] = '*Datek ODP:* `' . $esc($report->datek_odp) . '`';
-            $lines[] = '*Port ODP:* `' . $esc($report->port_odp) . '`';
+            $lines[] = "*OrderID:* `{$esc($report->order_id)}`";
+            $lines[] = "*Nomor Layanan:* `{$esc($report->nomer_layanan)}`";
+            $lines[] = "*SN ONT:* `{$esc($report->sn_ont)}`";
+            $lines[] = "*Datek ODP:* `{$esc($report->datek_odp)}`";
+            $lines[] = "*Port ODP:* `{$esc($report->port_odp)}`";
             $lines[] = '';
             $lines[] = '*Keterangan Insiden:*';
             $lines[] = '```';

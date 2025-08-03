@@ -125,10 +125,6 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             'show_fallout_menu' => $this->showFalloutMenu($telegram, $chatId, $messageId),
             'lapor_pelurusan' => $this->showPelurusanMenu($telegram, $chatId, $messageId),
             'back_to_main_menu' => $this->showMainMenu($telegram, $chatId, '↩️ Kembali ke menu utama. Pilih opsi:', $messageId),
-            'image_yes' => $this->handleImageYes($telegram, $chatId, $messageId),
-            'image_no' => $this->handleImageNo($telegram, $chatId, $messageId, $state),
-            'pelurusan_image_yes' => $this->handleImageYes($telegram, $chatId, $messageId, self::PROCESS_PELURUSAN),
-            'pelurusan_image_no' => $this->handleImageNo($telegram, $chatId, $messageId, $state, self::PROCESS_PELURUSAN),
             default => SendTelegramNotificationJob::dispatch($chatId, '⚠️ Aksi tidak valid.')
         };
     }
@@ -392,6 +388,13 @@ class ProcessTelegramUpdateJob implements ShouldQueue
 
             return;
         }
+
+        if ($currentStep === 'datek_odp' && ! preg_match('/^[A-Z0-9\-]+(?:\/[A-Z0-9\-]+)*$/i', $trimmedText)) {
+            SendTelegramNotificationJob::dispatch($chatId, '❌ Format Datek ODP tidak valid. Contoh: ODP-GDS-FAT/75. Silakan masukkan kembali:');
+
+            return;
+        }
+        
         $state['report_data'][$currentStep] = $trimmedText;
         $this->advancePelurusanStep($chatId, $state);
     }
@@ -490,15 +493,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
 
             if ($state['step'] === 'awaiting_image') {
-                $keyboard = [
-                    'inline_keyboard' => [
-                        [
-                            ['text' => 'Ya', 'callback_data' => 'pelurusan_image_yes'],
-                            ['text' => 'Tidak', 'callback_data' => 'pelurusan_image_no'],
-                        ],
-                    ],
-                ];
-                SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan', $tipeOrderId), $keyboard);
+                SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan', $tipeOrderId));
             } else {
                 SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan', $tipeOrderId));
             }
@@ -531,7 +526,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                     'nomer_layanan' => '2/4: Masukkan Nomor Layanan:',
                     'datek_odp' => '3/4: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):',
                     'port_odp' => '4/4: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):',
-                    'awaiting_image' => 'Apakah Anda ingin menambahkan gambar?',
+                    'awaiting_image' => '5/5: Silakan unggah gambar pendukung.',
                 ];
             } else {
                 $questions = [
@@ -542,7 +537,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                     'datek_odp' => '5/8: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):',
                     'port_odp' => '6/8: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):',
                     'keterangan' => '7/8: Masukkan Keterangan Tambahan Laporan:',
-                    'awaiting_image' => 'Apakah Anda ingin menambahkan gambar?',
+                    'awaiting_image' => '8/8: Silakan unggah gambar pendukung.',
                 ];
             }
         } else {
@@ -612,18 +607,4 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         }
     }
 
-    private function handleImageYes(Api $telegram, int $chatId, int $messageId, string $processType = self::PROCESS_FALLOUT): void
-    {
-        $this->editMessage($telegram, $chatId, $messageId, 'Silakan kirim gambar Anda.');
-    }
-
-    private function handleImageNo(Api $telegram, int $chatId, int $messageId, array $state, string $processType = self::PROCESS_FALLOUT): void
-    {
-        $this->editMessage($telegram, $chatId, $messageId, 'Baik, laporan akan diproses tanpa gambar.');
-        if ($processType === self::PROCESS_FALLOUT) {
-            $this->generateAndSendReport($chatId, $state);
-        } elseif ($processType === self::PROCESS_PELURUSAN) {
-            $this->generateAndSendPelurusanReport($chatId, $state);
-        }
-    }
 }
