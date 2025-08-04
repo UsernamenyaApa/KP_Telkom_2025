@@ -7,12 +7,12 @@
     </div>
 
     @if (session()->has('message'))
-        <div class="mt-4 p-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
+        <div class="mt-4 p-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-[#131518] dark:text-green-400" role="alert">
             {{ session('message') }}
         </div>
     @endif
 
-    <div class="mt-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+    <div class="mt-6 bg-white dark:bg-[#131518] p-4 rounded-lg shadow">
         <form wire:submit.prevent="{{ $isEditing ? 'update' : 'create' }}" class="space-y-4">
             <div>
                 <label for="name" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Order Type Name</label>

@@ -6,8 +6,8 @@
     <title>Page Expired</title>
     <style>
         html, body {
-            background-color: #fff;
-            color: #636b6f;
+            background-color: #131518;
+            color: #F9FAFB;
             font-family: sans-serif;
             font-weight: 100;
             height: 100vh;

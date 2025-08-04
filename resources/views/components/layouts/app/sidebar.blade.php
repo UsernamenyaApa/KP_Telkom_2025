@@ -3,7 +3,7 @@
 <head>
     @include('partials.head')
 </head>
-<body class="min-h-screen bg-theme-primary dark:bg-theme-primary" x-data="{
+<body class="min-h-screen bg-theme-primary dark:bg-[#131518]" x-data="{
         sidebarOpen: false,
         get darkMode() {
             return $flux.appearance === 'dark' || ($flux.appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -40,7 +40,7 @@
         });
     " x-on:saved.window="handleSavedEvent($event.detail.appearance, $event.detail.themeColor)">
     <flux:sidebar
-        class="fixed inset-y-0 left-0 z-50 w-64 border-e border-zinc-200 bg-theme-primary dark:border-zinc-700 dark:bg-theme-primary"
+        class="fixed inset-y-0 left-0 z-50 w-64 border-e border-zinc-200 bg-theme-primary dark:border-zinc-700 dark:bg-[#131518]"
         x-show="sidebarOpen"
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="-translate-x-full"
@@ -160,7 +160,7 @@
         </div>
     </flux:sidebar>
 
-    <flux:header class="fixed top-0 w-full z-40 shadow-lg border-b border-gray-200 dark:border-zinc-700 bg-theme-primary dark:bg-theme-primary">
+    <flux:header class="fixed top-0 w-full z-40 shadow-lg border-b border-gray-200 dark:border-zinc-700 bg-theme-primary dark:bg-[#131518]">
         <flux:sidebar.toggle icon="bars-2" inset="left" @click="sidebarOpen = true" class="text-theme-text hover:text-zinc-700 dark:hover:text-zinc-300" />
 
         <flux:spacer />
@@ -174,7 +174,7 @@
                     <span class="text-sm font-medium text-theme-text">{{ auth()->user()->name }}</span>
                 </button>
 
-                <flux:menu class="bg-theme-primary dark:bg-theme-primary border-gray-200 dark:border-zinc-600">
+                <flux:menu class="bg-theme-primary dark:bg-[#131518] border-gray-200 dark:border-zinc-600">
                     <flux:menu.radio.group>
                         <div class="p-0 text-sm font-normal">
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
@@ -234,7 +234,7 @@
         </div>
     </flux:header>
 
-    <div class="bg-theme-primary dark:bg-theme-primary pt-16 min-h-screen" :class="{'lg:ms-64': sidebarOpen, 'lg:ms-0': !sidebarOpen}">
+    <div class="bg-theme-primary dark:bg-[#131518] pt-16 min-h-screen" :class="{'lg:ms-64': sidebarOpen, 'lg:ms-0': !sidebarOpen}">
         {{ $slot }}
     </div>
 

@@ -7,13 +7,13 @@
     </div>
 
     @if (session()->has('message'))
-        <div class="mt-4 p-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
+        <div class="mt-4 p-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-[#131518] dark:text-green-400" role="alert">
             {{ session('message') }}
         </div>
     @endif
 
     {{-- Form untuk membuat pengguna baru --}}
-    <div class="mt-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+    <div class="mt-6 bg-white dark:bg-[#131518] p-4 rounded-lg shadow">
         <h2 class="text-lg font-medium text-gray-900 dark:text-white">Create New User</h2>
         <form wire:submit.prevent="createUser" class="mt-4 space-y-4">
             <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">

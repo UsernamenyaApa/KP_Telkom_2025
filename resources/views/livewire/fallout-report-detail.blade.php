@@ -5,8 +5,8 @@
                 <h1 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Fallout Report Details</h1>
                 <p class="mt-2 text-sm text-gray-700 dark:text-gray-400">Details for incident ticket: {{ $report->incident_ticket }}</p>
             </div>
-            <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex items-center space-x-4">
-                <a href="{{ route('fallout-reports.index', ['date' => $date]) }}" class="block rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-center text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 sm:mt-0">Back to Dashboard</a>
+            <div class="mt-4 sm:ml-16 sm:mt-0 flex items-center space-x-4">
+                <a href="{{ route('fallout-reports.index', ['date' => $date]) }}" class="block rounded-md bg-white dark:bg-[#131518] px-3 py-2 text-center text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 sm:mt-0">Back to Dashboard</a>
                 @if ($report->falloutStatus?->name === 'Open')
                     <button wire:click="takeOrder" class="block rounded-md bg-green-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">Ambil Order</button>
                 @endif
@@ -19,7 +19,7 @@
         <div class="mt-8 flow-root">
             <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                    <div class="overflow-hidden bg-white dark:bg-gray-800 shadow ring-1 ring-black ring-opacity-5 dark:ring-white/10 sm:rounded-lg">
+                    <div class="overflow-hidden bg-white dark:bg-[#131518] shadow ring-1 ring-black ring-opacity-5 dark:ring-white/10 sm:rounded-lg">
                         <div class="grid grid-cols-1 sm:grid-cols-2">
                             <div class="px-4 py-5 sm:p-6">
                                 <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">General Information</h3>
@@ -123,11 +123,11 @@
         <div class="fixed inset-0" wire:click="closeStatusModal"></div>
 
         <div class="flex items-center justify-center min-h-screen">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 relative z-20 w-full max-w-md">
+            <div class="bg-white dark:bg-[#131518] rounded-lg shadow-xl p-6 relative z-20 w-full max-w-md">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white">Change Fallout Status</h3>
                 <div class="mt-4">
                     <label for="status" class="sr-only">Status</label>
-                    <select wire:model="newStatusId" id="status" class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <select wire:model="newStatusId" id="status" class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-[#131518] text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         <option value="">Select Status</option>
                         @foreach($availableStatuses as $status)
                             <option value="{{ $status->id }}">{{ $status->name }}</option>
@@ -136,11 +136,11 @@
                 </div>
                 <div class="mt-4">
                     <label for="keterangan" class="sr-only">Keterangan</label>
-                    <textarea wire:model="keterangan" id="keterangan" rows="4" class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Tambahkan catatan..."></textarea>
+                    <textarea wire:model="keterangan" id="keterangan" rows="4" class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-[#131518] text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Tambahkan catatan..."></textarea>
                 </div>
                 
                 <div class="mt-6 flex justify-end space-x-4">
-                    <button wire:click="closeStatusModal" type="button" class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <button wire:click="closeStatusModal" type="button" class="px-4 py-2 bg-white dark:bg-[#131518] border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
                         Cancel
                     </button>
                     <button wire:click="changeStatus" type="button" class="px-4 py-2 bg-indigo-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700">

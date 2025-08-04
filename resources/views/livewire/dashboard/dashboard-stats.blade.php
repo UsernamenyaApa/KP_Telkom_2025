@@ -1,7 +1,7 @@
 <div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <!-- Card Wrapper -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <div class="bg-white dark:bg-[#131518] rounded-lg shadow-md p-4 border border-gray-300 dark:border-gray-600">
             <!-- Content -->
             <div wire:loading.remove>
                 <div class="flex justify-between items-start">
@@ -29,7 +29,7 @@
         </div>
 
         <!-- Card Wrapper -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <div class="bg-white dark:bg-[#131518] rounded-lg shadow-md p-4 border border-gray-300 dark:border-gray-600">
             <!-- Content -->
             <div wire:loading.remove>
                 <div class="flex justify-between items-start">
@@ -57,7 +57,7 @@
         </div>
 
         <!-- Card Wrapper -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <div class="bg-white dark:bg-[#131518] rounded-lg shadow-md p-4 border border-gray-300 dark:border-gray-600">
             <!-- Content -->
             <div wire:loading.remove>
                 <div class="flex justify-between items-start">
@@ -85,7 +85,7 @@
         </div>
 
         <!-- Card Wrapper -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <div class="bg-white dark:bg-[#131518] rounded-lg shadow-md p-4 border border-gray-300 dark:border-gray-600">
             <!-- Content -->
             <div wire:loading.remove>
                 <div class="flex justify-between items-start">
