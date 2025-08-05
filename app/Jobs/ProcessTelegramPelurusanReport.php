@@ -136,7 +136,7 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         $esc = fn (?string $text) => str_replace(
             ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
             ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
-            $text ?? '-'
+            $text ?? ''
         );
 
         $reporterName = data_get($userInfo, 'name', data_get($userInfo, 'username', 'N/A'));
@@ -153,32 +153,35 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
             $lines[] = "*Datek ODP:* `{$esc($report->datek_odp)}`";
             $lines[] = "*Port ODP:* `{$esc($report->port_odp)}`";
         } else {
-            $sanitizeCodeBlock = fn(?string $text) => str_replace(['\\', '`'], ['\\\\', '\\`'], $text ?? '-');
             $lines[] = "*OrderID:* `{$esc($report->order_id)}`";
             $lines[] = "*Nomor Layanan:* `{$esc($report->nomer_layanan)}`";
             $lines[] = "*SN ONT:* `{$esc($report->sn_ont)}`";
             $lines[] = "*Datek ODP:* `{$esc($report->datek_odp)}`";
             $lines[] = "*Port ODP:* `{$esc($report->port_odp)}`";
             $lines[] = "\n*Keterangan Insiden:*";
-            $lines[] = "```\n" . $sanitizeCodeBlock($report->incident_fallout_description) . "\n```";
+            $lines[] = "```";
+            $lines[] = $esc($report->incident_fallout_description);
+            $lines[] = "```";
             $lines[] = "*Keterangan Tambahan:*";
-            $lines[] = "```\n" . $sanitizeCodeBlock($report->keterangan) . "\n```";
+            $lines[] = "```";
+            $lines[] = $esc($report->keterangan);
+            $lines[] = "```";
         }
 
         if ($report->images->isNotEmpty()) {
             $lines[] = $esc("\n*Gambar Terlampir: (" . $report->images->count() . ")*");
         }
 
-        $lines[] = $esc('----------------------------------------');
+        $lines[] = ""; // Safe separator
         $lines[] = '*Dibuat Oleh:* ' . $esc($createdBy);
-        $lines[] = '*Waktu Dibuat:* ' . $esc($report->created_at->format('Y-m-d H:i:s'));
+        $lines[] = '*Waktu Dibuat:* `' . $esc($report->created_at->format('Y-m-d H:i:s')) . '`';
 
         $reportText = implode("\n", $lines);
         
         $groupChatId = \App\Models\TelegramGroup::first()?->chat_id;
-        $destinations = array_filter([env('TELEGRAM_CHANNEL_ID'), $groupChatId, $this->chatId]);
+        $destinations = array_unique(array_filter([env('TELEGRAM_CHANNEL_ID'), $groupChatId, $this->chatId]));
 
-        foreach (array_unique($destinations) as $chatId) {
+        foreach ($destinations as $chatId) {
             \App\Jobs\SendTelegramNotificationJob::dispatch($chatId, $reportText, null, 'MarkdownV2');
         }
     }

@@ -94,12 +94,8 @@ class ProcessTelegramReport implements ShouldQueue
 
     private function notifyRelevantParties(FalloutReport $report, array $userInfo): void
     {
-        // Use the real name if available (Office Staff), otherwise use the Telegram username.
         $reporterName = data_get($userInfo, 'name', data_get($userInfo, 'username', 'N/A'));
         $createdBy = data_get($userInfo, 'username') ? "@{$userInfo['username']}" : $reporterName;
-
-        $description = $report->incident_fallout_description ?? '-';
-        $keterangan = $report->keterangan ?? '-';
 
         // Sanitize for MarkdownV2
         $esc = fn (?string $text) => str_replace(
@@ -111,32 +107,36 @@ class ProcessTelegramReport implements ShouldQueue
         $lines = [
             '📊 *Laporan Fallout Baru* 📊',
             '',
-            '*Antrian:* `' . $report->id_harian . '`',
+            '*Antrian:* `' . $esc($report->id_harian) . '`',
             '*Kode Fallout:* `' . $esc($report->incident_ticket) . '`',
             '*Tipe Order:* `' . $esc($report->orderType->name) . '`',
             '*OrderID:* `' . $esc(str_replace('\\', '', $report->order_id)) . '`',
-            '*Nomor Layanan:* `' . $report->nomer_layanan . '`',
+            '*Nomor Layanan:* `' . $esc($report->nomer_layanan) . '`',
             '',
             '*Keterangan Insiden:*',
             '```text',
-            $description,
+            $esc($report->incident_fallout_description ?? '-'),
             '```',
             '*Keterangan Tambahan:*',
             '```text',
-            $keterangan,
+            $esc($report->keterangan ?? '-'),
             '```',
-            '----------------------------------------',
+            '',
             '*Dibuat Oleh:* ' . $esc($createdBy),
-            '*Waktu Dibuat:* `' . $report->created_at->format('Y-m-d H:i:s') . '`',
+            '*Waktu Dibuat:* `' . $esc($report->created_at->format('Y-m-d H:i:s')) . '`',
         ];
 
         $reportText = implode("\n", $lines);
         $groupChat = \App\Models\TelegramGroup::first();
-        $reporterChatId = data_get($userInfo, 'id'); // Get reporter's chat ID from userInfo
-        $destinations = array_filter([env('TELEGRAM_CHANNEL_ID'), $groupChat ? $groupChat->chat_id : null, $reporterChatId]);
+        $reporterChatId = data_get($userInfo, 'id');
 
-        Log::info('Group Chat:', ['groupChat' => $groupChat]);
-        Log::info('Destinations:', ['destinations' => $destinations]);
+        $destinations = array_unique(array_filter([
+            env('TELEGRAM_CHANNEL_ID'),
+            $groupChat ? $groupChat->chat_id : null,
+            $reporterChatId
+        ]));
+
+        Log::info('Sending Fallout Report Notification to Destinations:', ['destinations' => $destinations]);
 
         foreach ($destinations as $chatId) {
             SendTelegramNotificationJob::dispatch($chatId, $reportText, null, 'MarkdownV2');
