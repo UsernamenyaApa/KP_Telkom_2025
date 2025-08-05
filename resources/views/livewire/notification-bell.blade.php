@@ -1,7 +1,9 @@
 <div class="relative" x-data="{ open: false, filter: 'all' }" @click.outside="open = false" wire:ignore.self x-init="
-    setInterval(() => {
-        $wire.dispatch('checkNotifications');
-    }, 5000);
+    () => {
+        setInterval(() => {
+            $wire.dispatch('checkNotifications');
+        }, 5000);
+    }
 ">
     <!-- Clean Notification Button -->
     <button @click="open = !open" class="relative group">

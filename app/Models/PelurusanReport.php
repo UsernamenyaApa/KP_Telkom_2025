@@ -70,4 +70,12 @@ class PelurusanReport extends Model
     {
         return $this->hasMany(PelurusanReportImage::class);
     }
+
+    public function getReporterDisplayNameAttribute(): string
+    {
+        if ($this->reporter) {
+            return $this->reporter->name;
+        }
+        return $this->reporter_telegram_username ?? 'Unknown Telegram User';
+    }
 }

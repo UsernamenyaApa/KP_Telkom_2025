@@ -589,65 +589,45 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         $chatId = $message->getChat()->id;
         $state = Cache::get($chatId);
 
-        if (isset($state['process']) && $state['process'] === self::PROCESS_PELURUSAN && $state['step'] === 'awaiting_image') {
-            try {
-                $telegram = new Api(config('telegram.bots.mybot.token'));
-                $photoCollection = $message->photo;
-
-                // Ambil foto dengan resolusi tertinggi (elemen terakhir dari koleksi)
-                $photo = $photoCollection->last();
-
-                if (! $photo || ! $photo->file_id) {
-                    Log::error('Gagal mendapatkan data foto yang valid dari update.', ['update' => $update->toArray()]);
-                    SendTelegramNotificationJob::dispatch((string) $chatId, '❌ Gagal memproses file gambar. Format tidak didukung atau file kosong.');
-
-                    return;
-                }
-
-                $file = $telegram->getFile(['file_id' => $photo->file_id]);
-                $fileContents = file_get_contents('https://api.telegram.org/file/bot'.config('telegram.bots.mybot.token')."/{$file->filePath}");
-
-                $directory = 'pelurusan-images/'; // Always pelurusan for this context
-                $fileName = $directory.uniqid().'_'.time().'.jpg';
-                Storage::disk('public')->put($fileName, $fileContents);
-
-                // Initialize images array if it doesn't exist
-                if (! isset($state['report_data']['images'])) {
-                    $state['report_data']['images'] = [];
-                }
-
-                // Add the new image to the array
-                $state['report_data']['images'][] = $fileName;
-
-                // Check if max images reached
-                if (count($state['report_data']['images']) >= 5) {
-                    SendTelegramNotificationJob::dispatch((string) $chatId, '✅ Gambar ke-5 telah diterima. Laporan akan diproses.');
-                    $this->generateAndSendPelurusanReport($chatId, $state);
-                    Cache::forget($chatId);
-
-                    return;
-                }
-
-                // Update the step to awaiting_more_images_confirmation
-                $state['step'] = 'awaiting_more_images_confirmation';
-                Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
-
-                $keyboard = [
-                    'inline_keyboard' => [
-                        [['text' => '✅ Selesai', 'callback_data' => 'done_sending_images']],
-                        [['text' => 'Kirim Gambar Lain', 'callback_data' => 'send_more_images']],
-                    ],
-                ];
-
-                SendTelegramNotificationJob::dispatch((string) $chatId, 'Gambar diterima. Kirim gambar lain atau klik Selesai.', $keyboard);
-
-            } catch (\Exception $e) {
-                Log::error("Gagal memproses foto: ".$e->getMessage().' on line '.$e->getLine());
-                SendTelegramNotificationJob::dispatch((string) $chatId, '❌ Terjadi kesalahan teknis saat memproses gambar Anda.');
-            }
-        } else {
+        // Hanya proses jika dalam alur pelurusan dan menunggu gambar
+        if (!isset($state['process']) || $state['process'] !== self::PROCESS_PELURUSAN || !in_array($state['step'], ['awaiting_image', 'awaiting_more_images_confirmation'])) {
             SendTelegramNotificationJob::dispatch($chatId, 'Tidak sedang dalam proses unggah gambar.');
+            return;
         }
+
+        $photo = $message->photo->last(); // Ambil foto resolusi tertinggi
+        if (!$photo || !$photo->file_id) {
+            SendTelegramNotificationJob::dispatch($chatId, '❌ Gagal memproses file gambar. Format tidak didukung atau file kosong.');
+            return;
+        }
+
+        // Inisialisasi array gambar jika belum ada
+        if (!isset($state['report_data']['images'])) {
+            $state['report_data']['images'] = [];
+        }
+
+        // Cek apakah sudah mencapai batas sebelum memproses lebih lanjut
+        if (count($state['report_data']['images']) >= 5) {
+            SendTelegramNotificationJob::dispatch($chatId, 'Anda sudah mencapai batas maksimal 5 gambar.');
+            return;
+        }
+
+        $mediaGroupId = $message->mediaGroupId ?? 'single_'.$message->messageId;
+        $cacheKey = "media_group_{$mediaGroupId}";
+
+        // Tambahkan file_id ke cache untuk diproses oleh job
+        $fileIds = Cache::get($cacheKey, []);
+        $fileIds[] = $photo->file_id;
+        Cache::put($cacheKey, $fileIds, now()->addMinutes(5));
+
+        // Hanya jadwalkan job jika ini adalah item pertama dari grup
+        if (count($fileIds) === 1) {
+            $delay = $message->mediaGroupId ? 5 : 0; // Tunda jika ini album, proses langsung jika tunggal
+            ProcessPelurusanMediaGroupJob::dispatch($chatId, $mediaGroupId)->delay(now()->addSeconds($delay));
+        }
+
+        // Simpan state terbaru (terutama array gambar yang mungkin kosong di awal)
+        Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
     }
 
 }

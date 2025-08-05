@@ -67,7 +67,7 @@
                                     </div>
                                     <div class="sm:col-span-1">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Reporter</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->reporter?->name }}</dd>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->reporter_display_name }}</dd>
                                     </div>
                                     <div class="sm:col-span-1">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Order Create</dt>
@@ -91,34 +91,85 @@
                                     </div>
                                 </dl>
                             </div>
-                            <div class="px-4 py-5 sm:p-6 sm:col-span-2">
+                            <div class="px-4 py-5 sm:p-6 sm:col-span-2 border-t border-gray-200 dark:border-white/10">
                                 <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Descriptions</h3>
-                                <dl class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-8">
-                                    <!-- Text Descriptions Column -->
-                                    <div>
-                                        <div>
-                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Keterangan Insiden Pelurusan</dt>
-                                            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->incident_fallout_description }}</dd>
-                                        </div>
-                                        <div class="mt-8">
-                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Catatan Resolusi</dt>
-                                            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->resolution_notes }}</dd>
-                                        </div>
+                                <dl class="mt-5 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                                    <div class="sm:col-span-1">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Keterangan Insiden Pelurusan</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->incident_fallout_description ?? '-' }}</dd>
                                     </div>
-
-                                    <!-- Image Column -->
-                                    @if ($report->images->isNotEmpty())
-                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Images</dt>
-                                        <dd class="mt-1 flex overflow-x-auto space-x-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
-                                            @foreach ($report->images as $image)
-                                                <img src="{{ asset('storage/' . $image->image_path) }}" alt="Pelurusan Image" class="flex-shrink-0 w-48 h-48 object-contain rounded-lg shadow-md">
-                                            @endforeach
-                                        </dd>
+                                    <div class="sm:col-span-1">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Catatan Resolusi</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->resolution_notes ?? '-' }}</dd>
                                     </div>
-                                    @endif
                                 </dl>
                             </div>
+
+                            @if ($report->images->isNotEmpty())
+                            <div class="px-4 py-5 sm:p-6 sm:col-span-2 border-t border-gray-200 dark:border-white/10">
+                                <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Images</h3>
+                                <div x-data="{
+                                    images: {{ $report->images->pluck('image_path')->map(fn($path) => asset('storage/' . $path)) }},
+                                    currentIndex: 0,
+                                    lightboxOpen: false,
+                                    openLightbox(index) {
+                                        console.log('Opening lightbox for index:', index);
+                                        this.currentIndex = index;
+                                        this.lightboxOpen = true;
+                                    },
+                                    closeLightbox() {
+                                        this.lightboxOpen = false;
+                                    },
+                                    next() {
+                                        this.currentIndex = (this.currentIndex + 1) % this.images.length;
+                                    },
+                                    prev() {
+                                        this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+                                    }
+                                }" @keydown.escape.window="closeLightbox()" class="mt-5" wire:ignore.self>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                        <template x-for="(image, index) in images" :key="index">
+                                            <div @click="openLightbox(index)"
+                                                class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden shadow-md cursor-pointer hover:opacity-75 transition-opacity">
+                                                <img :src="image" alt="Pelurusan image " class="object-cover w-full h-32">
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Lightbox Modal -->
+                                    <div x-show="lightboxOpen" x-cloak
+                                        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black bg-opacity-80">
+                                        <div @click.away="closeLightbox()" class="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
+                                            <!-- Close Button -->
+                                            <button @click="closeLightbox()"
+                                                class="absolute top-4 right-4 z-[99999] p-2 text-white bg-black bg-opacity-50 rounded-full hover:bg-opacity-75 focus:outline-none">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
+
+                                            <!-- Image Display -->
+                                            <div class="flex items-center justify-center w-full h-full">
+                                                <img :src="images[currentIndex]" alt="Pelurusan Image Zoomed"
+                                                    class="object-contain max-w-full max-h-full rounded-lg shadow-lg">
+                                            </div>
+
+                                            <!-- Prev/Next Buttons -->
+                                            <template x-if="images.length > 1">
+                                                <div class="absolute inset-0 flex items-center justify-between px-4">
+                                                    <button @click.stop="prev()"
+                                                        class="p-2 text-white bg-black bg-opacity-40 rounded-full hover:bg-opacity-60 focus:outline-none">
+                                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                                    </button>
+                                                    <button @click.stop="next()"
+                                                        class="p-2 text-white bg-black bg-opacity-40 rounded-full hover:bg-opacity-60 focus:outline-none">
+                                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -159,4 +210,8 @@
         </div>
     </div>
     @endif
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </div>

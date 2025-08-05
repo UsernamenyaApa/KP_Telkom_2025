@@ -2,6 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ userTheme: '{{ auth()->user()->theme_color ?? 'default' }}' }" x-bind:data-theme="userTheme">
 <head>
     @include('partials.head')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-theme-primary dark:bg-[#131518]" x-data="{
         sidebarOpen: false,
