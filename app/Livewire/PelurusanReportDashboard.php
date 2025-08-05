@@ -95,47 +95,46 @@ class PelurusanReportDashboard extends Component
 
                 $user = Auth::user();
 
-                $message = "✅ Laporan Pelurusan Diambil! ✅\n\n" .
-                           "ID Laporan: " . ($report->id_harian ?? 'N/A') . "\n" .
-                           "Kode Pelurusan: " . ($report->pelurusan_code ?? 'N/A') . "\n" .
-                           "Tipe Order: " . ($report->orderType ? $report->orderType->name : 'N/A') . "\n" .
-                           "OrderID: " . ($report->order_id ?? 'N/A') . "\n" .
-                           "Nomor Layanan: " . ($report->nomer_layanan ?? 'N/A') . "\n" .
-                           "SN ONT: " . ($report->sn_ont ?? 'N/A') . "\n" .
-                           "Datek ODP: " . ($report->datek_odp ?? 'N/A') . "\n" .
-                           "Port ODP: " . ($report->port_odp ?? 'N/A') . "\n\n" .
-                           "Diambil Oleh: @" . ($user->telegram_username ?? 'N/A') . "\n" .
-                           "Waktu Diambil: " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
+                $esc = fn (?string $text) => str_replace(
+                    ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
+                    ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
+                    $text ?? '-'
+                );
 
+                $message = "✅ *Laporan Pelurusan Diambil!* ✅\n\n" .
+                           "*ID Laporan:* `" . $esc($report->id_harian) . "`\n" .
+                           "*Kode Pelurusan:* `" . $esc($report->pelurusan_code) . "`\n" .
+                           "*Tipe Order:* `" . $esc($report->orderType ? $report->orderType->name : 'N/A') . "`\n" .
+                           "*OrderID:* `" . $esc($report->order_id) . "`\n" .
+                           "*Nomor Layanan:* `" . $esc($report->nomer_layanan) . "`\n" .
+                           "*SN ONT:* `" . $esc($report->sn_ont) . "`\n" .
+                           "*Datek ODP:* `" . $esc($report->datek_odp) . "`\n" .
+                           "*Port ODP:* `" . $esc($report->port_odp) . "`\n\n" .
+                           "*Diambil Oleh:* " . $esc('@' . $user->telegram_username) . "\n" .
+                           "*Waktu Diambil:* `" . $esc($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "`";
+
+                $chatIdsToNotify = collect();
+
+                // Add the user who took the order
                 if ($user->telegram_user_id) {
-                    SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
+                    $chatIdsToNotify->push($user->telegram_user_id);
                 }
 
+                // Add the reporter
                 if ($report->reporter && $report->reporter->telegram_user_id) {
-                    $esc = fn (?string $text) => str_replace(
-                        ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '=', '|', '{', '}', '!'],
-                        ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\=', '\|', '\{', '\}', '\!'],
-                        $text ?? '-'
-                    );
-
-                    $reporterMessage = "✅ *Laporan Pelurusan Diambil!* ✅\n\n" .
-                                       "*ID Laporan:* `" . $esc($report->id_harian) . "`\n" .
-                                       "*Kode Pelurusan:* `" . $esc($report->pelurusan_code) . "`\n" .
-                                       "*Tipe Order:* `" . $esc($report->orderType->name) . "`\n" .
-                                       "*OrderID:* `" . $esc($report->order_id) . "`\n" .
-                                       "*Nomor Layanan:* `" . $esc($report->nomer_layanan) . "`\n" .
-                                       "*SN ONT:* `" . $esc($report->sn_ont) . "`\n" .
-                                       "*Datek ODP:* `" . $esc($report->datek_odp) . "`\n" .
-                                       "*Port ODP:* `" . $esc($report->port_odp) . "`\n\n" .
-                                       "*Diambil Oleh:* " . $esc('@' . $user->telegram_username) . "\n" .
-                                       "*Waktu Diambil:* `" . $esc($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "`";
-                    SendTelegramNotificationJob::dispatch($report->reporter->telegram_user_id, $reporterMessage, null, 'MarkdownV2');
+                    $chatIdsToNotify->push($report->reporter->telegram_user_id);
                 }
 
+                // Add the group chat
                 $groupChat = \App\Models\TelegramGroup::first();
                 if ($groupChat) {
-                    SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message);
+                    $chatIdsToNotify->push($groupChat->chat_id);
                 }
+
+                // Dispatch notification to unique chat IDs
+                $chatIdsToNotify->unique()->each(function ($chatId) use ($message) {
+                    SendTelegramNotificationJob::dispatch($chatId, $message, null, 'MarkdownV2');
+                });
             }
         }
     }

@@ -107,11 +107,13 @@
                                     </div>
 
                                     <!-- Image Column -->
-                                    @if ($report->image)
+                                    @if ($report->images->isNotEmpty())
                                     <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Image</dt>
-                                        <dd class="mt-1">
-                                            <img src="{{ asset('storage/' . $report->image) }}" alt="Pelurusan Image" class="w-full max-h-96 object-contain rounded-lg shadow-md">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Images</dt>
+                                        <dd class="mt-1 flex overflow-x-auto space-x-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                                            @foreach ($report->images as $image)
+                                                <img src="{{ asset('storage/' . $image->image_path) }}" alt="Pelurusan Image" class="flex-shrink-0 w-48 h-48 object-contain rounded-lg shadow-md">
+                                            @endforeach
                                         </dd>
                                     </div>
                                     @endif

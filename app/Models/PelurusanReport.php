@@ -15,7 +15,6 @@ class PelurusanReport extends Model
     protected $fillable = [
         'id_harian',
         'pelurusan_code',
-        'image', // Pastikan nama ini konsisten dengan database dan job
         'number_incident',
         'incident_fallout_description',
         'tipe_order_id',
@@ -64,5 +63,10 @@ class PelurusanReport extends Model
     public function assignedToUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to_user_id');
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(PelurusanReportImage::class);
     }
 }

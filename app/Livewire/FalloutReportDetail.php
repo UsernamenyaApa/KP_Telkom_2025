@@ -62,7 +62,7 @@ class FalloutReportDetail extends Component
             $this->report->resolution_notes = $this->keterangan;
 
             $newStatus = FalloutStatus::find($this->newStatusId);
-            if ($newStatus && in_array($newStatus->name, ['FA', 'eskalasi', 'input ulang', 'PI'])) {
+            if ($newStatus && in_array($newStatus->name, ['FA', 'input ulang', 'PI'])) {
                 $this->report->completed_at = now();
             }
 

@@ -57,7 +57,7 @@ class ProcessTelegramReport implements ShouldQueue
     {
         $data = [
             'tipe_order_id' => $this->tipeOrderId,
-            'order_id' => data_get($reportData, 'order_id'),
+            'order_id' => str_replace('\\', '', data_get($reportData, 'order_id')),
             'nomer_layanan' => data_get($reportData, 'nomer_layanan'),
             'incident_ticket' => data_get($reportData, 'incident_ticket'),
             'incident_fallout_description' => data_get($reportData, 'incident_fallout_description'),
@@ -114,7 +114,7 @@ class ProcessTelegramReport implements ShouldQueue
             '*Antrian:* `' . $report->id_harian . '`',
             '*Kode Fallout:* `' . $esc($report->incident_ticket) . '`',
             '*Tipe Order:* `' . $esc($report->orderType->name) . '`',
-            '*OrderID:* `' . $esc($report->order_id) . '`',
+            '*OrderID:* `' . $esc(str_replace('\\', '', $report->order_id)) . '`',
             '*Nomor Layanan:* `' . $report->nomer_layanan . '`',
             '',
             '*Keterangan Insiden:*',

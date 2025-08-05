@@ -125,6 +125,8 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             'show_fallout_menu' => $this->showFalloutMenu($telegram, $chatId, $messageId),
             'lapor_pelurusan' => $this->showPelurusanMenu($telegram, $chatId, $messageId),
             'back_to_main_menu' => $this->showMainMenu($telegram, $chatId, '↩️ Kembali ke menu utama. Pilih opsi:', $messageId),
+            'done_sending_images' => $this->handleDoneSendingImages($chatId, $state),
+            'send_more_images' => $this->handleSendMoreImages($chatId, $state),
             default => SendTelegramNotificationJob::dispatch($chatId, '⚠️ Aksi tidak valid.')
         };
     }
@@ -335,6 +337,24 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         SendTelegramNotificationJob::dispatch($chatId, '❌ Proses dibatalkan. Ketik /start atau /new untuk memulai lagi.');
     }
 
+    private function handleDoneSendingImages(int $chatId, array $state): void
+    {
+        if (isset($state['report_data']['images']) && count($state['report_data']['images']) >= 1) {
+            $this->generateAndSendPelurusanReport($chatId, $state);
+        } else {
+            SendTelegramNotificationJob::dispatch($chatId, 'Anda harus mengirim setidaknya 1 gambar.');
+            $state['step'] = 'awaiting_image'; // Keep user in image sending step
+            Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
+        }
+    }
+
+    private function handleSendMoreImages(int $chatId, array $state): void
+    {
+        $state['step'] = 'awaiting_image';
+        Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
+        SendTelegramNotificationJob::dispatch($chatId, 'Silakan unggah gambar pendukung.');
+    }
+
     private function handlePassword(int $chatId, string $text, array &$state): void
     {
         // For all bot users (Office or Field), authentication is done via a single shared password.
@@ -498,7 +518,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                 SendTelegramNotificationJob::dispatch($chatId, $this->getQuestionForStep($state['step'], 'pelurusan', $tipeOrderId));
             }
         } else {
-            $this->generateAndSendPelurusanReport($chatId, $state);
+            // Do nothing here, as report generation is handled by handleDoneSendingImages
         }
     }
 
@@ -577,30 +597,53 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                 // Ambil foto dengan resolusi tertinggi (elemen terakhir dari koleksi)
                 $photo = $photoCollection->last();
 
-                if (!$photo || !$photo->file_id) {
+                if (! $photo || ! $photo->file_id) {
                     Log::error('Gagal mendapatkan data foto yang valid dari update.', ['update' => $update->toArray()]);
-                    SendTelegramNotificationJob::dispatch((string)$chatId, '❌ Gagal memproses file gambar. Format tidak didukung atau file kosong.');
+                    SendTelegramNotificationJob::dispatch((string) $chatId, '❌ Gagal memproses file gambar. Format tidak didukung atau file kosong.');
+
                     return;
                 }
 
                 $file = $telegram->getFile(['file_id' => $photo->file_id]);
-                $fileContents = file_get_contents('https://api.telegram.org/file/bot' . config('telegram.bots.mybot.token') . "/{$file->filePath}");
+                $fileContents = file_get_contents('https://api.telegram.org/file/bot'.config('telegram.bots.mybot.token')."/{$file->filePath}");
 
-                $directory = ($state['process'] === self::PROCESS_FALLOUT) ? 'fallout-images/' : 'pelurusan-images/';
-                $fileName = $directory . uniqid() . '_' . time() . '.jpg';
+                $directory = 'pelurusan-images/'; // Always pelurusan for this context
+                $fileName = $directory.uniqid().'_'.time().'.jpg';
                 Storage::disk('public')->put($fileName, $fileContents);
 
-                $state['report_data']['image'] = $fileName;
+                // Initialize images array if it doesn't exist
+                if (! isset($state['report_data']['images'])) {
+                    $state['report_data']['images'] = [];
+                }
+
+                // Add the new image to the array
+                $state['report_data']['images'][] = $fileName;
+
+                // Check if max images reached
+                if (count($state['report_data']['images']) >= 5) {
+                    SendTelegramNotificationJob::dispatch((string) $chatId, '✅ Gambar ke-5 telah diterima. Laporan akan diproses.');
+                    $this->generateAndSendPelurusanReport($chatId, $state);
+                    Cache::forget($chatId);
+
+                    return;
+                }
+
+                // Update the step to awaiting_more_images_confirmation
+                $state['step'] = 'awaiting_more_images_confirmation';
                 Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
 
-                if ($state['process'] === self::PROCESS_FALLOUT) {
-                    $this->generateAndSendReport($chatId, $state);
-                } elseif ($state['process'] === self::PROCESS_PELURUSAN) {
-                    $this->generateAndSendPelurusanReport($chatId, $state);
-                }
+                $keyboard = [
+                    'inline_keyboard' => [
+                        [['text' => '✅ Selesai', 'callback_data' => 'done_sending_images']],
+                        [['text' => 'Kirim Gambar Lain', 'callback_data' => 'send_more_images']],
+                    ],
+                ];
+
+                SendTelegramNotificationJob::dispatch((string) $chatId, 'Gambar diterima. Kirim gambar lain atau klik Selesai.', $keyboard);
+
             } catch (\Exception $e) {
-                Log::error("Gagal memproses foto: " . $e->getMessage() . ' on line ' . $e->getLine());
-                SendTelegramNotificationJob::dispatch((string)$chatId, '❌ Terjadi kesalahan teknis saat memproses gambar Anda.');
+                Log::error("Gagal memproses foto: ".$e->getMessage().' on line '.$e->getLine());
+                SendTelegramNotificationJob::dispatch((string) $chatId, '❌ Terjadi kesalahan teknis saat memproses gambar Anda.');
             }
         } else {
             SendTelegramNotificationJob::dispatch($chatId, 'Tidak sedang dalam proses unggah gambar.');
