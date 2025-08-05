@@ -40,14 +40,9 @@ class SendTelegramNotificationJob implements ShouldQueue
     public function handle(): void
     {
         try {
-            $messageToSend = $this->message;
-            if ($this->parseMode === 'MarkdownV2') {
-                $messageToSend = $this->escapeMarkdownV2($this->message);
-            }
-
             $params = [
                 'chat_id' => $this->chatId,
-                'text' => $messageToSend,
+                'text' => $this->message,
                 'parse_mode' => $this->parseMode,
             ];
 
@@ -60,17 +55,5 @@ class SendTelegramNotificationJob implements ShouldQueue
         } catch (TelegramSDKException $e) {
             Log::error("Failed to send Telegram notification to {$this->chatId}: ".$e->getMessage());
         }
-    }
-
-    /**
-     * Escape text for Telegram's MarkdownV2 parse mode.
-     */
-    private function escapeMarkdownV2(string $text): string
-    {
-        $escape_chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
-        foreach ($escape_chars as $char) {
-            $text = str_replace($char, '\\'.$char, $text);
-        }
-        return $text;
     }
 }

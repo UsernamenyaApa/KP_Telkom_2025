@@ -68,82 +68,66 @@ class PelurusanReportDetail extends Component
 
             $user = Auth::user();
 
-            $message = "✅ Laporan Pelurusan Diambil! ✅\n\n" .
-                "ID Laporan: " . ($this->report->id_harian ?? 'N/A') . "\n" .
-                "Kode Pelurusan: " . ($this->report->pelurusan_code ?? 'N/A') . "\n" .
-                "Tipe Order: " . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "\n" .
-                "OrderID: " . ($this->report->order_id ?? 'N/A') . "\n" .
-                "Nomor Layanan: " . ($this->report->nomer_layanan ?? 'N/A') . "\n" .
-                "SN ONT: " . ($this->report->sn_ont ?? 'N/A') . "\n" .
-                "Datek ODP: " . ($this->report->datek_odp ?? 'N/A') . "\n" .
-                "Port ODP: " . ($this->report->port_odp ?? 'N/A') . "\n\n" .
-                "Diambil Oleh: @" . ($user->telegram_username ?? 'N/A') . "\n" .
-                "Waktu Diambil: " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
+            // Escape all dynamic data first
+            $escapedIdHarian = $this->escapeMarkdown($this->report->id_harian ?? 'N/A');
+            $escapedPelurusanCode = $this->escapeMarkdown($this->report->pelurusan_code ?? 'N/A');
+            $escapedOrderType = $this->escapeMarkdown($this->report->orderType ? $this->report->orderType->name : 'N/A');
+            $escapedOrderId = $this->escapeMarkdown($this->report->order_id ?? 'N/A');
+            $escapedNomerLayanan = $this->escapeMarkdown($this->report->nomer_layanan ?? 'N/A');
+            $escapedSnOnt = $this->escapeMarkdown($this->report->sn_ont ?? 'N/A');
+            $escapedDatekOdp = $this->escapeMarkdown($this->report->datek_odp ?? 'N/A');
+            $escapedPortOdp = $this->escapeMarkdown($this->report->port_odp ?? 'N/A');
+            $escapedUsername = $this->escapeMarkdown($user->telegram_username ?? 'N/A');
+            $escapedAssignedAt = $this->escapeMarkdown($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
 
+            // Message for the group chat
+            $groupMessage = "✅ Laporan Pelurusan Diambil\! ✅\n\n" .
+                "*ID Laporan:* `{$escapedIdHarian}`\n" .
+                "*Kode Pelurusan:* `{$escapedPelurusanCode}`\n" .
+                "*Tipe Order:* `{$escapedOrderType}`\n" .
+                "*OrderID:* `{$escapedOrderId}`\n" .
+                "*Nomor Layanan:* `{$escapedNomerLayanan}`\n" .
+                "*SN ONT:* `{$escapedSnOnt}`\n" .
+                "*Datek ODP:* `{$escapedDatekOdp}`\n" .
+                "*Port ODP:* `{$escapedPortOdp}`\n\n" .
+                "*Diambil Oleh:* @{$escapedUsername}\n" .
+                "*Waktu Diambil:* `{$escapedAssignedAt}`";
+
+            // Personal message for the user who took the order
+            $takerMessage = "✅ Anda telah berhasil mengambil laporan pelurusan dengan ID \#{$escapedIdHarian} (`{$escapedPelurusanCode}`)\. Mohon segera ditindaklanjuti\.\n\n" .
+                            "*Berikut detail laporan:*\n\n" .
+                            "*ID Laporan:* `{$escapedIdHarian}`\n" .
+                            "*Kode Pelurusan:* `{$escapedPelurusanCode}`\n" .
+                            "*Tipe Order:* `{$escapedOrderType}`\n" .
+                            "*OrderID:* `{$escapedOrderId}`\n" .
+                            "*Nomor Layanan:* `{$escapedNomerLayanan}`\n" .
+                            "*SN ONT:* `{$escapedSnOnt}`\n" .
+                            "*Datek ODP:* `{$escapedDatekOdp}`\n" .
+                            "*Port ODP:* `{$escapedPortOdp}`";
+
+            // Define recipients
+            $recipients = [];
+            if ($this->report->reporter_user_id && $this->report->reporter->telegram_user_id) {
+                $recipients[] = $this->report->reporter->telegram_user_id;
+            } elseif ($this->report->reporter_telegram_id) {
+                $recipients[] = $this->report->reporter_telegram_id;
+            }
+
+            $groupChat = Cache::remember('telegram_group', now()->addHour(), fn () => TelegramGroup::first());
+            if ($groupChat?->chat_id) {
+                $recipients[] = $groupChat->chat_id;
+            }
+
+            // Send notifications
+            foreach (array_unique($recipients) as $recipient) {
+                SendTelegramNotificationJob::dispatch($recipient, $groupMessage, null, 'MarkdownV2');
+            }
+
+            // Always send a personal notification to the user who took the action
             if ($user->telegram_user_id) {
-                $takerMessage = "✅ Anda telah berhasil mengambil laporan pelurusan dengan ID #{$this->report->id_harian} (`{$this->report->pelurusan_code}`). Mohon segera ditindaklanjuti.
-
-" .
-                                "Berikut detail laporan:
-
-" .
-                                "*ID Laporan:* `" . ($this->report->id_harian ?? 'N/A') . "`
-" .
-                                "*Kode Pelurusan:* `" . ($this->report->pelurusan_code ?? 'N/A') . "`
-" .
-                                "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
-" .
-                                "*OrderID:* `" . ($this->report->order_id ?? 'N/A') . "`
-" .
-                                "*Nomor Layanan:* `" . ($this->report->nomer_layanan ?? 'N/A') . "`
-" .
-                                "*SN ONT:* `" . ($this->report->sn_ont ?? 'N/A') . "`
-" .
-                                "*Datek ODP:* `" . ($this->report->datek_odp ?? 'N/A') . "`
-" .
-                                "*Port ODP:* `" . ($this->report->port_odp ?? 'N/A') . "`
-
-" .
-                                "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "
-" .
-                                "*Waktu Diambil:* " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
                 SendTelegramNotificationJob::dispatch($user->telegram_user_id, $takerMessage, null, 'MarkdownV2');
             }
 
-            if ($this->report->reporter_user_id) {
-                $reporterChatId = $this->report->reporter->telegram_user_id;
-            } else {
-                $reporterChatId = $this->report->reporter_telegram_id;
-            }
-
-            if ($reporterChatId) {
-                $reporterMessage = "✅ Laporan Pelurusan Diambil! ✅
-
-" .
-                                   "*ID Laporan:* `" . ($this->report->id_harian ?? 'N/A') . "`
-" .
-                                   "*Kode Pelurusan:* `" . ($this->report->pelurusan_code ?? 'N/A') . "`
-" .
-                                   "*Tipe Order:* `" . ($this->report->orderType ? $this->report->orderType->name : 'N/A') . "`
-" .
-                                   "*OrderID:* `" . ($this->report->order_id ?? 'N/A') . "`
-" .
-                                   "*Nomor Layanan:* `" . ($this->report->nomer_layanan ?? 'N/A') . "`
-" .
-                                   "*SN ONT:* `" . ($this->report->sn_ont ?? 'N/A') . "`
-" .
-                                   "*Datek ODP:* `" . ($this->report->datek_odp ?? 'N/A') . "`
-" .
-                                   "*Port ODP:* `" . ($this->report->port_odp ?? 'N/A') . "`
-
-" .
-                                   "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "
-" .
-                                   "*Waktu Diambil:* " . ($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
-                SendTelegramNotificationJob::dispatch($reporterChatId, $reporterMessage, null, 'MarkdownV2');
-            }
-
-            $this->sendTelegramNotifications($message);
             $this->dispatch('reportAssigned');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -211,58 +195,80 @@ class PelurusanReportDetail extends Component
         $reporter = $this->report->reporter;
         $assignee = $this->report->assignedToUser;
 
+        // Escape all dynamic data first
+        $escapedStatusName = $this->escapeMarkdown($newStatus->name);
+        $escapedIdHarian = $this->escapeMarkdown($this->report->id_harian);
+        $escapedPelurusanCode = $this->escapeMarkdown($this->report->pelurusan_code);
+        $escapedOrderType = $this->escapeMarkdown($this->report->orderType?->name ?? 'N/A');
+        $escapedOrderId = $this->escapeMarkdown($this->report->order_id);
+        $escapedNomerLayanan = $this->escapeMarkdown($this->report->nomer_layanan);
+        $escapedSnOnt = $this->escapeMarkdown($this->report->sn_ont);
+        $escapedDatekOdp = $this->escapeMarkdown($this->report->datek_odp);
+        $escapedPortOdp = $this->escapeMarkdown($this->report->port_odp);
+        $escapedReporterUsername = $this->escapeMarkdown($reporter ? $reporter->telegram_username : ($this->report->reporter_telegram_username ?? 'N/A'));
+        $escapedCreatedAt = $this->escapeMarkdown($this->report->created_at->format('Y-m-d H:i:s'));
+        $escapedAssigneeUsername = $this->escapeMarkdown($assignee ? $assignee->telegram_username : 'N/A');
+        $escapedTakenAt = $this->escapeMarkdown($this->report->taken_at ? $this->report->taken_at->format('Y-m-d H:i:s') : 'N/A');
+
         $messageLines = [
             '*Status Laporan Pelurusan Diperbarui* ',
-            '*Status Baru:* `' . $newStatus->name . '`',
-            '---',
-            '*ID Laporan:* `' . $this->report->id_harian . '`',
-            '*Kode Pelurusan:* `' . $this->report->pelurusan_code . '`',
-            '*Tipe Order:* `' . ($this->report->orderType?->name ?? 'N/A') . '`',
-            '*OrderID:* `' . $this->report->order_id . '`',
-            '*Nomor Layanan:* `' . $this->report->nomer_layanan . '`',
-            '*SN ONT:* `' . $this->report->sn_ont . '`',
-            '*Datek ODP:* `' . $this->report->datek_odp . '`',
-            '*Port ODP:* `' . $this->report->port_odp . '`',
+            "*Status Baru:* `{$escapedStatusName}`",
+            '',
+            "*ID Laporan:* `{$escapedIdHarian}`",
+            "*Kode Pelurusan:* `{$escapedPelurusanCode}`",
+            "*Tipe Order:* `{$escapedOrderType}`",
+            "*OrderID:* `{$escapedOrderId}`",
+            "*Nomor Layanan:* `{$escapedNomerLayanan}`",
+            "*SN ONT:* `{$escapedSnOnt}`",
+            "*Datek ODP:* `{$escapedDatekOdp}`",
+            "*Port ODP:* `{$escapedPortOdp}`",
         ];
 
         if ($this->keterangan) {
-            $messageLines[] = '---';
+            $messageLines[] = '';
             $messageLines[] = '*Catatan Resolusi:*';
             $messageLines[] = '```';
-            $messageLines[] = $this->keterangan;
+            $messageLines[] = $this->escapeMarkdown($this->keterangan);
             $messageLines[] = '```';
         }
 
-        $messageLines[] = '---';
-        $messageLines[] = '*Dibuat Oleh:* @' . ($reporter ? $reporter->telegram_username : $this->report->reporter_telegram_username);
-        $messageLines[] = '*Dibuat Pada:* `' . $this->report->created_at->format('Y-m-d H:i:s') . '`';
-        $messageLines[] = '*Diambil Oleh:* @' . ($assignee ? $assignee->telegram_username : 'N/A');
-        $messageLines[] = '*Diambil Pada:* `' . ($this->report->taken_at ? $this->report->taken_at->format('Y-m-d H:i:s') : 'N/A') . '`';
+        $messageLines[] = '';
+        $messageLines[] = "*Dibuat Oleh:* @{$escapedReporterUsername}";
+        $messageLines[] = "*Dibuat Pada:* `{$escapedCreatedAt}`";
+        $messageLines[] = "*Diambil Oleh:* @{$escapedAssigneeUsername}";
+        $messageLines[] = "*Diambil Pada:* `{$escapedTakenAt}`";
 
         if ($this->report->completed_at) {
-            $messageLines[] = '*Selesai Pada:* `' . $this->report->completed_at->format('Y-m-d H:i:s') . '`';
+            $escapedCompletedAt = $this->escapeMarkdown($this->report->completed_at->format('Y-m-d H:i:s'));
             $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
-            $messageLines[] = '*Durasi:* `' . $duration . '`';
+            $escapedDuration = $this->escapeMarkdown($duration);
+            $messageLines[] = "*Selesai Pada:* `{$escapedCompletedAt}`";
+            $messageLines[] = "*Durasi:* `{$escapedDuration}`";
         }
 
         $message = implode("\n", $messageLines);
 
-        // Send to reporter
+        // Define recipients
+        $recipients = [];
         if ($reporter && $reporter->telegram_user_id) {
-            SendTelegramNotificationJob::dispatch($reporter->telegram_user_id, $message, null, 'MarkdownV2');
+            $recipients[] = $reporter->telegram_user_id;
         } elseif ($this->report->reporter_telegram_id) {
-            SendTelegramNotificationJob::dispatch($this->report->reporter_telegram_id, $message, null, 'MarkdownV2');
+            $recipients[] = $this->report->reporter_telegram_id;
         }
 
-        // Send to group chat
         $groupChat = \App\Models\TelegramGroup::first();
         if ($groupChat) {
-            SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message, null, 'MarkdownV2');
+            $recipients[] = $groupChat->chat_id;
         }
 
-        // Send to the user who changed the status
-        if (auth()->user()->telegram_user_id) {
-            SendTelegramNotificationJob::dispatch(auth()->user()->telegram_user_id, $message, null, 'MarkdownV2');
+        $currentUser = auth()->user();
+        if ($currentUser->telegram_user_id) {
+            $recipients[] = $currentUser->telegram_user_id;
+        }
+
+        // Send to unique recipients
+        foreach (array_unique($recipients) as $recipient) {
+            SendTelegramNotificationJob::dispatch($recipient, $message, null, 'MarkdownV2');
         }
     }
 
