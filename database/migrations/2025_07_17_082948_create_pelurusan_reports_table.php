@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id(); // id_pelurusan
             $table->integer('id_harian')->default(0);
             $table->string('pelurusan_code')->nullable();
-            $table->string('image')->nullable();
             $table->string('number_incident')->nullable();
             $table->text('incident_fallout_description')->nullable();
             $table->foreignId('tipe_order_id')->constrained('order_types');

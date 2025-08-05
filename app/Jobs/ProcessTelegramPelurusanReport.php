@@ -166,10 +166,10 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         }
 
         if ($report->images->isNotEmpty()) {
-            $lines[] = "\n*Gambar Terlampir: (" . $report->images->count() . ")*";
+            $lines[] = $esc("\n*Gambar Terlampir: (" . $report->images->count() . ")*");
         }
 
-        $lines[] = '----------------------------------------';
+        $lines[] = $esc('----------------------------------------');
         $lines[] = '*Dibuat Oleh:* ' . $esc($createdBy);
         $lines[] = '*Waktu Dibuat:* ' . $esc($report->created_at->format('Y-m-d H:i:s'));
 
