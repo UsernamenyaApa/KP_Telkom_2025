@@ -140,10 +140,8 @@ class PelurusanReportDetail extends Component
         $allStatuses = FalloutStatus::all();
         $currentStatusName = $this->report->falloutStatus?->name;
 
-        $this->availableStatuses = $allStatuses->filter(function ($status) use ($currentStatusName) {
-            if ($currentStatusName === 'Open') {
-                return true;
-            }
+        $this->availableStatuses = $allStatuses->filter(function ($status) {
+            // Allow all statuses except Open and OnProgress to be manually selected.
             return !in_array($status->name, ['Open', 'OnProgress']);
         });
 

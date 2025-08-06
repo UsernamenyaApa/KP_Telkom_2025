@@ -138,26 +138,7 @@
                 @endif
             </flux:navlist>
 
-            <flux:spacer />
-
-            <flux:navlist variant="outline">
-                <flux:navlist.item 
-                    icon="folder-git-2" 
-                    href="https://github.com/laravel/livewire-starter-kit" 
-                    target="_blank"
-                    class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg"
-                >
-                    {{ __('Repository') }}
-                </flux:navlist.item>
-                <flux:navlist.item 
-                    icon="book-open-text" 
-                    href="https://laravel.com/docs/starter-kits#livewire" 
-                    target="_blank"
-                    class="text-theme-text hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all duration-200 rounded-lg"
-                >
-                    {{ __('Documentation') }}
-                </flux:navlist.item>
-            </flux:navlist>
+            
         </div>
     </flux:sidebar>
 
