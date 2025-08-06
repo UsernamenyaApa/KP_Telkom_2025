@@ -13,7 +13,7 @@ Berikut adalah daftar teknologi utama yang digunakan dalam proyek ini:
 - **Backend:** PHP 8.2+, [Laravel 11](https://laravel.com/)
 - **Frontend:** [Livewire 3](https://livewire.laravel.com/), [Alpine.js](https://alpinejs.dev/)
 - **UI & Styling:** [Tailwind CSS 4](https://tailwindcss.com/), [Flux (Komponen dari Livewire)](https://livewire.laravel.com/docs/flux)
-- **Database:** Menggunakan driver database Laravel. Umumnya **MySQL** atau **MariaDB** untuk produksi, dan **SQLite** untuk development atau testing.
+- **Database:** Menggunakan driver database Laravel.
 - **Antrian (Queue):** Menggunakan driver default Laravel (kemungkinan database atau Redis) untuk menangani proses latar belakang seperti pengiriman notifikasi.
 - **Notifikasi:** [Telegram Bot SDK](https://telegram-bot-sdk.readme.io/) untuk mengirim pesan ke pengguna dan grup.
 - **Development Server:** [Vite](https://vitejs.dev/) untuk kompilasi aset frontend.
@@ -36,7 +36,7 @@ Berikut adalah langkah-langkah untuk menginstal dan menjalankan proyek ini di li
 1.  **Clone Repository**
 
     ```bash
-    git clone <URL_REPOSITORY_ANDA>
+    git clone https://github.com/UsernamenyaApa/KP_Telkom_2025.git
     cd kp
     ```
 
@@ -81,11 +81,10 @@ Berikut adalah langkah-langkah untuk menginstal dan menjalankan proyek ini di li
 
 7.  **Konfigurasi Telegram**
 
-    Tambahkan token Bot Telegram dan ID Grup utama ke dalam file `.env`:
+    Tambahkan token Bot Telegram ke dalam file `.env`. ID Grup untuk notifikasi tidak diatur di sini, melainkan dikelola di dalam aplikasi.
 
     ```env
     TELEGRAM_BOT_TOKEN=token_bot_telegram_anda
-    TELEGRAM_CHAT_ID=id_grup_telegram_anda
     ```
 
 8.  **Jalankan Migrasi dan Seeder Database**
@@ -122,7 +121,7 @@ Memahami struktur direktori akan mempercepat proses pengembangan dan perbaikan.
   - Berisi pekerjaan (jobs) yang dijalankan di latar belakang (antrian/queue). Sebagian besar digunakan untuk memproses update dari Telegram dan mengirim notifikasi tanpa membuat pengguna menunggu.
 
 - `app/Console/Commands/`
-  - Berisi perintah-perintah custom yang bisa dijalankan melalui `php artisan`. Perintah-perintah ini digunakan untuk **logika eskalasi otomatis Fallout** dan tugas-tugas terjadwal lainnya.
+  - Berisi perintah-perintah custom yang bisa dijalankan melalui `php artisan`. Contohnya adalah `SetTelegramWebhookCommand.php` yang digunakan untuk mendaftarkan webhook bot Telegram saat setup awal.
 
 - `app/Models/`
   - Berisi definisi model Eloquent yang merepresentasikan tabel-tabel di database, seperti `FalloutReport.php`, `PelurusanReport.php`, dan `User.php`.
@@ -141,59 +140,38 @@ Memahami struktur direktori akan mempercepat proses pengembangan dan perbaikan.
 
 ### 5.1. Manajemen Laporan Fallout
 
-Alur kerja laporan fallout dirancang agar proaktif dengan eskalasi otomatis untuk memastikan setiap laporan ditangani tepat waktu.
+Alur kerja laporan fallout mengandalkan intervensi manual untuk setiap tahapannya.
 
 - **Pembuatan Laporan:** Laporan dapat dibuat oleh pengguna melalui antarmuka web atau dikirim melalui bot Telegram.
 - **Penugasan (Assignment):** Teknisi dapat "mengambil" laporan yang belum ditugaskan dari dashboard. Setelah diambil, status berubah menjadi `OnProgress`.
-- **Pembaruan Status:** Teknisi yang ditugaskan dapat mengubah status laporan (misalnya ke `FA`, `PI`, `Eskalasi`).
-- **Logika Eskalasi Otomatis:** Ini adalah fitur kunci. Sistem memiliki tugas terjadwal (cron jobs) yang berjalan secara periodik untuk memantau laporan fallout:
-    - `CheckUnassignedFalloutReports`: Mencari laporan yang berstatus `Open` terlalu lama dan mengirim notifikasi.
-    - `CheckUncompletedFalloutReports`: Mencari laporan yang berstatus `OnProgress` terlalu lama tanpa pembaruan dan mengirim notifikasi.
-    - Logika ini diatur di `app/Console/Commands/` dan dijadwalkan di `routes/console.php`.
+- **Pembaruan Status & Eskalasi:** Teknisi yang ditugaskan dapat mengubah status laporan (misalnya ke `FA`, `PI`, `Eskalasi`). Semua perubahan status, termasuk eskalasi, harus dilakukan secara **manual** melalui antarmuka pengguna. Tidak ada sistem eskalasi otomatis yang berjalan.
 
 ### 5.2. Manajemen Laporan Pelurusan
 
-Alur kerja pelurusan lebih sederhana dan mengandalkan intervensi manual.
+Alur kerja pelurusan mirip dengan fallout dan juga mengandalkan intervensi manual.
 
 - **Pembuatan & Penugasan:** Mirip dengan Fallout, laporan dibuat dan diambil oleh teknisi.
-- **Pembaruan Status:** Teknisi dapat mengubah status laporan.
-- **Logika Eskalasi Manual:** Tidak ada eskalasi otomatis. Perubahan status ke `Eskalasi` dilakukan secara manual oleh teknisi melalui tombol di halaman detail laporan (`PelurusanReportDetail.php`).
-- **Fleksibilitas Status:** Tidak ada penguncian status. Teknisi dapat mengubah status dari `Eskalasi` kembali ke status lain jika diperlukan (sesuai perubahan yang telah diimplementasikan).
+- **Pembaruan Status & Eskalasi:** Perubahan status ke `Eskalasi` dilakukan secara manual oleh teknisi melalui halaman detail laporan (`PelurusanReportDetail.php`).
+- **Fleksibilitas Status:** Tidak ada penguncian status. Teknisi dapat mengubah status dari `Eskalasi` kembali ke status lain jika diperlukan.
 
 ### 5.3. Notifikasi Telegram
 
-Sistem secara aktif mengirim notifikasi ke grup Telegram utama dan pengguna perorangan untuk berbagai kejadian:
+Sistem secara aktif mengirim notifikasi ke grup Telegram utama dan pengguna perorangan untuk berbagai kejadian. ID grup target diambil dari tabel `telegram_groups` di database, bukan dari file `.env`.
 
 - Laporan baru dibuat.
 - Laporan diambil oleh teknisi.
 - Status laporan diperbarui.
-- Notifikasi eskalasi otomatis.
 
 Logika pengiriman notifikasi ditangani oleh `App\Jobs\SendTelegramNotificationJob.php` untuk memastikan tidak memperlambat aplikasi.
 
-## 6. Tugas Terjadwal (Scheduled Tasks)
+### 5.4. Sistem Antrian (Queue)
 
-Aplikasi ini menggunakan Penjadwal (Scheduler) Laravel untuk menjalankan tugas-tugas secara otomatis di latar belakang. Konfigurasi jadwal ini terdapat di `app/Console/Kernel.php`.
+Sistem ini menggunakan antrian untuk menangani tugas-tugas yang memakan waktu, seperti mengirim notifikasi Telegram, agar tidak memperlambat interaksi pengguna.
 
-**Penting:** Agar penjadwal ini berjalan, Anda perlu menambahkan satu baris konfigurasi Cron di server produksi Anda:
+- **Driver Aktif:** Secara default, antrian menggunakan **database**. Pekerjaan yang akan dieksekusi disimpan dalam tabel `jobs`.
+- **Konfigurasi:** Driver antrian diatur dalam file `.env` melalui variabel `QUEUE_CONNECTION`. Untuk mengubahnya ke Redis, ganti nilainya menjadi `redis` dan pastikan Redis server sudah terkonfigurasi.
 
-```bash
-* * * * * cd /path-ke-proyek-anda && php artisan schedule:run >> /dev/null 2>&1
-```
-
-Berikut adalah tugas-tugas yang dijadwalkan:
-
-1.  **`CheckUnassignedFalloutReports`**
-    - **Perintah:** `app/Console/Commands/CheckUnassignedFalloutReports.php`
-    - **Jadwal:** Setiap jam (`hourly`), pada hari kerja (`weekdays`), antara pukul 08:00 dan 18:00 (WIB).
-    - **Tujuan:** Memeriksa laporan fallout yang belum ditugaskan (status `Open`) dan mengirimkan notifikasi untuk eskalasi.
-
-2.  **`CheckUncompletedFalloutReports`**
-    - **Perintah:** `app/Console/Commands/CheckUncompletedFalloutReports.php`
-    - **Jadwal:** Setiap jam (`hourly`), pada hari kerja (`weekdays`), antara pukul 08:00 dan 18:00 (WIB).
-    - **Tujuan:** Memeriksa laporan fallout yang sudah ditugaskan tapi tidak selesai (status `OnProgress`) dalam waktu yang lama dan mengirimkan notifikasi untuk eskalasi.
-
-## 7. Panduan Troubleshooting
+## 5. Panduan Troubleshooting
 
 Berikut adalah panduan untuk mendiagnosis dan menyelesaikan masalah umum.
 
@@ -213,22 +191,22 @@ tail -f storage/logs/laravel.log
 
 1.  **Notifikasi Telegram Tidak Terkirim**
     - **Penyebab Umum:**
-        - Token bot (`TELEGRAM_BOT_TOKEN`) atau ID grup (`TELEGRAM_CHAT_ID`) di file `.env` salah.
+        - Token bot (`TELEGRAM_BOT_TOKEN`) di file `.env` salah.
+        - ID grup tidak ada atau salah di tabel `telegram_groups` di database.
         - Bot belum ditambahkan sebagai admin di grup Telegram.
         - Pengguna yang dituju belum pernah berinteraksi dengan bot (bot tidak bisa memulai percakapan).
         - Ada error pada saat proses pengiriman (periksa `laravel.log`).
     - **Solusi:**
-        - Pastikan konfigurasi di `.env` sudah benar.
+        - Pastikan `TELEGRAM_BOT_TOKEN` di `.env` sudah benar.
+        - Pastikan ada entri yang benar di tabel `telegram_groups`.
         - Pastikan bot memiliki izin yang cukup di grup.
         - Minta pengguna untuk memulai chat dengan bot terlebih dahulu.
 
-2.  **Tugas Terjadwal (Eskalasi Otomatis) Tidak Berjalan**
+2.  **Proses Antrian (Queue) Tidak Berjalan**
     - **Penyebab Umum:**
-        - Cron job di server belum di-setup dengan benar (lihat bagian 6).
-        - Proses antrian (`php artisan queue:listen`) tidak berjalan atau macet.
+        - Perintah `php artisan queue:listen` atau `queue:work` tidak berjalan atau macet. Ini akan menyebabkan notifikasi tidak terkirim.
     - **Solusi:**
-        - Pastikan cron job sudah terpasang dan menunjuk ke direktori proyek yang benar.
-        - Restart proses antrian. Untuk produksi, disarankan menggunakan Supervisor untuk menjaga agar proses antrian selalu berjalan.
+        - Jalankan ulang proses antrian. Untuk produksi, sangat disarankan menggunakan Supervisor untuk menjaga agar proses antrian selalu berjalan.
 
 3.  **Perubahan pada File CSS/JS Tidak Muncul**
     - **Penyebab Umum:**

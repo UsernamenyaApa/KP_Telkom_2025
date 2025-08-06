@@ -10,7 +10,7 @@
                 @if ($report->falloutStatus?->name === 'Open')
                     <button wire:click="takeOrder" class="block rounded-md bg-green-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">Ambil Order</button>
                 @endif
-                @if ($report->falloutStatus?->name === 'OnProgress' && $report->assigned_to_user_id == auth()->id())
+                @if (!in_array($report->falloutStatus?->name, ['Open', 'FA', 'input ulang', 'PI']) && $report->assigned_to_user_id == auth()->id())
                     <button wire:click="openStatusModal" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Change Status</button>
                 @endif
             </div>
@@ -189,7 +189,7 @@
                     <label for="status" class="sr-only">Status</label>
                     <select wire:model="newStatusId" id="status" class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-[#131518] text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         <option value="">Select Status</option>
-                        @foreach(App\Models\FalloutStatus::whereNotIn('name', ['Open', 'OnProgress'])->get() as $status)
+                        @foreach($availableStatuses as $status)
                             <option value="{{ $status->id }}">{{ $status->name }}</option>
                         @endforeach
                     </select>

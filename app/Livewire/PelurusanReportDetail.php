@@ -25,7 +25,7 @@ class PelurusanReportDetail extends Component
     public $availableStatuses = [];
 
     private const ON_PROGRESS = 'OnProgress';
-    private const COMPLETED_STATUSES = ['FA', 'input ulang', 'PI'];
+    private const COMPLETED_STATUSES = ['FA', 'input ulang', 'PI', 'Done'];
 
     public function mount($id, $date = null)
     {
@@ -141,8 +141,8 @@ class PelurusanReportDetail extends Component
         $currentStatusName = $this->report->falloutStatus?->name;
 
         $this->availableStatuses = $allStatuses->filter(function ($status) {
-            // Allow all statuses except Open and OnProgress to be manually selected.
-            return !in_array($status->name, ['Open', 'OnProgress']);
+            // Hanya izinkan status "Done" untuk dipilih.
+            return $status->name === 'Done';
         });
 
         $this->newStatusId = $this->report->fallout_status_id;

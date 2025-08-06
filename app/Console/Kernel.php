@@ -12,19 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // --- JADWAL UNTUK PRODUKSI NANTI ---
-        // Aktifkan ini setelah testing selesai.
-        $schedule->command(\App\Console\Commands\CheckUnassignedFalloutReports::class)
-            ->hourly() // Dijalankan setiap jam
-            ->weekdays()
-            ->between('8:00', '18:00') // Jam kerja normal
-            ->timezone('Asia/Jakarta');
-
-        $schedule->command(\App\Console\Commands\CheckUncompletedFalloutReports::class)
-            ->hourly() // Dijalankan setiap jam
-            ->weekdays()
-            ->between('8:00', '18:00') // Jam kerja normal
-            ->timezone('Asia/Jakarta');
+        //
     }
 
     /**
