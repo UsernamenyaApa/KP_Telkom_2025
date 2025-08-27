@@ -9,7 +9,9 @@ use Livewire\Component;
 class NotificationBell extends Component
 {
     public $totalUnassignedCount = 0;
+
     public $unassignedFalloutReports = [];
+
     public $unassignedPelurusanReports = [];
 
     protected $listeners = [

@@ -8,6 +8,8 @@ use App\Models\FalloutStatus;
 use App\Models\TelegramGroup;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use League\CommonMark\CommonMarkConverter;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -17,13 +19,18 @@ class FalloutReportDetail extends Component
     public $date;
 
     public FalloutReport $report;
+
     public $showStatusModal = false;
+
     public $newStatusId;
+
     public $keterangan = '';
+
     public $availableStatuses = [];
 
     private const ON_PROGRESS = 'OnProgress';
-    private const COMPLETED_STATUSES = ['FA', 'input ulang', 'PI'];
+
+    private const COMPLETED_STATUSES = ['cancel atau input ulang', 'Done'];
 
     public function mount($id, $date = null)
     {
@@ -31,16 +38,21 @@ class FalloutReportDetail extends Component
         $this->date = $date ?? $this->date;
     }
 
-    
-
     public function openStatusModal()
     {
         $allStatuses = FalloutStatus::all();
         $currentStatusName = $this->report->falloutStatus?->name;
 
         $this->availableStatuses = $allStatuses->filter(function ($status) use ($currentStatusName) {
-            if ($currentStatusName === 'Open') return true;
-            return !in_array($status->name, ['Open', 'OnProgress']);
+            if ($currentStatusName === 'Open') {
+                return true;
+            }
+
+            if ($currentStatusName === self::ON_PROGRESS) {
+                return ! in_array($status->name, ['Open', 'OnProgress']);
+            }
+
+            return ! in_array($status->name, ['Open', 'OnProgress']);
         });
 
         $this->newStatusId = $this->report->fallout_status_id;
@@ -54,15 +66,46 @@ class FalloutReportDetail extends Component
         $this->reset(['newStatusId', 'keterangan']);
     }
 
+    public function takeOrder()
+    {
+        try {
+            DB::beginTransaction();
+
+            if ($this->report->assigned_to_user_id) {
+                throw new \Exception('Laporan ini sudah diambil.');
+            }
+
+            $onProgressStatus = FalloutStatus::where('name', self::ON_PROGRESS)->firstOrFail();
+
+            $this->report->update([
+                'fallout_status_id' => $onProgressStatus->id,
+                'assigned_to_user_id' => Auth::id(),
+                'taken_at' => now(),
+            ]);
+
+            DB::commit();
+
+            $user = Auth::user();
+
+            $this->dispatchNotification($onProgressStatus, $user, 'take');
+
+            $this->dispatch('reportAssigned');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->addError('error', 'Gagal mengambil laporan: '.$e->getMessage());
+        }
+    }
+
     public function changeStatus()
     {
         $this->validate([
             'newStatusId' => 'required|exists:fallout_statuses,id',
-            'keterangan'  => 'nullable|string|max:1000',
+            'keterangan' => 'nullable|string|max:1000',
         ]);
 
         if ($this->report->assigned_to_user_id != Auth::id()) {
             $this->addError('auth', 'Anda tidak ditugaskan untuk laporan ini.');
+
             return;
         }
 
@@ -71,21 +114,22 @@ class FalloutReportDetail extends Component
             $newStatus = FalloutStatus::findOrFail($this->newStatusId);
             $this->report->update([
                 'fallout_status_id' => $this->newStatusId,
-                'resolution_notes'  => $this->keterangan,
-                'completed_at'      => in_array($newStatus->name, self::COMPLETED_STATUSES) ? now() : null,
+                'resolution_notes' => $this->keterangan,
+                'completed_at' => in_array($newStatus->name, self::COMPLETED_STATUSES) ? now() : null,
             ]);
             DB::commit();
 
-            $this->dispatchStatusUpdateNotification($newStatus);
+            $this->dispatchNotification($newStatus, Auth::user(), 'change');
 
             $this->closeStatusModal();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->addError('statusError', 'Gagal mengubah status laporan: ' . $e->getMessage());
+            Log::error('Gagal mengubah status laporan fallout: '.$e->getMessage());
+            $this->addError('statusError', 'Gagal mengubah status laporan: '.$e->getMessage());
         }
     }
 
-    private function dispatchStatusUpdateNotification(FalloutStatus $newStatus): void
+    private function dispatchNotification(FalloutStatus $newStatus, $user, $action = 'change')
     {
         $reporter = $this->report->reporter;
         $assignee = $this->report->assignedToUser;
@@ -95,21 +139,25 @@ class FalloutReportDetail extends Component
         $escapedIncidentTicket = $this->escapeMarkdown($this->report->incident_ticket);
         $escapedOrderType = $this->escapeMarkdown($this->report->orderType?->name ?? 'N/A');
         $escapedOrderId = $this->escapeMarkdown($this->report->order_id);
-        $escapedNomerLayanan = $this->escapeMarkdown($this->report->nomer_layanan);
         $escapedKeterangan = $this->escapeMarkdown($this->keterangan);
         $escapedReporterUsername = $this->escapeMarkdown($reporter ? $reporter->telegram_username : ($this->report->reporter_telegram_username ?? 'N/A'));
         $escapedCreatedAt = $this->escapeMarkdown($this->report->created_at->format('Y-m-d H:i:s'));
         $escapedAssigneeUsername = $this->escapeMarkdown($assignee ? $assignee->telegram_username : 'N/A');
         $escapedTakenAt = $this->escapeMarkdown($this->report->taken_at ? $this->report->taken_at->format('Y-m-d H:i:s') : 'N/A');
 
+        if ($action === 'take') {
+            $title = '✅ *Laporan Fallout Diambil* ✅';
+        } else {
+            $title = '🔔 *Update Status Laporan Fallout* 🔔';
+        }
+
         $messageLines = [
-            '🔔 *Update Status Laporan Fallout* 🔔',
+            $title,
             "*Status Baru:* {$escapedStatusName}",
             '',
             "*Kode Fallout:* `{$escapedIncidentTicket}`",
             "*Tipe Order:* {$escapedOrderType}",
             "*OrderID:* `{$escapedOrderId}`",
-            "*Nomor Layanan:* `{$escapedNomerLayanan}`",
         ];
 
         if ($this->keterangan) {
@@ -130,7 +178,7 @@ class FalloutReportDetail extends Component
             $escapedCompletedAt = $this->escapeMarkdown($this->report->completed_at->format('Y-m-d H:i:s'));
             $duration = $this->report->created_at->diffForHumans($this->report->completed_at, true, true, 2);
             $escapedDuration = $this->escapeMarkdown($duration);
-            $messageLines[] = "";
+            $messageLines[] = '';
             $messageLines[] = "✅ *Selesai pada:* `{$escapedCompletedAt}`";
             $messageLines[] = "⏳ *Durasi:* `{$escapedDuration}`";
         }
@@ -139,6 +187,7 @@ class FalloutReportDetail extends Component
 
         // Define recipients
         $recipients = [];
+
         if ($reporter && $reporter->telegram_user_id) {
             $recipients[] = $reporter->telegram_user_id;
         } elseif ($this->report->reporter_telegram_id) {
@@ -150,12 +199,8 @@ class FalloutReportDetail extends Component
             $recipients[] = $groupChat->chat_id;
         }
 
-        $currentUser = auth()->user();
-        if ($currentUser->telegram_user_id) {
-            // Add the current user only if they are not the reporter
-            if (!$reporter || $reporter->telegram_user_id != $currentUser->telegram_user_id) {
-                $recipients[] = $currentUser->telegram_user_id;
-            }
+        if ($user && $user->telegram_user_id) {
+            $recipients[] = $user->telegram_user_id;
         }
 
         // Send to unique recipients
@@ -164,105 +209,19 @@ class FalloutReportDetail extends Component
         }
     }
 
-    public function takeOrder()
-    {
-        if ($this->report->falloutStatus?->name !== 'Open') {
-            return; // Or display an error to the user
-        }
-
-        try {
-            DB::beginTransaction();
-
-            $onProgressStatus = FalloutStatus::where('name', self::ON_PROGRESS)->firstOrFail();
-
-            $this->report->update([
-                'fallout_status_id'     => $onProgressStatus->id,
-                'assigned_to_user_id'   => Auth::id(),
-                'taken_at'              => now(),
-            ]);
-
-            DB::commit();
-
-            $user = Auth::user();
-
-            // Escape all dynamic data first
-            $escapedIdHarian = $this->escapeMarkdown($this->report->id_harian ?? 'N/A');
-            $escapedIncidentTicket = $this->escapeMarkdown($this->report->incident_ticket ?? 'N/A');
-            $escapedOrderType = $this->escapeMarkdown($this->report->orderType ? $this->report->orderType->name : 'N/A');
-            $escapedOrderId = $this->escapeMarkdown($this->report->order_id ?? 'N/A');
-            $escapedNomerLayanan = $this->escapeMarkdown($this->report->nomer_layanan ?? 'N/A');
-            $escapedUsername = $this->escapeMarkdown($user->telegram_username ?? 'N/A');
-            $escapedTakenAt = $this->escapeMarkdown($this->report->taken_at ? $this->report->taken_at->format('Y-m-d H:i:s') : 'N/A');
-
-            // Message for the group chat and reporter
-            $groupMessage = "✅ *Laporan Fallout Diambil\!* ✅\n\n" .
-                "*Antrian:* `{$escapedIdHarian}`\n" .
-                "*Kode Fallout:* `{$escapedIncidentTicket}`\n" .
-                "*Tipe Order:* `{$escapedOrderType}`\n" .
-                "*OrderID:* `{$escapedOrderId}`\n" .
-                "*Nomor Layanan:* `{$escapedNomerLayanan}`\n\n" .
-                "*Diambil Oleh:* @{$escapedUsername}\n" .
-                "*Waktu Diambil:* `{$escapedTakenAt}`";
-
-            // Personal message for the user who took the order
-            $takerMessage = "✅ Anda telah berhasil mengambil laporan Fallout\.\n\n" .
-                            "*Berikut detail laporan:*\n\n" .
-                            "*Antrian:* `{$escapedIdHarian}`\n" .
-                            "*Kode Fallout:* `{$escapedIncidentTicket}`\n" .
-                            "*Tipe Order:* `{$escapedOrderType}`\n" .
-                            "*OrderID:* `{$escapedOrderId}`\n" .
-                            "*Nomor Layanan:* `{$escapedNomerLayanan}`";
-
-            // Define recipients for the group message
-            $recipients = [];
-            if ($this->report->reporter_user_id && $this->report->reporter->telegram_user_id) {
-                $recipients[] = $this->report->reporter->telegram_user_id;
-            } elseif ($this->report->reporter_telegram_id) {
-                $recipients[] = $this->report->reporter_telegram_id;
-            }
-
-            $groupChat = TelegramGroup::first();
-            if ($groupChat?->chat_id) {
-                $recipients[] = $groupChat->chat_id;
-            }
-
-            // Send notifications to group and reporter
-            foreach (array_unique($recipients) as $recipient) {
-                SendTelegramNotificationJob::dispatch($recipient, $groupMessage, null, 'MarkdownV2');
-            }
-
-            // Always send a personal notification to the user who took the action
-            if ($user->telegram_user_id) {
-                // Ensure the user doesn't get the group message twice if they are also the reporter
-                if (!in_array($user->telegram_user_id, $recipients)) {
-                    SendTelegramNotificationJob::dispatch($user->telegram_user_id, $takerMessage, null, 'MarkdownV2');
-                } else {
-                    // If they are the reporter, they already got the main message.
-                    // We can send a simplified personal confirmation.
-                    $personalConfirmation = "✅ Anda telah berhasil mengambil laporan Fallout ini\.";
-                    SendTelegramNotificationJob::dispatch($user->telegram_user_id, $personalConfirmation, null, 'MarkdownV2');
-                }
-            }
-
-            $this->dispatch('reportAssigned');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $this->addError('error', 'Gagal mengambil laporan: ' . $e->getMessage());
-        }
-    }
-
     public function render()
     {
         return view('livewire.fallout-report-detail');
     }
 
-    private function escapeMarkdown($text): string
+        private function escapeMarkdown($text): string
     {
         if (is_null($text)) {
             return 'N/A';
         }
+
         $chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
-        return str_replace($chars, array_map(fn ($char) => '\\' . $char, $chars), $text);
+
+        return str_replace($chars, array_map(fn ($char) => '\\'.$char, $chars), $text);
     }
 }

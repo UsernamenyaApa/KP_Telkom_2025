@@ -55,47 +55,49 @@
 }
 
 .dark {
-    --theme-primary: #131518;
-    --theme-secondary: #131518;
-    --theme-text: #F9FAFB;
-    --theme-text-light: #D1D5DB;
-    --theme-text-dark: #FFFFFF;
-    --theme-accent: #60A5FA;
-    --theme-accent-light: #1E40AF;
-    --theme-accent-dark: #2563EB;
+    --theme-primary: #000000; /* Black */
+    --theme-secondary: #1a1a1a; /* Very Dark Gray */
+    --theme-text: #edf2f7;         /* Gray-100 */
+    --theme-text-light: #a0aec0;   /* Gray-400 */
+    --theme-text-dark: #e2e8f0;    /* Gray-200 */
+    --theme-accent: #3B82F6;       /* Blue-500 */
+    --theme-accent-light: #2563EB; /* Blue-600 */
+    --theme-accent-dark: #1D4ED8;  /* Blue-700 */
+    --card-bg: #1a1a1a;           /* Very Dark Gray untuk kartu */
+    --border-color: #374151;      /* Gray-700 untuk border */
 }
 
 .dark[data-theme="dark-red"] {
-    --theme-primary: #131518;
-    --theme-secondary: #131518;
-    --theme-text: #F9FAFB;
-    --theme-text-light: #D1D5DB;
-    --theme-text-dark: #FFFFFF;
-    --theme-accent: #EF4444;
-    --theme-accent-light: #DC2626;
-    --theme-accent-dark: #B91C1C;
+    --theme-primary: #4a5568;
+    --theme-secondary: #2d3748;
+    --theme-text: #edf2f7;
+    --theme-text-light: #a0aec0;
+    --theme-text-dark: #e2e8f0;
+    --theme-accent: #6b7280; /* Gray-500 */
+    --theme-accent-light: #718096;
+    --theme-accent-dark: #5a626e;
 }
 
 .dark[data-theme="dark-blue"] {
-    --theme-primary: #131518;
-    --theme-secondary: #131518;
-    --theme-text: #F9FAFB;
-    --theme-text-light: #D1D5DB;
-    --theme-text-dark: #FFFFFF;
-    --theme-accent: #3B82F6;
-    --theme-accent-light: #2563EB;
-    --theme-accent-dark: #1D4ED8;
+    --theme-primary: #4a5568;
+    --theme-secondary: #2d3748;
+    --theme-text: #edf2f7;
+    --theme-text-light: #a0aec0;
+    --theme-text-dark: #e2e8f0;
+    --theme-accent: #6b7280; /* Gray-500 */
+    --theme-accent-light: #718096;
+    --theme-accent-dark: #5a626e;
 }
 
 .dark[data-theme="dark-dark-blue"] {
-    --theme-primary: #131518;
-    --theme-secondary: #131518;
-    --theme-text: #F9FAFB;
-    --theme-text-light: #D1D5DB;
-    --theme-text-dark: #FFFFFF;
-    --theme-accent: #1D4ED8;
-    --theme-accent-light: #1E40AF;
-    --theme-accent-dark: #1A202C;
+    --theme-primary: #4a5568;
+    --theme-secondary: #2d3748;
+    --theme-text: #edf2f7;
+    --theme-text-light: #a0aec0;
+    --theme-text-dark: #e2e8f0;
+    --theme-accent: #6b7280; /* Gray-500 */
+    --theme-accent-light: #718096;
+    --theme-accent-dark: #5a626e;
 }
 
 @layer base {
@@ -112,7 +114,7 @@
     body {
         margin: 0;
         padding: 0;
-        @apply text-zinc-800 dark:text-zinc-200;
+        @apply bg-gray-50 text-zinc-800 dark:bg-gray-900 dark:text-zinc-200 transition-colors duration-300;
     }
 
     *,
@@ -165,4 +167,11 @@ button[type="submit"]:hover {
 header {
     background-color: var(--theme-primary) !important;
     z-index: 9999 !important;
+}
+
+/* === TAMBAHKAN KODE DI BAWAH INI === */
+
+/* Menghilangkan panah/caret dari semua komponen dropdown */
+[data-flux-dropdown-button]::after {
+    display: none !important;
 }

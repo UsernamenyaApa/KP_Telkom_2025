@@ -41,7 +41,7 @@ class ProcessTelegramReport implements ShouldQueue
 
             $dbData = $this->prepareReportDataForStorage($reportData, $userInfo);
             $falloutReport = $this->saveReportToDatabase($dbData);
-            
+
             $this->notifyRelevantParties($falloutReport, $userInfo);
 
         } catch (\Exception $e) {
@@ -57,8 +57,7 @@ class ProcessTelegramReport implements ShouldQueue
     {
         $data = [
             'tipe_order_id' => $this->tipeOrderId,
-            'order_id' => str_replace('\\', '', data_get($reportData, 'order_id')),
-            'nomer_layanan' => data_get($reportData, 'nomer_layanan'),
+            'order_id' => data_get($reportData, 'order_id'),
             'incident_ticket' => data_get($reportData, 'incident_ticket'),
             'incident_fallout_description' => data_get($reportData, 'incident_fallout_description'),
             'keterangan' => data_get($reportData, 'keterangan'),
@@ -85,7 +84,7 @@ class ProcessTelegramReport implements ShouldQueue
             $openStatus = FalloutStatus::where('name', 'Open')->firstOrFail();
 
             $dbData['id_harian'] = $idHarian;
-            $dbData['fallout_code'] = 'FA'.$today->format('Ymd').str_pad($idHarian, 3, '0', STR_PAD_LEFT);
+            $dbData['fallout_code'] = 'FO'.$today->format('Ymd').str_pad($idHarian, 3, '0', STR_PAD_LEFT);
             $dbData['fallout_status_id'] = $openStatus->id;
 
             return FalloutReport::create($dbData);
@@ -107,11 +106,11 @@ class ProcessTelegramReport implements ShouldQueue
         $lines = [
             '📊 *Laporan Fallout Baru* 📊',
             '',
-            '*Antrian:* `' . $esc($report->id_harian) . '`',
-            '*Kode Fallout:* `' . $esc($report->incident_ticket) . '`',
-            '*Tipe Order:* `' . $esc($report->orderType->name) . '`',
-            '*OrderID:* `' . $esc(str_replace('\\', '', $report->order_id)) . '`',
-            '*Nomor Layanan:* `' . $esc($report->nomer_layanan) . '`',
+            '*Antrian:* `'.$esc($report->id_harian).'`',
+            '*Kode Fallout:* `'.$esc($report->incident_ticket).'`',
+            '*Tipe Order:* `'.$esc($report->orderType->name).'`',
+            '*OrderID:* `'.$esc($report->order_id).'`',
+
             '',
             '*Keterangan Insiden:*',
             '```text',
@@ -122,8 +121,8 @@ class ProcessTelegramReport implements ShouldQueue
             $esc($report->keterangan ?? '-'),
             '```',
             '',
-            '*Dibuat Oleh:* ' . $esc($createdBy),
-            '*Waktu Dibuat:* `' . $esc($report->created_at->format('Y-m-d H:i:s')) . '`',
+            '*Dibuat Oleh:* '.$esc($createdBy),
+            '*Waktu Dibuat:* `'.$esc($report->created_at->format('Y-m-d H:i:s')).'`',
         ];
 
         $reportText = implode("\n", $lines);
@@ -133,7 +132,7 @@ class ProcessTelegramReport implements ShouldQueue
         $destinations = array_unique(array_filter([
             env('TELEGRAM_CHANNEL_ID'),
             $groupChat ? $groupChat->chat_id : null,
-            $reporterChatId
+            $reporterChatId,
         ]));
 
         Log::info('Sending Fallout Report Notification to Destinations:', ['destinations' => $destinations]);

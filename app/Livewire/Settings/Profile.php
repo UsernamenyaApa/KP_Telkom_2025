@@ -11,8 +11,11 @@ class Profile extends Component
     use WithFileUploads;
 
     public User $user;
+
     public string $name = '';
+
     public string $nik = '';
+
     public $photo;
 
     public function mount(): void
@@ -32,6 +35,7 @@ class Profile extends Component
 
         if ($this->photo) {
             $this->user->updateProfilePhoto($this->photo);
+            dd($this->user->profile_photo_path); // Debugging line
         }
 
         $this->user->forceFill([

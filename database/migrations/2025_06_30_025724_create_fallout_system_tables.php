@@ -31,7 +31,6 @@ return new class extends Migration
             $table->text('incident_fallout_description')->nullable();
             $table->foreignId('tipe_order_id')->constrained('order_types');
             $table->string('order_id');
-            $table->string('nomer_layanan');
             // $table->string('sn_ont');
             // $table->string('datek_odp');
             // $table->integer('port_odp');

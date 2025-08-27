@@ -14,7 +14,10 @@ class SuperAdminSeeder extends Seeder
     public function run(): void
     {
         $role = Role::firstOrCreate(['name' => 'super-admin']);
-        $user = User::where('nik', '12345678')->first();
-        $user->assignRole($role);
+        $superAdminNiks = ['24870005', '12345678'];
+
+        User::whereIn('nik', $superAdminNiks)->get()->each(function ($user) use ($role) {
+            $user->assignRole($role);
+        });
     }
 }

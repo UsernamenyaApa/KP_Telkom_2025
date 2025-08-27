@@ -147,9 +147,6 @@
                                                     case 'eskalasi':
                                                         $statusColorClass = 'bg-red-500/50';
                                                         break;
-                                                    case 'FA':
-                                                        $statusColorClass = 'bg-green-500/50';
-                                                        break;
                                                     case 'OnProgress':
                                                         $statusColorClass = 'bg-yellow-500/50';
                                                         break;
@@ -158,9 +155,6 @@
                                                         break;
                                                     case 'input ulang':
                                                         $statusColorClass = 'bg-[#E79C56]/50';
-                                                        break;
-                                                    case 'PI':
-                                                        $statusColorClass = 'bg-purple-500/50';
                                                         break;
                                                     case 'Completed':
                                                         $statusColorClass = 'bg-green-700/50';
@@ -181,7 +175,7 @@
                                         <td class="px-3 py-4 text-sm text-gray-500 dark:text-white font-istok-web">{{ $report->updated_at->format('d M Y, H:i') }}</td>
                                         <td class="px-3 py-4 text-sm text-gray-500 dark:text-white font-istok-web">{{ $report->taken_at && $report->completed_at ? $report->completed_at->diffForHumans($report->taken_at, true) : '-' }}</td>
                                         <td class="relative whitespace-nowrap py-4 pl-6 pr-8 text-right text-sm font-medium font-istok-web">
-                                            <a href="{{ route('pelurusan-reports.show', ['id' => $report->id, 'date' => $date]) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 px-2">Details</a>
+                                            <a href="{{ route('pelurusan-reports.show', $report->id) }}?date={{ $date }}" wire:navigate class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 px-2">Details</a>
                                         </td>
                                     </tr>
                                 @empty

@@ -37,7 +37,7 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
                 $reportData = data_get($this->state, 'report_data', []);
                 $userInfo = data_get($this->state, 'user_info');
 
-                if (!$userInfo) {
+                if (! $userInfo) {
                     throw new \Exception('Informasi pengguna tidak ditemukan dalam state.');
                 }
 
@@ -46,7 +46,7 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
 
                 // 2. Ekstrak data gambar dari state
                 $imagesData = data_get($reportData, 'images', []);
-                if (empty($imagesData) || !is_array($imagesData)) {
+                if (empty($imagesData) || ! is_array($imagesData)) {
                     throw new \Exception('Laporan harus memiliki minimal 1 gambar.');
                 }
 
@@ -78,19 +78,19 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
      */
     private function prepareMainReportData(array $reportData, array $userInfo): array
     {
-        $sanitize = fn(?string $text) => $text ? str_replace('\\', '', $text) : null;
+        $sanitize = fn (?string $text) => $text ? str_replace('\\', '', $text) : null;
 
         $data = [
             'tipe_order_id' => $this->tipeOrderId,
             'nomer_layanan' => $sanitize(data_get($reportData, 'nomer_layanan')),
-            'datek_odp'     => $sanitize(data_get($reportData, 'datek_odp')),
-            'port_odp'      => is_numeric($portOdp = data_get($reportData, 'port_odp')) ? (int) $portOdp : null,
+            'datek_odp' => $sanitize(data_get($reportData, 'datek_odp')),
+            'port_odp' => is_numeric($portOdp = data_get($reportData, 'port_odp')) ? (int) $portOdp : null,
         ];
 
         // Kustomisasi berdasarkan tipe order
         if ($this->tipeOrderId == 8) { // ID untuk "Ex Gangguan"
             $data['order_id'] = $sanitize(data_get($reportData, 'nomor_incident'));
-            $data['sn_ont'] = '-';
+            $data['sn_ont'] = $sanitize(data_get($reportData, 'sn_ont'));
         } else {
             $data['order_id'] = $sanitize(data_get($reportData, 'order_id'));
             $data['sn_ont'] = $sanitize(data_get($reportData, 'sn_ont'));
@@ -107,6 +107,7 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         }
 
         unset($data['image']); // Ensure 'image' is not passed to the main report table
+
         return $data;
     }
 
@@ -120,10 +121,9 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         $openStatus = FalloutStatus::where('name', 'Open')->firstOrFail();
 
         $mainReportData['id_harian'] = $idHarian;
-        $mainReportData['pelurusan_code'] = 'PL' . $today->format('Ymd') . str_pad($idHarian, 3, '0', STR_PAD_LEFT);
+        $mainReportData['pelurusan_code'] = 'PL'.$today->format('Ymd').str_pad($idHarian, 3, '0', STR_PAD_LEFT);
         $mainReportData['fallout_status_id'] = $openStatus->id;
 
-        
         return PelurusanReport::create($mainReportData);
     }
 
@@ -150,6 +150,7 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
         if ($report->tipe_order_id == 8) { // Ex Gangguan
             $lines[] = "*Nomor Incident:* `{$esc($report->order_id)}`";
             $lines[] = "*Nomor Layanan:* `{$esc($report->nomer_layanan)}`";
+            $lines[] = "*SN ONT:* `{$esc($report->sn_ont)}`";
             $lines[] = "*Datek ODP:* `{$esc($report->datek_odp)}`";
             $lines[] = "*Port ODP:* `{$esc($report->port_odp)}`";
         } else {
@@ -159,25 +160,25 @@ class ProcessTelegramPelurusanReport implements ShouldQueue
             $lines[] = "*Datek ODP:* `{$esc($report->datek_odp)}`";
             $lines[] = "*Port ODP:* `{$esc($report->port_odp)}`";
             $lines[] = "\n*Keterangan Insiden:*";
-            $lines[] = "```";
+            $lines[] = '```';
             $lines[] = $esc($report->incident_fallout_description);
-            $lines[] = "```";
-            $lines[] = "*Keterangan Tambahan:*";
-            $lines[] = "```";
+            $lines[] = '```';
+            $lines[] = '*Keterangan Tambahan:*';
+            $lines[] = '```';
             $lines[] = $esc($report->keterangan);
-            $lines[] = "```";
+            $lines[] = '```';
         }
 
         if ($report->images->isNotEmpty()) {
-            $lines[] = $esc("\n*Gambar Terlampir: (" . $report->images->count() . ")*");
+            $lines[] = $esc("\n*Gambar Terlampir: (".$report->images->count().')*');
         }
 
-        $lines[] = ""; // Safe separator
-        $lines[] = '*Dibuat Oleh:* ' . $esc($createdBy);
-        $lines[] = '*Waktu Dibuat:* `' . $esc($report->created_at->format('Y-m-d H:i:s')) . '`';
+        $lines[] = ''; // Safe separator
+        $lines[] = '*Dibuat Oleh:* '.$esc($createdBy);
+        $lines[] = '*Waktu Dibuat:* `'.$esc($report->created_at->format('Y-m-d H:i:s')).'`';
 
         $reportText = implode("\n", $lines);
-        
+
         $groupChatId = \App\Models\TelegramGroup::first()?->chat_id;
         $destinations = array_unique(array_filter([env('TELEGRAM_CHANNEL_ID'), $groupChatId, $this->chatId]));
 

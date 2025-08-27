@@ -54,7 +54,7 @@ class CheckUnassignedFalloutReports extends Command
             $message = "🔔 *Peringatan: Laporan Fallout Belum Diambil!* 🔔\n\n"
                        .'Tipe Order: '.($report->orderType ? $report->orderType->name : 'N/A')."\n"
                        .'OrderID: '.$report->order_id."\n"
-                       .'Nomor Layanan: '.$report->nomer_layanan."\n"
+
                        .'SN ONT: '.$report->sn_ont."\n"
                        .'Datek ODP: '.$report->datek_odp."\n"
                        .'Port ODP: '.$report->port_odp."\n\n"

@@ -88,30 +88,30 @@ class PelurusanReportDashboard extends Component
                 $report->fallout_status_id = $onProgressStatus->id;
                 $report->assigned_to_user_id = Auth::id();
                 if (is_null($report->assigned_at)) {
-                    $report->assigned_at = now();
+                    $report->assigned_at = $assignedAtDateTime;
                 }
-                $report->taken_at = now();
+                $report->taken_at = $assignedAtDateTime;
                 $report->save();
 
                 $user = Auth::user();
 
                 $esc = fn (?string $text) => str_replace(
                     ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
-                    ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
+                    ['\_', '\*', '\\[', '\\]', '\\(', '\\)', '\\~', '`', '\\>', '\\#', '\\+', '\\-', '\\=', '\\|', '\\{', '\\}', '\\.', '\\!'],
                     $text ?? '-'
                 );
 
-                $message = "✅ *Laporan Pelurusan Diambil!* ✅\n\n" .
-                           "*ID Laporan:* `" . $esc($report->id_harian) . "`\n" .
-                           "*Kode Pelurusan:* `" . $esc($report->pelurusan_code) . "`\n" .
-                           "*Tipe Order:* `" . $esc($report->orderType ? $report->orderType->name : 'N/A') . "`\n" .
-                           "*OrderID:* `" . $esc($report->order_id) . "`\n" .
-                           "*Nomor Layanan:* `" . $esc($report->nomer_layanan) . "`\n" .
-                           "*SN ONT:* `" . $esc($report->sn_ont) . "`\n" .
-                           "*Datek ODP:* `" . $esc($report->datek_odp) . "`\n" .
-                           "*Port ODP:* `" . $esc($report->port_odp) . "`\n\n" .
-                           "*Diambil Oleh:* " . $esc('@' . $user->telegram_username) . "\n" .
-                           "*Waktu Diambil:* `" . $esc($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A') . "`";
+                $message = "✅ *Laporan Pelurusan Diambil!* ✅\n\n".
+                           '*ID Laporan:* `'.$esc($report->id_harian)."`\n".
+                           '*Kode Pelurusan:* `'.$esc($report->pelurusan_code)."`\n".
+                           '*Tipe Order:* `'.$esc($report->orderType ? $report->orderType->name : 'N/A')."`\n".
+                           '*OrderID:* `'.$esc($report->order_id)."`\n".
+                           '*Nomor Layanan:* `'.$esc($report->nomer_layanan)."`\n".
+                           '*SN ONT:* `'.$esc($report->sn_ont)."`\n".
+                           '*Datek ODP:* `'.$esc($report->datek_odp)."`\n".
+                           '*Port ODP:* `'.$esc($report->port_odp)."`\n\n".
+                           '*Diambil Oleh:* '.$esc('@'.$user->telegram_username)."\n".
+                           '*Waktu Diambil:* `'.$esc($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A').'`';
 
                 $chatIdsToNotify = collect();
 
@@ -135,6 +135,10 @@ class PelurusanReportDashboard extends Component
                 $chatIdsToNotify->unique()->each(function ($chatId) use ($message) {
                     SendTelegramNotificationJob::dispatch($chatId, $message, null, 'MarkdownV2');
                 });
+
+                // Redirect back to the current URL, ensuring the 'date' parameter is preserved
+                // This will cause a full page reload, but guarantees the URL state.
+                return $this->redirect(request()->fullUrlWithQuery(['date' => $this->date]), navigate: true);
             }
         }
     }

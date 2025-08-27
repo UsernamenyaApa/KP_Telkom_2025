@@ -26,10 +26,9 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'nik' => fake()->unique()->numerify('################'), // 16 digit NIK
-            
+
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
     }
-
 }

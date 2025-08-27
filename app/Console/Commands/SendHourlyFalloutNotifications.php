@@ -37,7 +37,7 @@ class SendHourlyFalloutNotifications extends Command
             ->whereNull('assigned_to_user_id')
             ->get();
 
-        $inProgressReports = FalloutReport::where('fallout_status_id', 2) // Assuming 2 is 'In Progress'
+        $inProgressReports = FalloutReport::with('assignedToUser')->where('fallout_status_id', 2) // Assuming 2 is 'In Progress'
             ->get();
 
         if ($unassignedReports->isEmpty() && $inProgressReports->isEmpty()) {
@@ -60,7 +60,7 @@ class SendHourlyFalloutNotifications extends Command
         if ($inProgressReports->isNotEmpty()) {
             $notificationMessage .= "*Laporan Belum Selesai:*\n";
             foreach ($inProgressReports as $report) {
-                $handler = $report->handler ? $report->handler->name : 'N/A';
+                $handler = $report->assignedToUser ? $report->assignedToUser->name : 'N/A';
                 $notificationMessage .= "- ID: `{$report->id}` (`{$report->fallout_code}`) - Ditangani oleh: {$handler}\n";
             }
             $notificationMessage .= "\n";

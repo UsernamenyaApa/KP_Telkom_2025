@@ -43,7 +43,7 @@ class SendTelegramNotificationJob implements ShouldQueue
             $params = [
                 'chat_id' => $this->chatId,
                 'text' => $this->message,
-                'parse_mode' => $this->parseMode,
+                'parse_mode' => $this->parseMode, // Use the parseMode passed to the job
             ];
 
             if ($this->replyMarkup) {

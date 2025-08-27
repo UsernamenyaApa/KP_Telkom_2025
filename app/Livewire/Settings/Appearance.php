@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Settings;
 
-use App\Models\User;
 use Livewire\Component;
 
 class Appearance extends Component
 {
     public string $appearance;
+
     public string $theme_color;
 
     public function mount(): void

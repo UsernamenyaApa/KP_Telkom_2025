@@ -76,6 +76,7 @@ class PelurusanReport extends Model
         if ($this->reporter) {
             return $this->reporter->name;
         }
+
         return $this->reporter_telegram_username ?? 'Unknown Telegram User';
     }
 }

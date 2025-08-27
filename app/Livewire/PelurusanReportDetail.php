@@ -19,31 +19,29 @@ class PelurusanReportDetail extends Component
     public $date;
 
     public PelurusanReport $report;
+
     public $showStatusModal = false;
+
     public $newStatusId;
+
     public $keterangan = '';
+
     public $availableStatuses = [];
 
     private const ON_PROGRESS = 'OnProgress';
-    private const COMPLETED_STATUSES = ['FA', 'input ulang', 'PI'];
 
-    public function mount($id, $date = null)
+    private const COMPLETED_STATUSES = ['Done'];
+
+    public function mount($id)
     {
         $this->report = PelurusanReport::with([
             'orderType',
             'falloutStatus',
             'reporter',
-            'assignedToUser'
+            'assignedToUser',
         ])->findOrFail($id);
 
-        $this->date = $date ?? $this->date;
-
-        // Debugging: Log reporter information
-        if ($this->report->reporter) {
-            \Illuminate\Support\Facades\Log::info('PelurusanReportDetail: Reporter User ID: ' . $this->report->reporter_user_id . ', Reporter Name: ' . $this->report->reporter->name);
-        } else {
-            \Illuminate\Support\Facades\Log::info('PelurusanReportDetail: Reporter not found for report ID: ' . $this->report->id . ', Reporter User ID in DB: ' . $this->report->reporter_user_id);
-        }
+        \Illuminate\Support\Facades\Log::debug('PelurusanDetail Date: '.($this->date ?? 'null'));
     }
 
     public function takeOrder()
@@ -58,10 +56,10 @@ class PelurusanReportDetail extends Component
             $onProgressStatus = FalloutStatus::where('name', self::ON_PROGRESS)->firstOrFail();
 
             $this->report->update([
-                'fallout_status_id'     => $onProgressStatus->id,
-                'assigned_to_user_id'   => Auth::id(),
-                'assigned_at'           => $this->report->assigned_at ?? now(),
-                'taken_at'              => now(),
+                'fallout_status_id' => $onProgressStatus->id,
+                'assigned_to_user_id' => Auth::id(),
+                'assigned_at' => $this->report->assigned_at ?? now(),
+                'taken_at' => now(),
             ]);
 
             DB::commit();
@@ -81,28 +79,28 @@ class PelurusanReportDetail extends Component
             $escapedAssignedAt = $this->escapeMarkdown($this->report->assigned_at ? $this->report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
 
             // Message for the group chat
-            $groupMessage = "✅ Laporan Pelurusan Diambil\! ✅\n\n" .
-                "*ID Laporan:* `{$escapedIdHarian}`\n" .
-                "*Kode Pelurusan:* `{$escapedPelurusanCode}`\n" .
-                "*Tipe Order:* `{$escapedOrderType}`\n" .
-                "*OrderID:* `{$escapedOrderId}`\n" .
-                "*Nomor Layanan:* `{$escapedNomerLayanan}`\n" .
-                "*SN ONT:* `{$escapedSnOnt}`\n" .
-                "*Datek ODP:* `{$escapedDatekOdp}`\n" .
-                "*Port ODP:* `{$escapedPortOdp}`\n\n" .
-                "*Diambil Oleh:* @{$escapedUsername}\n" .
+            $groupMessage = "✅ Laporan Pelurusan Diambil\! ✅\n\n".
+                "*ID Laporan:* `{$escapedIdHarian}`\n".
+                "*Kode Pelurusan:* `{$escapedPelurusanCode}`\n".
+                "*Tipe Order:* `{$escapedOrderType}`\n".
+                "*OrderID:* `{$escapedOrderId}`\n".
+                "*Nomor Layanan:* `{$escapedNomerLayanan}`\n".
+                "*SN ONT:* `{$escapedSnOnt}`\n".
+                "*Datek ODP:* `{$escapedDatekOdp}`\n".
+                "*Port ODP:* `{$escapedPortOdp}`\n\n".
+                "*Diambil Oleh:* @{$escapedUsername}\n".
                 "*Waktu Diambil:* `{$escapedAssignedAt}`";
 
             // Personal message for the user who took the order
-            $takerMessage = "✅ Anda telah berhasil mengambil laporan pelurusan dengan ID \#{$escapedIdHarian} (`{$escapedPelurusanCode}`)\. Mohon segera ditindaklanjuti\.\n\n" .
-                            "*Berikut detail laporan:*\n\n" .
-                            "*ID Laporan:* `{$escapedIdHarian}`\n" .
-                            "*Kode Pelurusan:* `{$escapedPelurusanCode}`\n" .
-                            "*Tipe Order:* `{$escapedOrderType}`\n" .
-                            "*OrderID:* `{$escapedOrderId}`\n" .
-                            "*Nomor Layanan:* `{$escapedNomerLayanan}`\n" .
-                            "*SN ONT:* `{$escapedSnOnt}`\n" .
-                            "*Datek ODP:* `{$escapedDatekOdp}`\n" .
+            $takerMessage = "✅ Anda telah berhasil mengambil laporan pelurusan dengan ID \#{$escapedIdHarian} (`{$escapedPelurusanCode}`)\. Mohon segera ditindaklanjuti\.\n\n".
+                            "*Berikut detail laporan:*\n\n".
+                            "*ID Laporan:* `{$escapedIdHarian}`\n".
+                            "*Kode Pelurusan:* `{$escapedPelurusanCode}`\n".
+                            "*Tipe Order:* `{$escapedOrderType}`\n".
+                            "*OrderID:* `{$escapedOrderId}`\n".
+                            "*Nomor Layanan:* `{$escapedNomerLayanan}`\n".
+                            "*SN ONT:* `{$escapedSnOnt}`\n".
+                            "*Datek ODP:* `{$escapedDatekOdp}`\n".
                             "*Port ODP:* `{$escapedPortOdp}`";
 
             // Define recipients
@@ -131,7 +129,7 @@ class PelurusanReportDetail extends Component
             $this->dispatch('reportAssigned');
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->addError('error', 'Gagal mengambil laporan: ' . $e->getMessage());
+            $this->addError('error', 'Gagal mengambil laporan: '.$e->getMessage());
         }
     }
 
@@ -142,7 +140,7 @@ class PelurusanReportDetail extends Component
 
         $this->availableStatuses = $allStatuses->filter(function ($status) {
             // Allow all statuses except Open and OnProgress to be manually selected.
-            return !in_array($status->name, ['Open', 'OnProgress']);
+            return ! in_array($status->name, ['Open', 'OnProgress']);
         });
 
         $this->newStatusId = $this->report->fallout_status_id;
@@ -160,11 +158,12 @@ class PelurusanReportDetail extends Component
     {
         $this->validate([
             'newStatusId' => 'required|exists:fallout_statuses,id',
-            'keterangan'  => 'nullable|string|max:1000',
+            'keterangan' => 'nullable|string|max:1000',
         ]);
 
         if ($this->report->assigned_to_user_id != Auth::id()) {
             $this->addError('auth', 'Anda tidak ditugaskan untuk laporan ini.');
+
             return;
         }
 
@@ -173,8 +172,8 @@ class PelurusanReportDetail extends Component
             $newStatus = FalloutStatus::findOrFail($this->newStatusId);
             $this->report->update([
                 'fallout_status_id' => $this->newStatusId,
-                'resolution_notes'  => $this->keterangan,
-                'completed_at'      => in_array($newStatus->name, self::COMPLETED_STATUSES) ? now() : null,
+                'resolution_notes' => $this->keterangan,
+                'completed_at' => in_array($newStatus->name, self::COMPLETED_STATUSES) ? now() : null,
             ]);
             DB::commit();
 
@@ -183,8 +182,8 @@ class PelurusanReportDetail extends Component
             $this->closeStatusModal();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Gagal mengubah status laporan pelurusan: " . $e->getMessage());
-            $this->addError('statusError', 'Gagal mengubah status laporan: ' . $e->getMessage());
+            Log::error('Gagal mengubah status laporan pelurusan: '.$e->getMessage());
+            $this->addError('statusError', 'Gagal mengubah status laporan: '.$e->getMessage());
         }
     }
 
@@ -298,6 +297,7 @@ class PelurusanReportDetail extends Component
         }
 
         $chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
-        return str_replace($chars, array_map(fn ($char) => '\\' . $char, $chars), $text);
+
+        return str_replace($chars, array_map(fn ($char) => '\\'.$char, $chars), $text);
     }
 }

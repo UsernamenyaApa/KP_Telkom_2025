@@ -9,6 +9,8 @@ use App\Models\OrderType;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use League\CommonMark\CommonMarkConverter;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -80,54 +82,17 @@ class FalloutReportDashboard extends Component
         $this->resetPage();
     }
 
-    public function takeOrder($reportId)
+    
+
+        private function escapeMarkdown($text): string
     {
-        $report = FalloutReport::with(['orderType', 'reporter'])->find($reportId);
-
-        if ($report) {
-            $onProgressStatus = FalloutStatus::where('name', 'OnProgress')->first();
-            if ($onProgressStatus) {
-                $report->fallout_status_id = $onProgressStatus->id;
-                $report->assigned_to_user_id = Auth::id();
-                if (is_null($report->assigned_at)) {
-                    $report->assigned_at = now();
-                }
-                $report->taken_at = now();
-                $report->save();
-
-                $user = Auth::user();
-
-                $message = "✅ Laporan Fallout Diambil! ✅\n\n" .
-                           "Antrian: " . ($report->id_harian ?? 'N/A') . "\n" .
-                           "Kode Fallout: " . ($report->incident_ticket ?? 'N/A') . "\n" .
-                           "Tipe Order: " . ($report->orderType ? $report->orderType->name : 'N/A') . "\n" .
-                           "OrderID: " . ($report->order_id ?? 'N/A') . "\n" .
-                           "Nomor Layanan: " . ($report->nomer_layanan ?? 'N/A') . "\n\n" .
-                           "Diambil Oleh: @" . ($user->telegram_username ?? 'N/A') . "\n" .
-                           "Waktu Diambil: " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
-
-                if ($user->telegram_user_id) {
-                    SendTelegramNotificationJob::dispatch($user->telegram_user_id, $message);
-                }
-
-                if ($report->reporter && $report->reporter->telegram_user_id) {
-                    $reporterMessage = "✅ Laporan Fallout Diambil! ✅\n\n" .
-                                       "*Antrian:* " . ($report->id_harian ?? 'N/A') . "\n" .
-                                       "*Kode Fallout:* " . ($report->incident_ticket ?? 'N/A') . "\n" .
-                                       "*Tipe Order:* " . ($report->orderType ? $report->orderType->name : 'N/A') . "\n" .
-                                       "*OrderID:* " . ($report->order_id ?? 'N/A') . "\n" .
-                                       "*Nomor Layanan:* " . ($report->nomer_layanan ?? 'N/A') . "\n\n" .
-                                       "*Diambil Oleh:* @" . ($user->telegram_username ?? 'N/A') . "\n" .
-                                       "*Waktu Diambil:* " . ($report->assigned_at ? $report->assigned_at->format('Y-m-d H:i:s') : 'N/A');
-                    SendTelegramNotificationJob::dispatch($report->reporter->telegram_user_id, $reporterMessage, null, 'MarkdownV2');
-                }
-
-                $groupChat = \App\Models\TelegramGroup::first();
-                if ($groupChat) {
-                    SendTelegramNotificationJob::dispatch($groupChat->chat_id, $message);
-                }
-            }
+        if (is_null($text)) {
+            return 'N/A';
         }
+
+        $chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+
+        return str_replace($chars, array_map(fn ($char) => '\\'.$char, $chars), $text);
     }
 
     public function render()
@@ -157,13 +122,9 @@ class FalloutReportDashboard extends Component
             $query->where('assigned_to_user_id', $this->selectedAssignedTo);
         }
 
-        // Custom logic for fallout status filter
+        // Filter by fallout status
         if ($this->selectedFalloutStatus) {
-            if ($this->selectedFalloutStatus == 7) { // Close
-                $query->whereNotIn('fallout_status_id', [1, 2, 4]);
-            } else {
-                $query->where('fallout_status_id', $this->selectedFalloutStatus);
-            }
+            $query->where('fallout_status_id', $this->selectedFalloutStatus);
         }
 
         $reports = $query->orderBy('created_at', 'asc')->paginate(10);

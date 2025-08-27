@@ -51,7 +51,7 @@ class FalloutReportSeeder extends Seeder
                 FalloutReport::create([
                     'tipe_order_id' => $orderTypes[array_rand($orderTypes)],
                     'order_id' => 'ORD'.$date->format('Ymd').str_pad($i + 1, 4, '0', STR_PAD_LEFT),
-                    'nomer_layanan' => 'NL'.rand(100000000, 999999999),
+
                     'sn_ont' => 'SN'.rand(1000000000, 9999999999),
                     'datek_odp' => 'ODP-MLG-FA/'.chr(rand(65, 90)).rand(1, 20),
                     'port_odp' => rand(1, 16),
@@ -86,7 +86,7 @@ class FalloutReportSeeder extends Seeder
             FalloutReport::create([
                 'tipe_order_id' => $orderTypes[array_rand($orderTypes)],
                 'order_id' => 'ORD'.Carbon::parse($createdAt)->format('Ymd').str_pad($i + 1, 4, '0', STR_PAD_LEFT),
-                'nomer_layanan' => 'NL'.rand(100000000, 999999999),
+
                 'sn_ont' => 'SN'.rand(1000000000, 9999999999),
                 'datek_odp' => 'ODP-MLG-FA/'.chr(rand(65, 90)).rand(1, 20),
                 'port_odp' => rand(1, 16),

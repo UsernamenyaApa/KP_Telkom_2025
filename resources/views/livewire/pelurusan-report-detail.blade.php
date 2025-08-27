@@ -4,13 +4,16 @@
             <div class="sm:flex-auto">
                 <h1 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Pelurusan Report Details</h1>
                 <p class="mt-2 text-sm text-gray-700 dark:text-gray-400">Details for pelurusan report: {{ $report->pelurusan_code }}</p>
+                @if ($date)
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Filtered date from dashboard: {{ \Carbon\Carbon::parse($date)->format('d M Y') }}</p>
+                @endif
             </div>
             <div class="mt-4 sm:ml-16 sm:mt-0 flex items-center space-x-4">
-                <a href="{{ route('pelurusan.index', ['date' => $date]) }}" class="block rounded-md bg-white dark:bg-[#131518] px-3 py-2 text-center text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 sm:mt-0">Back to Dashboard</a>
+                <a href="{{ route('pelurusan.index') }}?date={{ $date }}" wire:navigate class="block rounded-md bg-white dark:bg-[#131518] px-3 py-2 text-center text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 sm:mt-0">Back to Dashboard</a>
                 @if ($report->falloutStatus?->name === 'Open')
-                    <button wire:click="takeOrder" class="block rounded-md bg-green-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">Ambil Order</button>
+                    <button wire:click="takeOrder" class="block rounded-md bg-green-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">Take Order</button>
                 @endif
-                @if ($report->falloutStatus?->name === 'OnProgress' && $report->assigned_to_user_id == auth()->id())
+                @if (in_array($report->falloutStatus?->name, ['OnProgress', 'eskalasi']) && $report->assigned_to_user_id == auth()->id())
                     <button wire:click="openStatusModal" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Change Status</button>
                 @endif
             </div>
@@ -58,35 +61,35 @@
                                 <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Status and Assignment</h3>
                                 <dl class="mt-5 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
                                     <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status Pelurusan</dt>
+                                        <dt class="text-sm font-semibold text-gray-600 dark:text-gray-400">Status Pelurusan</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->falloutStatus?->name }}</dd>
                                     </div>
                                     <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Assigned To</dt>
+                                        <dt class="text-sm font-semibold text-gray-600 dark:text-gray-400">Assigned To</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->assignedToUser?->name ?? 'Unassigned' }}</dd>
                                     </div>
                                     <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Reporter</dt>
+                                        <dt class="text-sm font-semibold text-gray-600 dark:text-gray-400">Reporter</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->reporter_display_name }}</dd>
                                     </div>
                                     <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Order Create</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->created_at->format('d M Y, H:i') }}</dd>
+                                        <dt class="text-sm font-semibold text-gray-600 dark:text-gray-400">Order Create</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->created_at->translatedFormat('l, d M Y, H:i') }}</dd>
                                     </div>
                                     <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Order Take</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->taken_at ? $report->taken_at->format('d M Y, H:i') : '-' }}</dd>
+                                        <dt class="text-sm font-semibold text-gray-600 dark:text-gray-400">Order Take</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->taken_at ? $report->taken_at->translatedFormat('l, d M Y, H:i') : '-' }}</dd>
                                     </div>
                                     <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Order Complete</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->completed_at ? $report->completed_at->format('d M Y, H:i') : '-' }}</dd>
+                                        <dt class="text-sm font-semibold text-gray-600 dark:text-gray-400">Order Complete</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->completed_at ? $report->completed_at->translatedFormat('l, d M Y, H:i') : '-' }}</dd>
                                     </div>
                                     <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Last Updated</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->updated_at->format('d M Y, H:i') }}</dd>
+                                        <dt class="text-sm font-semibold text-gray-600 dark:text-gray-400">Last Updated</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->updated_at->translatedFormat('l, d M Y, H:i') }}</dd>
                                     </div>
                                     <div class="sm:col-span-1">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Duration</dt>
+                                        <dt class="text-sm font-semibold text-gray-600 dark:text-gray-400">Duration</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $report->taken_at && $report->completed_at ? $report->completed_at->diffForHumans($report->taken_at, true) : '-' }}</dd>
                                     </div>
                                 </dl>
@@ -138,8 +141,14 @@
 
                                     <!-- Lightbox Modal -->
                                     <div x-show="lightboxOpen" x-cloak
-                                        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black bg-opacity-80">
-                                        <div @click.away="closeLightbox()" class="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
+                                        x-transition:enter="transition ease-out duration-300"
+                                        x-transition:enter-start="opacity-0"
+                                        x-transition:enter-end="opacity-100"
+                                        x-transition:leave="transition ease-in duration-200"
+                                        x-transition:leave-start="opacity-100"
+                                        x-transition:leave-end="opacity-0"
+                                        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50">
+                                        <div @click.away="closeLightbox()" class="relative max-w-screen-xl max-h-full w-full h-full flex items-center justify-center">
                                             <!-- Close Button -->
                                             <button @click="closeLightbox()"
                                                 class="absolute top-4 right-4 z-[99999] p-2 text-white bg-black bg-opacity-50 rounded-full hover:bg-opacity-75 focus:outline-none">
@@ -180,7 +189,7 @@
     @if($showStatusModal)
     <div class="fixed inset-0 z-10 overflow-y-auto">
         <!-- Backdrop -->
-        <div class="fixed inset-0" wire:click="closeStatusModal"></div>
+        <div class="fixed inset-0 bg-black/50" wire:click="closeStatusModal"></div>
 
         <div class="flex items-center justify-center min-h-screen">
             <div class="bg-white dark:bg-[#131518] rounded-lg shadow-xl p-6 relative z-20 w-full max-w-md">
@@ -189,7 +198,7 @@
                     <label for="status" class="sr-only">Status</label>
                     <select wire:model="newStatusId" id="status" class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-[#131518] text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         <option value="">Select Status</option>
-                        @foreach(App\Models\FalloutStatus::whereNotIn('name', ['Open', 'OnProgress'])->get() as $status)
+                        @foreach($availableStatuses as $status)
                             <option value="{{ $status->id }}">{{ $status->name }}</option>
                         @endforeach
                     </select>

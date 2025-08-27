@@ -1,147 +1,199 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Dashboard;
 
 use App\Models\FalloutReport;
 use App\Models\PelurusanReport;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class DailyReportDashboard extends Component
 {
-    public $users;
-    public $reportRows = [];
-    public $reportData = [];
-    public $userTotals = [];
-    public $rowTotals = []; // Ensure it's initialized as an empty array
-    public $grandTotal = 0;
+    #[Reactive]
     public $selectedDate;
-    public $search = '';
-    public $selectedStatus = null;
-    public $selectedUserId = null;
-    public $statusCounts = ['OPEN' => 0, 'PROGRESS' => 0, 'ESKALASI' => 0, 'CLOSE' => 0];
+
+    #[Reactive]
+    public $reportType;
+
+    public $users = [];
+
+    public $userCount = 0;
+
+    public $reportRows = [];
+
+    public $reportData = [];
+
+    public $userTotals = [];
+
+    public $rowTotals = [];
+
+    public $grandTotal = 0;
+
+    public $dashboardData = []; // Initialize as an empty array to avoid undefined variable
+
+    public $bestPerformer = null;
+
+    public $bestScore = 0;
 
     public function mount(): void
     {
-        $this->selectedDate = now()->format('Y-m-d');
+        $this->selectedDate = $this->selectedDate ?? now()->format('Y-m-d'); // Default to today if not set
         $this->loadReportData();
-    }
-
-    public function updatedSelectedDate(): void
-    {
-        $this->loadReportData();
-    }
-
-    public function updatedSearch(): void
-    {
-        $this->loadReportData();
+        $this->userCount = User::role('hd-daman')->count();
+        $this->getStats();
+        $this->getBestPerformer();
     }
 
     public function loadReportData(): void
     {
         $userQuery = User::role('hd-daman');
-
-        if (!empty($this->search)) {
-            $userQuery->where('name', 'like', '%' . $this->search . '%');
-        }
-
-        $this->users = $userQuery->get();
-        $filterDate = Carbon::parse($this->selectedDate);
+        $this->users = $userQuery->get() ?? collect();
+        $this->userCount = $this->users->count();
 
         $this->reportRows = [
-            'fallout_data' => 'Fallout Data',
-            'pelurusan' => 'Pelurusan',
-            'total_perorang' => 'Total Perorang',
+            'fallout_completed' => 'Fallout Reports',
+            'pelurusan_completed' => 'Pelunasan',
         ];
 
+        // Reset data arrays
         $this->reportData = [];
         $this->userTotals = array_fill_keys($this->users->pluck('id')->toArray(), 0);
         $this->rowTotals = array_fill_keys(array_keys($this->reportRows), 0);
         $this->grandTotal = 0;
-        $this->statusCounts = ['OPEN' => 0, 'PROGRESS' => 0, 'ESKALASI' => 0, 'CLOSE' => 0];
 
-        // Fetch status counts for fallout and pelurusan
-        $falloutCounts = FalloutReport::whereDate('updated_at', $filterDate)
-            ->groupBy('fallout_status_id')
-            ->select('fallout_status_id', DB::raw('count(*) as total'))
-            ->pluck('total', 'fallout_status_id');
-
-        $pelurusanCounts = PelurusanReport::whereDate('updated_at', $filterDate)
-            ->groupBy('fallout_status_id')
-            ->select('fallout_status_id', DB::raw('count(*) as total'))
-            ->pluck('total', 'fallout_status_id');
-
-        $statusMap = [1 => 'OPEN', 2 => 'PROGRESS', 4 => 'ESKALASI', 6 => 'CLOSE'];
-        foreach ($statusMap as $id => $status) {
-            $this->statusCounts[$status] += ($falloutCounts->get($id, 0) + $pelurusanCounts->get($id, 0));
+        // Fallout Reports
+        $falloutQuery = FalloutReport::query()
+            ->whereHas('falloutStatus', fn ($q) => $q->where('name', '!=', 'Open')->where('name', '!=', 'OnProgress'));
+        if ($this->selectedDate) {
+            $falloutQuery->whereDate('created_at', $this->selectedDate);
         }
-
-        // Fetch user-specific data
-        $completedCounts = FalloutReport::whereDate('updated_at', $filterDate)
-            ->whereIn('fallout_status_id', [3, 4, 5, 6])
-            ->groupBy('assigned_to_user_id')
+        $falloutCounts = $falloutQuery->groupBy('assigned_to_user_id')
             ->select('assigned_to_user_id', DB::raw('count(*) as total'))
             ->pluck('total', 'assigned_to_user_id');
 
-        $onProgressCounts = FalloutReport::where('fallout_status_id', 2)
-            ->groupBy('assigned_to_user_id')
-            ->select('assigned_to_user_id', DB::raw('count(*) as total'))
-            ->pluck('total', 'assigned_to_user_id');
-
-        $pelurusanCompletedCounts = PelurusanReport::whereDate('updated_at', $filterDate)
-            ->whereIn('fallout_status_id', [3, 4, 5, 6])
-            ->groupBy('assigned_to_user_id')
-            ->select('assigned_to_user_id', DB::raw('count(*) as total'))
-            ->pluck('total', 'assigned_to_user_id');
-
-        $pelurusanOnProgressCounts = PelurusanReport::where('fallout_status_id', 2)
-            ->groupBy('assigned_to_user_id')
+        // Pelurusan Reports
+        $pelurusanQuery = PelurusanReport::query()
+            ->whereHas('falloutStatus', fn ($q) => $q->where('name', '!=', 'Open')->where('name', '!=', 'OnProgress'));
+        if ($this->selectedDate) {
+            $pelurusanQuery->whereDate('created_at', $this->selectedDate);
+        }
+        $pelurusanCounts = $pelurusanQuery->groupBy('assigned_to_user_id')
             ->select('assigned_to_user_id', DB::raw('count(*) as total'))
             ->pluck('total', 'assigned_to_user_id');
 
         foreach ($this->users as $user) {
-            $countFalloutCompleted = $completedCounts->get($user->id, 0);
-            $countFalloutOnProgress = $onProgressCounts->get($user->id, 0);
-            $countPelurusanCompleted = $pelurusanCompletedCounts->get($user->id, 0);
-            $countPelurusanOnProgress = $pelurusanOnProgressCounts->get($user->id, 0);
+            $countFallout = $falloutCounts->get($user->id, 0);
+            $this->reportData['fallout_completed'][$user->id] = $countFallout;
+            $this->rowTotals['fallout_completed'] += $countFallout;
+            $this->userTotals[$user->id] += $countFallout;
 
-            $this->reportData['fallout_data'][$user->id] = $countFalloutCompleted + $countFalloutOnProgress;
-            $this->reportData['pelurusan'][$user->id] = $countPelurusanCompleted + $countPelurusanOnProgress;
-            $this->reportData['total_perorang'][$user->id] = $this->reportData['fallout_data'][$user->id] + $this->reportData['pelurusan'][$user->id];
-
-            $this->rowTotals['fallout_data'] += $this->reportData['fallout_data'][$user->id];
-            $this->rowTotals['pelurusan'] += $this->reportData['pelurusan'][$user->id];
-            $this->rowTotals['total_perorang'] += $this->reportData['total_perorang'][$user->id];
-            $this->userTotals[$user->id] = $this->reportData['total_perorang'][$user->id];
+            $countPelurusan = $pelurusanCounts->get($user->id, 0);
+            $this->reportData['pelurusan_completed'][$user->id] = $countPelurusan;
+            $this->rowTotals['pelurusan_completed'] += $countPelurusan;
+            $this->userTotals[$user->id] += $countPelurusan;
         }
 
         $this->grandTotal = array_sum($this->userTotals);
     }
 
-    public function viewDetails($status, $userId = null): void
+    private function getStats(): void
     {
-        $this->selectedStatus = $status;
-        $this->selectedUserId = $userId;
+        $modelClass = $this->reportType === 'fallout' ? FalloutReport::class : PelurusanReport::class;
+        $tableName = (new $modelClass)->getTable();
+
+        $query = $modelClass::query()
+            ->join('fallout_statuses', "$tableName.fallout_status_id", '=', 'fallout_statuses.id');
+
+        if ($this->selectedDate) {
+            $query->whereDate("$tableName.created_at", $this->selectedDate);
+        }
+
+        $results = $query->select(
+            DB::raw('SUM(CASE WHEN fallout_statuses.name = "Open" THEN 1 ELSE 0 END) as open'),
+            DB::raw('SUM(CASE WHEN fallout_statuses.name = "OnProgress" THEN 1 ELSE 0 END) as progress'),
+            DB::raw('SUM(CASE WHEN fallout_statuses.name = "eskalasi" THEN 1 ELSE 0 END) as eskalasi'),
+            DB::raw('SUM(CASE WHEN fallout_statuses.name NOT IN ("Open", "OnProgress", "eskalasi") THEN 1 ELSE 0 END) as close'),
+            DB::raw('COUNT(*) as total_orders'),
+            DB::raw('SUM(CASE WHEN fallout_statuses.name NOT IN ("Open", "OnProgress") THEN 1 ELSE 0 END) as completed_orders'),
+            DB::raw('COUNT(DISTINCT assigned_to_user_id) as active_staff')
+        )->first();
+
+        $completionRate = ($results->total_orders ?? 0) > 0 ? round(($results->completed_orders ?? 0) / $results->total_orders * 100, 2) : 0;
+        $avgPerPerson = ($results->active_staff ?? 0) > 0 ? round(($results->total_orders ?? 0) / $results->active_staff, 2) : 0;
+
+        $this->dashboardData = [
+            'open' => $results->open ?? 0,
+            'progress' => $results->progress ?? 0,
+            'eskalasi' => $results->eskalasi ?? 0,
+            'close' => $results->close ?? 0,
+            'completion_rate' => $completionRate,
+            'active_staff' => $results->active_staff ?? 0,
+            'avg_per_person' => $avgPerPerson,
+            'team_open' => $results->open ?? 0,
+            'team_progress' => $results->progress ?? 0,
+            'team_completed' => $results->completed_orders ?? 0,
+            'users' => $this->users->map(fn ($user) => ['id' => $user->id, 'name' => $user->name])->toArray(),
+            'work_distribution' => [
+                'Fallout Reports' => $this->reportData['fallout_completed'] ?? [],
+                'Pelunasan' => $this->reportData['pelurusan_completed'] ?? [],
+            ],
+            'user_totals' => $this->userTotals,
+            'grand_total' => $this->grandTotal,
+            'best_performer' => $this->bestPerformer,
+        ];
     }
 
-    public function resetDetails(): void
+    private function getBestPerformer(): void
     {
-        $this->selectedStatus = null;
-        $this->selectedUserId = null;
+        $userTotals = [];
+
+        $fetchCompleted = fn ($modelClass) => $modelClass::query()
+            ->whereHas('falloutStatus', fn ($q) => $q->where('name', '!=', 'Open')->where('name', '!=', 'OnProgress'))
+            ->when($this->selectedDate, fn ($q) => $q->whereDate('created_at', $this->selectedDate))
+            ->groupBy('assigned_to_user_id')
+            ->select('assigned_to_user_id', DB::raw('count(*) as total'))
+            ->get();
+
+        $falloutCompleted = $fetchCompleted(FalloutReport::class);
+        $pelurusanCompleted = $fetchCompleted(PelurusanReport::class);
+
+        foreach ($falloutCompleted->concat($pelurusanCompleted) as $result) {
+            $userId = $result->assigned_to_user_id;
+            $userTotals[$userId] = ($userTotals[$userId] ?? 0) + $result->total;
+        }
+
+        if (empty($userTotals)) {
+            $this->bestPerformer = null;
+            $this->bestScore = 0;
+
+            return;
+        }
+
+        $bestScore = max($userTotals);
+        $bestPerformerId = array_search($bestScore, $userTotals);
+        $user = User::find($bestPerformerId);
+
+        $this->bestPerformer = $user ? [
+            'name' => $user->name,
+            'initials' => strtoupper(substr($user->name, 0, 2)),
+            'score' => $bestScore,
+        ] : null;
+        $this->bestScore = $bestScore;
     }
 
     public function render()
     {
-        return view('livewire.daily-report-dashboard', [
-            'selectedStatus' => $this->selectedStatus,
-            'selectedUserId' => $this->selectedUserId,
-            'users' => $this->users,
-            'reportData' => $this->reportData,
-            'rowTotals' => $this->rowTotals ?? [],
-            'grandTotal' => $this->grandTotal,
-            'statusCounts' => $this->statusCounts,
+        $this->loadReportData();
+        $this->getStats();
+        $this->getBestPerformer();
+
+        $themeColor = auth()->user()->theme_color ?? 'light-blue';
+
+        return view('livewire.dashboard.daily-report-dashboard', [
+            'themeColor' => $themeColor,
+            'dashboardData' => $this->dashboardData, // Explicitly pass $dashboardData to the view
         ]);
     }
 }

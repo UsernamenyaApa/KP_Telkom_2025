@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class HdDamanManager extends Component
@@ -37,10 +36,10 @@ class HdDamanManager extends Component
     {
         $this->users = User::where(function ($query) {
             $query->where('name', 'like', '%'.$this->searchTerm.'%')
-                  ->orWhere('nik', 'like', '%'.$this->searchTerm.'%');
+                ->orWhere('nik', 'like', '%'.$this->searchTerm.'%');
         })
-        ->with('roles') // Eager load roles
-        ->get();
+            ->with('roles') // Eager load roles
+            ->get();
     }
 
     public function updatedSearchTerm()

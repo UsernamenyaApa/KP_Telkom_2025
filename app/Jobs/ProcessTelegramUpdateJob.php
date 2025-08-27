@@ -11,7 +11,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Objects\Update;
@@ -51,10 +50,10 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                         ['chat_id' => $chat->id],
                         ['name' => $chat->title]
                     );
-                    Log::info("Group chat ID stored: " . $chat->id . " - " . $chat->title);
+                    Log::info('Group chat ID stored: '.$chat->id.' - '.$chat->title);
 
                     if ($telegramGroup->wasRecentlyCreated) {
-                        \App\Jobs\SendTelegramNotificationJob::dispatch($chat->id, "✅ ID Grup Telegram ini telah berhasil didaftarkan dan disimpan.");
+                        \App\Jobs\SendTelegramNotificationJob::dispatch($chat->id, '✅ ID Grup Telegram ini telah berhasil didaftarkan dan disimpan.');
                     }
                 }
             }
@@ -133,7 +132,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
 
     private function showFalloutMenu(Api $telegram, int $chatId, ?int $messageId = null): void
     {
-        $orderTypes = Cache::remember('fallout_order_types', now()->addMinutes(60), fn() => OrderType::where('name', '!=', 'Ex Gangguan')->get());
+        $orderTypes = Cache::remember('fallout_order_types', now()->addMinutes(60), fn () => OrderType::where('name', '!=', 'Ex Gangguan')->get());
         if ($orderTypes->isEmpty()) {
             SendTelegramNotificationJob::dispatch($chatId, '⚠️ Maaf, belum ada tipe order yang tersedia di sistem.');
             $this->showMainMenu($telegram, $chatId, 'Silakan hubungi admin untuk menambahkan tipe order.', $messageId);
@@ -273,11 +272,18 @@ class ProcessTelegramUpdateJob implements ShouldQueue
 
     private function handleStartCommand(int $chatId, TelegramUser $user): void
     {
-        $message = "👋 Halo, {$user->firstName}!\n\n"
-                 ."Selamat datang di Bot Laporan Fallout. Bot ini akan membantu Anda membuat laporan teknis dengan mudah dan cepat.\n\n"
-                 ."Gunakan perintah berikut untuk memulai:\n"
-                 ."• `/new` - Untuk login dan memulai sesi baru.\n"
-                 .'• `/help` - Untuk melihat semua daftar perintah yang tersedia.';
+        $message = "👋 Halo, {$user->firstName}!
+
+".'Selamat datang di Bot Laporan Fallout. Bot ini dirancang untuk membantu Anda membuat laporan teknis dengan mudah dan cepat melalui Telegram.
+
+'.'*Panduan Penting:*
+'.'• Jika ada data yang tidak relevan atau tidak tersedia untuk laporan Anda, cukup ketik `-` (tanda strip) sebagai input.
+'.'• Untuk panduan lengkap penggunaan bot dan daftar perintah, silakan gunakan perintah `/help`.
+
+'.'*Untuk memulai, gunakan perintah berikut:*
+'.'• `/new` - Untuk login dan memulai sesi laporan baru.
+'.'• `/cancel` - Untuk membatalkan proses laporan yang sedang berjalan.
+';
         SendTelegramNotificationJob::dispatch($chatId, $message);
     }
 
@@ -327,7 +333,8 @@ class ProcessTelegramUpdateJob implements ShouldQueue
                      ."1. Ketik `/new` dan masukkan kata sandi.\n"
                      ."2. Pilih menu 'Laporan Fallout'.\n"
                      ."3. Ikuti langkah-langkah pengisian data.\n"
-                     .'4. Gunakan `/cancel` jika ingin berhenti di tengah jalan.';
+                     ."4. Gunakan `/cancel` jika ingin berhenti di tengah jalan.\n"
+                    ."5. GUNAKAN TANDA - JIKA DATA DARI LAPORAN TERSEBUT KOSONG!!!.\n";
         SendTelegramNotificationJob::dispatch($chatId, $helpMessage, null, 'Markdown');
     }
 
@@ -385,6 +392,13 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             $userName = $userRecord->name;
             $state['user_info']['db_user_id'] = $userRecord->id;
             $state['user_info']['name'] = $userRecord->name; // Store the real name in the state
+
+            // Update telegram_username if it has changed
+            if ($userRecord->telegram_username !== ($state['user_info']['username'] ?? null)) {
+                $userRecord->update([
+                    'telegram_username' => $state['user_info']['username'] ?? null,
+                ]);
+            }
         }
 
         Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
@@ -414,7 +428,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
 
             return;
         }
-        
+
         $state['report_data'][$currentStep] = $trimmedText;
         $this->advancePelurusanStep($chatId, $state);
     }
@@ -482,9 +496,17 @@ class ProcessTelegramUpdateJob implements ShouldQueue
 
     private function advanceFalloutStep(int $chatId, array &$state): void
     {
-        $steps = ['incident_ticket', 'incident_fallout_description', 'order_id', 'nomer_layanan', 'keterangan'];
+        $steps = ['incident_ticket', 'incident_fallout_description', 'order_id', 'keterangan'];
         $currentStepIndex = array_search($state['step'], $steps);
         $nextStepIndex = $currentStepIndex + 1;
+
+        Log::debug('Advancing fallout step', [
+            'chat_id' => $chatId,
+            'current_step' => $state['step'],
+            'current_step_index' => $currentStepIndex,
+            'next_step_index' => $nextStepIndex,
+        ]);
+
         if ($nextStepIndex < count($steps)) {
             $state['step'] = $steps[$nextStepIndex];
             Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
@@ -500,7 +522,7 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         $orderType = $tipeOrderId ? OrderType::find($tipeOrderId) : null;
 
         if ($orderType && $orderType->name === 'Ex Gangguan') {
-            $steps = ['nomor_incident', 'nomer_layanan', 'datek_odp', 'port_odp', 'awaiting_image'];
+            $steps = ['nomor_incident', 'nomer_layanan', 'sn_ont', 'datek_odp', 'port_odp', 'awaiting_image'];
         } else {
             $steps = ['incident_fallout_description', 'order_id', 'nomer_layanan', 'sn_ont', 'datek_odp', 'port_odp', 'keterangan', 'awaiting_image'];
         }
@@ -526,14 +548,14 @@ class ProcessTelegramUpdateJob implements ShouldQueue
     {
         ProcessTelegramReport::dispatch($chatId, $state, $state['report_data']['tipe_order_id']);
         Cache::forget($chatId);
-        SendTelegramNotificationJob::dispatch($chatId, "✅ Laporan Anda telah diterima dan sedang diproses.");
+        SendTelegramNotificationJob::dispatch($chatId, '✅ Laporan Anda telah diterima dan sedang diproses.');
     }
 
     private function generateAndSendPelurusanReport(int $chatId, array $state): void
     {
         ProcessTelegramPelurusanReport::dispatch($chatId, $state, $state['report_data']['tipe_order_id']);
         Cache::forget($chatId);
-        SendTelegramNotificationJob::dispatch($chatId, "✅ Laporan Anda telah diterima dan sedang diproses.");
+        SendTelegramNotificationJob::dispatch($chatId, '✅ Laporan Anda telah diterima dan sedang diproses.');
     }
 
     private function getQuestionForStep(string $step, string $process = 'fallout', ?int $tipeOrderId = null): string
@@ -542,11 +564,12 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             $orderType = $tipeOrderId ? OrderType::find($tipeOrderId) : null;
             if ($orderType && $orderType->name === 'Ex Gangguan') {
                 $questions = [
-                    'nomor_incident' => '1/4: Masukkan Nomor Incident:',
-                    'nomer_layanan' => '2/4: Masukkan Nomor Layanan:',
-                    'datek_odp' => '3/4: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):',
-                    'port_odp' => '4/4: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):',
-                    'awaiting_image' => '5/5: Silakan unggah gambar pendukung.',
+                    'nomor_incident' => '1/6: Masukkan Nomor Incident:',
+                    'nomer_layanan' => '2/6: Masukkan Nomor Layanan:',
+                    'sn_ont' => '3/6: Masukkan SN ONT:',
+                    'datek_odp' => '4/6: Masukkan Datek ODP (contoh: ODP-GDS-FAT/75):',
+                    'port_odp' => '5/6: Masukkan Port ODP (contoh: 3) (HARUS ANGKA):',
+                    'awaiting_image' => '6/6: Silakan unggah gambar pendukung.',
                 ];
             } else {
                 $questions = [
@@ -562,11 +585,10 @@ class ProcessTelegramUpdateJob implements ShouldQueue
             }
         } else {
             $questions = [
-                'incident_ticket' => '1/5: Masukkan Nomor Tiket Insiden:',
-                'incident_fallout_description' => '2/5: Masukkan Keterangan Insiden Fallout:',
-                'order_id' => '3/5: Masukkan Order ID:',
-                'nomer_layanan' => '4/5: Masukkan Nomor Layanan:',
-                'keterangan' => '5/5: Masukkan Keterangan Tambahan Laporan:',
+                'incident_ticket' => '1/4: Masukkan Nomor Tiket Insiden:',
+                'incident_fallout_description' => '2/4: Masukkan Keterangan Insiden Fallout:',
+                'order_id' => '3/4: Masukkan Order ID:',
+                'keterangan' => '4/4: Masukkan Keterangan Tambahan Laporan:',
             ];
         }
 
@@ -590,25 +612,28 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         $state = Cache::get($chatId);
 
         // Hanya proses jika dalam alur pelurusan dan menunggu gambar
-        if (!isset($state['process']) || $state['process'] !== self::PROCESS_PELURUSAN || !in_array($state['step'], ['awaiting_image', 'awaiting_more_images_confirmation'])) {
+        if (! isset($state['process']) || $state['process'] !== self::PROCESS_PELURUSAN || ! in_array($state['step'], ['awaiting_image', 'awaiting_more_images_confirmation'])) {
             SendTelegramNotificationJob::dispatch($chatId, 'Tidak sedang dalam proses unggah gambar.');
+
             return;
         }
 
         $photo = $message->photo->last(); // Ambil foto resolusi tertinggi
-        if (!$photo || !$photo->file_id) {
+        if (! $photo || ! $photo->file_id) {
             SendTelegramNotificationJob::dispatch($chatId, '❌ Gagal memproses file gambar. Format tidak didukung atau file kosong.');
+
             return;
         }
 
         // Inisialisasi array gambar jika belum ada
-        if (!isset($state['report_data']['images'])) {
+        if (! isset($state['report_data']['images'])) {
             $state['report_data']['images'] = [];
         }
 
         // Cek apakah sudah mencapai batas sebelum memproses lebih lanjut
         if (count($state['report_data']['images']) >= 5) {
             SendTelegramNotificationJob::dispatch($chatId, 'Anda sudah mencapai batas maksimal 5 gambar.');
+
             return;
         }
 
@@ -629,5 +654,4 @@ class ProcessTelegramUpdateJob implements ShouldQueue
         // Simpan state terbaru (terutama array gambar yang mungkin kosong di awal)
         Cache::put($chatId, $state, now()->addMinutes(self::CACHE_TTL_MINUTES));
     }
-
 }

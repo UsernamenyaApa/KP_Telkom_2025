@@ -9,6 +9,7 @@ use Livewire\Component;
 class UncollectedOrderNotification extends Component
 {
     public $uncollectedCount = 0;
+
     public $newUncollectedCount = 0;
 
     public function mount()

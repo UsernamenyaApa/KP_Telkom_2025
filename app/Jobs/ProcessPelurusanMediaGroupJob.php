@@ -17,6 +17,7 @@ class ProcessPelurusanMediaGroupJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private const MAX_IMAGES = 5;
+
     private const CACHE_TTL_MINUTES = 60;
 
     /**
@@ -33,7 +34,7 @@ class ProcessPelurusanMediaGroupJob implements ShouldQueue
     public function handle(): void
     {
         $state = Cache::get($this->chatId);
-        if (!isset($state['process']) || $state['process'] !== 'pelurusan') {
+        if (! isset($state['process']) || $state['process'] !== 'pelurusan') {
             return; // Bukan proses pelurusan, abaikan
         }
 
@@ -42,6 +43,7 @@ class ProcessPelurusanMediaGroupJob implements ShouldQueue
 
         if (empty($fileIds)) {
             Log::warning("Tidak ada file_id ditemukan di cache untuk media_group_id: {$this->mediaGroupId}");
+
             return;
         }
 
@@ -56,10 +58,10 @@ class ProcessPelurusanMediaGroupJob implements ShouldQueue
                 }
 
                 $file = $telegram->getFile(['file_id' => $fileId]);
-                $fileContents = file_get_contents('https://api.telegram.org/file/bot' . config('telegram.bots.mybot.token') . "/{$file->filePath}");
+                $fileContents = file_get_contents('https://api.telegram.org/file/bot'.config('telegram.bots.mybot.token')."/{$file->filePath}");
 
                 $directory = 'pelurusan-images/';
-                $fileName = $directory . uniqid() . '_' . time() . '_' . basename($file->filePath);
+                $fileName = $directory.uniqid().'_'.time().'_'.basename($file->filePath);
                 Storage::disk('public')->put($fileName, $fileContents);
 
                 $imagePaths[] = $fileName;
@@ -74,6 +76,7 @@ class ProcessPelurusanMediaGroupJob implements ShouldQueue
                 SendTelegramNotificationJob::dispatch($this->chatId, "✅ Gambar ke-{$totalImages} telah diterima. Batas maksimal tercapai, laporan akan diproses.");
                 ProcessTelegramPelurusanReport::dispatch($this->chatId, $state, $state['report_data']['tipe_order_id']);
                 Cache::forget($this->chatId);
+
                 return;
             }
 
@@ -89,12 +92,12 @@ class ProcessPelurusanMediaGroupJob implements ShouldQueue
             ];
 
             $message = "{$imagesProcessedCount} gambar berhasil diterima. Total gambar saat ini: {$totalImages}."
-                     . "\nKirim gambar lain (maksimal " . self::MAX_IMAGES . "), atau klik Selesai.";
+                     ."\nKirim gambar lain (maksimal ".self::MAX_IMAGES.'), atau klik Selesai.';
 
             SendTelegramNotificationJob::dispatch($this->chatId, $message, $keyboard);
 
         } catch (\Exception $e) {
-            Log::error("Gagal memproses media group: " . $e->getMessage(), [
+            Log::error('Gagal memproses media group: '.$e->getMessage(), [
                 'chat_id' => $this->chatId,
                 'media_group_id' => $this->mediaGroupId,
                 'trace' => $e->getTraceAsString(),

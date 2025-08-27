@@ -22,10 +22,10 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'password',
         'nik',
-        'telegram_username',
+        'password',
         'telegram_user_id',
+        'telegram_username',
         'profile_photo_path',
         'appearance',
         'theme_color',
@@ -58,8 +58,8 @@ class User extends Authenticatable
     public function profilePhotoUrl(): string
     {
         return $this->profile_photo_path
-            ? asset('storage/' . $this->profile_photo_path)
-            : 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+            ? asset('storage/'.$this->profile_photo_path)
+            : 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=7F9CF5&background=EBF4FF';
     }
 
     public function updateProfilePhoto($photo): void
